@@ -18,12 +18,186 @@ var path = require('path'),
 	promises = require('bluebird'),
 	filesystem = promises.promisifyAll(require('fs'));
 
+var publicRootPathRenderer = function(request, response, next) {
+	var cacheSrvc = this.$services.cacheService.getInterface(),
+		databaseSrvc = this.$services.databaseService.getInterface(),
+		loggerSrvc = this.$services.logger.getInterface(),
+		self = this;
+
+	// Step 1: Check to see if the user is already in the cache
+	cacheSrvc.getAsync('twyr!portal!user!public')
+	.then(function(cachedData) {
+		// If the user is in the cache already, simply return it
+		cachedData = JSON.parse(cachedData);
+		if(cachedData) {
+			loggerSrvc.debug('Template Router Render Options (from Cache): ', request.path, ' with:\nQuery: ', request.query, '\nBody: ', request.body, '\nParams: ', request.params, '\nOptions: ', cachedData);
+
+			response.render(path.join(self.$config.templates.path, self.$config.currentTemplate.name, self.$config.currentTemplate.client_index_file), cachedData, function(err, html) {
+				if(err) {
+					loggerSrvc.error('Template Router Render Error: ', request.path, ' with:\nQuery: ', request.query, '\nBody: ', request.body, '\nParams: ', request.params, '\nError: ', err, '\nHTML: ', html);
+					response.status(err.code || err.number || 404).redirect('/error');
+					return;
+				}
+		
+				loggerSrvc.silly('Template Router Render Result: ', request.path, ' with:\nQuery: ', request.query, '\nBody: ', request.body, '\nParams: ', request.params, '\nHTML: ', html);
+				response.status(200).send(html);
+			});
+
+			return;
+		}
+
+		// Step 2: Setup basic stuff...
+		var deserializedUser = {
+			'title': self.$config.title,
+			'baseYear': self.$config.baseYear,
+			'currentYear': (new Date()).getFullYear().toString(),
+
+			'template': path.relative(self.$config.publicDir, path.join(self.$config.templates.path, self.$config.currentTemplate.name)),
+			'clientLoader': path.relative(self.$config.publicDir, path.join(self.$config.templates.path, self.$config.currentTemplate.name, self.$config.currentTemplate.client_loader)),
+
+			'developmentMode': ((process.env.NODE_ENV || 'development') == 'development'),
+			'apiServer': self.$config.apiServer,
+
+			'components': [],
+			'widgets': null
+		};
+
+		var mountPath = self.$config ? (self.$config.componentMountPath || '') : '';
+		for(var idx in self.$components) {
+			deserializedUser.components.push({ 'name': path.join(mountPath, idx) });
+		}
+
+		databaseSrvc.knex.raw('SELECT * FROM fn_get_component_widgets(\'ffffffff-ffff-ffff-ffff-ffffffffffff\');')
+		// Step 3: Fetch, and process, public widgets
+		.then(function(componentWidgets) {
+			// Re-organize widgets according to display position, and order of display within that position
+			var reorgedWidgets = {};
+
+			componentWidgets.rows.forEach(function(thisWidget) {
+				if(!reorgedWidgets[thisWidget.position_name])
+					reorgedWidgets[thisWidget.position_name] = [];
+
+				var existingWidget = (reorgedWidgets[thisWidget.position_name]).find(function(item) {
+					return item.id == thisWidget.id;
+				});
+
+				if(existingWidget)
+					return;
+
+				(reorgedWidgets[thisWidget.position_name]).push(thisWidget);
+			});
+
+			Object.keys(reorgedWidgets).forEach(function(position) {
+				var widgetsInThisPosition = reorgedWidgets[position];
+				
+				widgetsInThisPosition.sort(function(left, right) {
+					var retVal = left.display_order - right.display_order;
+					
+					delete left.position_name;
+					delete left.display_order;
+
+					delete right.position_name;
+					delete right.display_order;
+
+					return retVal;
+				});
+			});
+
+			deserializedUser.widgets = reorgedWidgets;
+		})
+		// Step 4: Store User data in the cache for quick retrieval next time
+		.then(function() {
+			return cacheSrvc.setAsync('twyr!portal!user!public', JSON.stringify(deserializedUser));
+		})
+		// Finally, send it back up...
+		.then(function() {
+			loggerSrvc.debug('Template Router Render Options (from Database): ', request.path, ' with:\nQuery: ', request.query, '\nBody: ', request.body, '\nParams: ', request.params, '\nOptions: ', deserializedUser);
+
+			response.render(path.join(self.$config.templates.path, self.$config.currentTemplate.name, self.$config.currentTemplate.client_index_file), deserializedUser, function(err, html) {
+				if(err) {
+					loggerSrvc.error('Template Router Render Error: ', request.path, ' with:\nQuery: ', request.query, '\nBody: ', request.body, '\nParams: ', request.params, '\nError: ', err, '\nHTML: ', html);
+					response.status(err.code || err.number || 404).redirect('/error');
+					return;
+				}
+		
+				loggerSrvc.silly('Template Router Render Result: ', request.path, ' with:\nQuery: ', request.query, '\nBody: ', request.body, '\nParams: ', request.params, '\nHTML: ', html);
+				response.status(200).send(html);
+			});
+		})
+		.catch(function(err) {
+			loggerSrvc.error('Template Router Render Error: ', request.path, ' with:\nQuery: ', request.query, '\nBody: ', request.body, '\nParams: ', request.params, '\nError: ', err);
+			response.status(err.code || err.number || 404).redirect('/error');
+		});
+	})
+	.catch(function(err) {
+		loggerSrvc.error('Template Router Render Error: ', request.path, ' with:\nQuery: ', request.query, '\nBody: ', request.body, '\nParams: ', request.params, '\nError: ', err);
+		response.status(err.code || err.number || 404).redirect('/error');
+	});
+};
+
+var registeredRootPathRenderer = function(request, response, next) {
+	var cacheSrvc = this.$services.cacheService.getInterface(),
+		loggerSrvc = this.$services.logger.getInterface(),
+		self = this;
+
+	var renderOptions = {
+		'title': self.$config.title,
+		'baseYear': self.$config.baseYear,
+		'currentYear': (new Date()).getFullYear().toString(),
+
+		'template': path.relative(self.$config.publicDir, path.join(self.$config.templates.path, self.$config.currentTemplate.name)),
+		'clientLoader': path.relative(self.$config.publicDir, path.join(self.$config.templates.path, self.$config.currentTemplate.name, self.$config.currentTemplate.client_loader)),
+
+		'developmentMode': ((process.env.NODE_ENV || 'development') == 'development'),
+		'apiServer': self.$config.apiServer,
+
+		'components': [],
+		'widgets': null
+	};
+
+	var mountPath = self.$config ? (self.$config.componentMountPath || '') : '';
+	for(var idx in self.$components) {
+		renderOptions.components.push({ 'name': path.join(mountPath, idx) });
+	}
+
+	cacheSrvc.getAsync('twyr!portal!user!' + request.user.id)
+	.then(function(cachedData) {
+		// If the user is in the cache already, simply return it
+		cachedData = JSON.parse(cachedData);
+		if(!cachedData) {
+			throw({ 'code': 404, 'message': 'User not found' });
+			return;
+		}
+
+		// TODO: Add functionality to store "currentTenant" in the database, and use that always
+		var userTenant = cachedData.currentTenant || cachedData.tenants[(Object.keys(cachedData.tenants)[0])];
+		renderOptions.widgets = userTenant.widgets;
+
+		cachedData.currentTenant = userTenant;
+		return cacheSrvc.setAsync('twyr!portal!user!' + request.user.id, JSON.stringify(cachedData));
+	})
+	.then(function() {
+		response.render(path.join(self.$config.templates.path, self.$config.currentTemplate.name, self.$config.currentTemplate.client_index_file), renderOptions, function(err, html) {
+			if(err) {
+				loggerSrvc.error('Template Router Render Error: ', request.path, ' with:\nQuery: ', request.query, '\nBody: ', request.body, '\nParams: ', request.params, '\nError: ', err, '\nHTML: ', html);
+				response.status(err.code || err.number || 404).redirect('/error');
+				return;
+			}
+	
+			loggerSrvc.silly('Template Router Render Result: ', request.path, ' with:\nQuery: ', request.query, '\nBody: ', request.body, '\nParams: ', request.params, '\nHTML: ', html);
+			response.status(200).send(html);
+		});
+	})
+	.catch(function(err) {
+		loggerSrvc.error('Template Router Render Error: ', request.path, ' with:\nQuery: ', request.query, '\nBody: ', request.body, '\nParams: ', request.params, '\nError: ', err);
+		response.status(err.code || err.number || 404).redirect('/error');
+	});
+};
+
 var serverRouter = (function() {
 	// Step 1: Instantiate the Router itself...
 	var router = require('express').Router(),
 		logger = require('morgan'),
-		cacheSrvc = this.$services.cacheService.getInterface(),
-		databaseSrvc = this.$services.databaseService.getInterface(),
 		loggerSrvc = this.$services.logger.getInterface(),
 		self = this;
 
@@ -80,115 +254,12 @@ var serverRouter = (function() {
 	router.all('/*', function(request, response, next) {
 		loggerSrvc.silly('Template Router Rendering: ', request.path, ' with:\nQuery: ', request.query, '\nBody: ', request.body, '\nParams: ', request.params);
 
-		// Step 1: Check to see if the user is already in the cache
-		cacheSrvc.getAsync('twyr!portal!user!public')
-		.then(function(cachedData) {
-			// If the user is in the cache already, simply return it
-			cachedData = JSON.parse(cachedData);
-			if(cachedData) {
-				loggerSrvc.debug('Template Router Render Options (from Cache): ', request.path, ' with:\nQuery: ', request.query, '\nBody: ', request.body, '\nParams: ', request.params, '\nOptions: ', cachedData);
-
-				response.render(path.join(self.$config.templates.path, self.$config.currentTemplate.name, self.$config.currentTemplate.client_index_file), cachedData, function(err, html) {
-					if(err) {
-						loggerSrvc.error('Template Router Render Error: ', request.path, ' with:\nQuery: ', request.query, '\nBody: ', request.body, '\nParams: ', request.params, '\nError: ', err, '\nHTML: ', html);
-						response.status(err.code || err.number || 404).redirect('/error');
-						return;
-					}
-			
-					loggerSrvc.silly('Template Router Render Result: ', request.path, ' with:\nQuery: ', request.query, '\nBody: ', request.body, '\nParams: ', request.params, '\nHTML: ', html);
-					response.status(200).send(html);
-				});
-
-				return;
-			}
-
-			// Step 2: Setup basic stuff...
-			var deserializedUser = {
-				'title': self.$config.title,
-				'baseYear': self.$config.baseYear,
-				'currentYear': (new Date()).getFullYear().toString(),
-
-				'template': path.relative(self.$config.publicDir, path.join(self.$config.templates.path, self.$config.currentTemplate.name)),
-				'clientLoader': path.relative(self.$config.publicDir, path.join(self.$config.templates.path, self.$config.currentTemplate.name, self.$config.currentTemplate.client_loader)),
-
-				'developmentMode': ((process.env.NODE_ENV || 'development') == 'development'),
-				'apiServer': self.$config.apiServer,
-
-				'components': [],
-				'widgets': null
-			};
-
-			var mountPath = self.$config ? (self.$config.componentMountPath || '') : '';
-			for(var idx in self.$components) {
-				deserializedUser.components.push({ 'name': path.join(mountPath, idx) });
-			}
-
-			databaseSrvc.knex.raw('SELECT * FROM fn_get_component_widgets(\'ffffffff-ffff-ffff-ffff-ffffffffffff\');')
-			// Step 3: Fetch, and process, public widgets
-			.then(function(componentWidgets) {
-				// Re-organize widgets according to display position, and order of display within that position
-				var reorgedWidgets = {};
-
-				componentWidgets.rows.forEach(function(thisWidget) {
-					if(!reorgedWidgets[thisWidget.position_name])
-						reorgedWidgets[thisWidget.position_name] = [];
-
-					var existingWidget = (reorgedWidgets[thisWidget.position_name]).find(function(item) {
-						return item.id == thisWidget.id;
-					});
-
-					if(existingWidget)
-						return;
-
-					(reorgedWidgets[thisWidget.position_name]).push(thisWidget);
-				});
-
-				Object.keys(reorgedWidgets).forEach(function(position) {
-					var widgetsInThisPosition = reorgedWidgets[position];
-					
-					widgetsInThisPosition.sort(function(left, right) {
-						var retVal = left.display_order - right.display_order;
-						
-						delete left.position_name;
-						delete left.display_order;
-
-						delete right.position_name;
-						delete right.display_order;
-
-						return retVal;
-					});
-				});
-
-				deserializedUser.widgets = reorgedWidgets;
-			})
-			// Step 4: Store User data in the cache for quick retrieval next time
-			.then(function() {
-				return cacheSrvc.setAsync('twyr!portal!user!public', JSON.stringify(deserializedUser));
-			})
-			// Finally, send it back up...
-			.then(function() {
-				loggerSrvc.debug('Template Router Render Options (from Database): ', request.path, ' with:\nQuery: ', request.query, '\nBody: ', request.body, '\nParams: ', request.params, '\nOptions: ', deserializedUser);
-
-				response.render(path.join(self.$config.templates.path, self.$config.currentTemplate.name, self.$config.currentTemplate.client_index_file), deserializedUser, function(err, html) {
-					if(err) {
-						loggerSrvc.error('Template Router Render Error: ', request.path, ' with:\nQuery: ', request.query, '\nBody: ', request.body, '\nParams: ', request.params, '\nError: ', err, '\nHTML: ', html);
-						response.status(err.code || err.number || 404).redirect('/error');
-						return;
-					}
-			
-					loggerSrvc.silly('Template Router Render Result: ', request.path, ' with:\nQuery: ', request.query, '\nBody: ', request.body, '\nParams: ', request.params, '\nHTML: ', html);
-					response.status(200).send(html);
-				});
-			})
-			.catch(function(err) {
-				loggerSrvc.error('Template Router Render Error: ', request.path, ' with:\nQuery: ', request.query, '\nBody: ', request.body, '\nParams: ', request.params, '\nError: ', err);
-				response.status(err.code || err.number || 404).redirect('/error');
-			});
-		})
-		.catch(function(err) {
-			loggerSrvc.error('Template Router Render Error: ', request.path, ' with:\nQuery: ', request.query, '\nBody: ', request.body, '\nParams: ', request.params, '\nError: ', err);
-			response.status(err.code || err.number || 404).redirect('/error');
-		});
+		if(request.user) {
+			(registeredRootPathRenderer.bind(self))(request, response, next);
+		}
+		else {
+			(publicRootPathRenderer.bind(self))(request, response, next);
+		}
 	});
 
 	return router;

@@ -14,7 +14,7 @@
 	"homepage": "https://twyr.github.io",
 	"repository": {
 		"type": "git",
-		"url": "https://github.com/shadyvd/twyr-portal-server.git"
+		"url": "https://github.com/twyr/twyr-portal-framework"
 	},
 	"main": "index.js",
 	"scripts": {
@@ -81,7 +81,7 @@
 		"url": "https://www.linkedin.com/in/vishdesai"
 	}],
 	"bugs": {
-		"url": "https://github.com/shadyvd/twyr-portal-server.git",
+		"url": "https://github.com/twyr/twyr-portal-framework/issues",
 		"email": "vishwakarma_d@hotmail.com"
 	},
 	"license": "MITNFA",
