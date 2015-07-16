@@ -1,0 +1,237 @@
+<script type="text/x-handlebars" data-template-name="manageProfile">
+<div class="box-header">
+	<h3 class="box-title">Manage Profile</h3>
+</div>
+<div class="box-body">
+<div class="row">
+	<div class="col-md-8">
+		<div class="box box-primary">
+			<form role="form">
+			<div class="box-header">
+				<h3 class="box-title">Manage Personal Details</h3>
+			</div>
+			<div id="div-manage-profile-alert-message" class="box-body alert alert-danger" style="display:none;">
+				<i class="fa fa-ban"></i>
+				<span id="manage-profile-alert-message">Alert!</span>
+			</div>
+			<div id="div-manage-profile-failed-message" class="box-body alert alert-danger" style="display:none;">
+				{{#each model.errors.firstname as |error|}}
+					<span id="manage-profile-failed-message">{{error.message}}</span>
+				{{/each}}
+			</div>
+			<div id="div-manage-profile-success-message" class="box-body alert alert-success" style="display:none; border-radius:0px">
+				<span id="manage-profile-success-message">Success!</span>
+			</div>
+			<div class="box-body">
+				<div class="row">
+					<div class="col-md-6">
+						<div class="form-group" id="div-manage-profile-salutation">
+							<label>Salutation</label>
+							{{input id="input-manage-profile-salutation" type="text" value=model.salutation class="form-control" placeholder="Mr. / Ms. / Dr."}}
+						</div>
+						<div class="form-group" id="div-manage-profile-firstname">
+							<label>First Name<sup>*</sup></label>
+							{{input id="input-manage-profile-firstname" type="text" value=model.firstname class="form-control" placeholder="First/Given Name"}}
+						</div>
+						<div class="form-group" id="div-manage-profile-middlenames">
+							<label>Middle Names</label>
+							{{input id="input-manage-profile-middlenames" type="text" value=model.middlenames class="form-control" placeholder="Middle Name(s)"}}
+						</div>
+						<div class="form-group" id="div-manage-profile-lastname">
+							<label>Last Name<sup>*</sup></label>
+							{{input id="input-manage-profile-lastname" type="text" value=model.lastname class="form-control" placeholder="Last/Family Name or Surname"}}
+						</div>
+						<div class="form-group" id="div-manage-profile-suffix">
+							<label>Suffix</label>
+							{{input id="input-manage-profile-suffix" type="text" value=model.suffix class="form-control" placeholder="Jr. / II"}}
+						</div>
+					</div>
+					<div class="col-md-6">
+						<div class="form-group" id="div-manage-profile-username">
+							<label>Username / Login</label>
+							{{input id="input-manage-profile-username" type="email" value=model.username class="form-control" placeholder="username@twyrportal.com" readonly="readonly"}}
+						</div>
+						<div class="form-group" id="div-manage-profile-password-1">
+							<label>Enter New Password</label>
+							{{input id="input-manage-profile-password-1" type="password" value=model.password1 class="form-control" placeholder="Enter New Password"}}
+						</div>
+						<div class="form-group" id="div-manage-profile-password-2">
+							<label>Confirm Password</label>
+							{{input id="input-manage-profile-password-2" type="password" value=model.password2 class="form-control" placeholder="Confirm Password"}}
+						</div>
+						<div class="form-group" id="div-manage-profile-member-since">
+							<label>Member Since</label>
+							{{input id="input-manage-profile-member-since" type="data" value=model.createdon class="form-control" placeholder="Member Since" readonly="readonly"}}
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="box-footer">
+				<div class="row">
+					<div class="col-md-4">
+					</div>
+					<div class="col-md-4">
+						<button id="button-manage-profile-submit" type="submit" class="btn btn-block btn-success" {{action "saveChanges"}}>Save Changes</button>
+					</div>
+					<div class="col-md-4">
+						<button id="button-manage-profile-cancel" type="button" class="btn btn-block btn-warning" {{action "cancelChanges"}}>Cancel Changes</button>
+					</div>
+				</div>
+			</div>
+			</form>
+		</div>
+	</div>
+	<div class="col-md-4">
+		<div class="box box-primary">
+			<form role="form">
+			<div class="box-header">
+				<h3 class="box-title">Manage Social Logins</h3>
+			</div>
+			<div id="div-manage-social-alert-message" class="box-body alert alert-danger" style="display:none;">
+				<i class="fa fa-ban"></i>
+				<span id="manage-social-alert-message">Alert!</span>
+			</div>
+			<div id="div-manage-social-success-message" class="box-body alert alert-success" style="display:none; border-radius:0px">
+				<span id="manage-social-success-message">Success!</span>
+			</div>
+			<div class="box-body">
+				<div class="form-group" id="div-manage-social-profile-facebook">
+					<div class="row">
+					<% if(!!social.facebook) { %>
+						<div class="col-md-2">
+							<i class="fa fa-facebook-square fa-3x" title="Facebook Login"></i>
+						</div>
+						<div class="col-md-6" style="vertical-align:middle;">
+							<p>
+								<%= social.facebook.displayName %><br/>
+								<%= social.facebook.id %>
+							</p>
+						</div>
+						<div class="col-md-4">
+							<button id="button-manage-social-profile-facebook-delink" type="button" class="btn btn-flat btn-warning btn-sm" {{action "unlink" "facebook"}}>De-link</button>
+						</div>
+					<% } else { %>
+						<div class="col-md-2">
+							<i class="fa fa-facebook-square fa-3x" title="Facebook Login" style="margin:0px 5px;"></i>
+						</div>
+						<div class="col-md-10">
+							<button id="button-manage-social-profile-facebook-link" type="button" class="btn btn-flat btn-success btn-sm" {{action "link" "facebook"}}>Link Facebook Account</button>
+						</div>
+					<% } %>
+					</div>
+				</div>
+				<div class="form-group" id="div-manage-social-profile-github">
+					<div class="row">
+					<% if(!!social.github) { %>
+						<div class="col-md-2">
+							<i class="fa fa-github-square fa-3x" title="Github Login"></i>
+						</div>
+						<div class="col-md-6" style="vertical-align:middle;">
+							<p>
+								<%= social.github.displayName %><br />
+								<%= social.github.id %>
+							</p>
+						</div>
+						<div class="col-md-4">
+							<button id="button-manage-social-profile-github-delink" type="button" class="btn btn-flat btn-warning btn-sm" {{action "unlink" "github"}}>De-link</button>
+						</div>
+					<% } else { %>
+						<div class="col-md-2">
+							<i class="fa fa-github-square fa-3x" title="Github Login" style="margin:0px 5px;"></i>
+						</div>
+						<div class="col-md-10">
+							<button id="button-manage-social-profile-github-link" type="button" class="btn btn-flat btn-success btn-sm" {{action "link" "github"}}>Link Github Account</button>
+						</div>
+					<% } %>
+					</div>
+				</div>
+				<div class="form-group" id="div-manage-social-profile-google">
+					<div class="row">
+					<% if(!!social.google) { %>
+						<div class="col-md-2">
+							<i class="fa fa-google-plus-square fa-3x" title="Google Login"></i>
+						</div>
+						<div class="col-md-6" style="vertical-align:middle;">
+							<p>
+								<%= social.google.displayName %><br />
+								<%= social.google.id %>
+							</p>
+						</div>
+						<div class="col-md-4">
+							<button id="button-manage-social-profile-google-delink" type="button" class="btn btn-flat btn-warning btn-sm" {{action "unlink" "google"}}>De-link</button>
+						</div>
+					<% } else { %>
+						<div class="col-md-2">
+							<i class="fa fa-google-plus-square fa-3x" title="Google Login" style="margin:0px 5px;"></i>
+						</div>
+						<div class="col-md-10">
+							<button id="button-manage-social-profile-google-link" type="button" class="btn btn-flat btn-success btn-sm" {{action "link" "google"}}>Link Google Account</button>
+						</div>
+					<% } %>
+					</div>
+				</div>
+				<div class="form-group" id="div-manage-social-profile-linkedin">
+					<div class="row">
+					<% if(!!social.linkedin) { %>
+						<div class="col-md-2">
+							<i class="fa fa-linkedin-square fa-3x" title="LinkedIn Login"></i>
+						</div>
+						<div class="col-md-6" style="vertical-align:middle;">
+							<p>
+								<%= social.linkedin.displayName %><br />
+								<%= social.linkedin.id %>
+							</p>
+						</div>
+						<div class="col-md-4">
+							<button id="button-manage-social-profile-linkedin-delink" type="button" class="btn btn-flat btn-warning btn-sm" {{action "unlink" "linkedin"}}>De-link</button>
+						</div>
+					<% } else { %>
+						<div class="col-md-2">
+							<i class="fa fa-linkedin-square fa-3x" title="LinkedIn Login" style="margin:0px 5px;"></i>
+						</div>
+						<div class="col-md-10">
+							<button id="button-manage-social-profile-linkedin-link" type="button" class="btn btn-flat btn-success btn-sm" {{action "link" "linkedin"}}>Link LinkedIn Account</button>
+						</div>
+					<% } %>
+					</div>
+				</div>
+				<div class="form-group" id="div-manage-social-profile-twitter">
+					<div class="row">
+					<% if(!!social.twitter) { %>
+						<div class="col-md-2">
+							<i class="fa fa-twitter-square fa-3x" title="Twitter Login"></i>
+						</div>
+						<div class="col-md-6" style="vertical-align:middle;">
+							<p>
+								<%= social.twitter.displayName %><br />
+								<%= social.twitter.id %>
+							</p>
+						</div>
+						<div class="col-md-4">
+							<button id="button-manage-social-profile-twitter-delink" type="button" class="btn btn-flat btn-warning btn-sm" {{action "unlink" "twitter"}}>De-link</button>
+						</div>
+					<% } else { %>
+						<div class="col-md-2">
+							<i class="fa fa-twitter-square fa-3x" title="Twitter Login" style="margin:0px 5px;"></i>
+						</div>
+						<div class="col-md-10">
+							<button id="button-manage-social-profile-twitter-link" type="button" class="btn btn-flat btn-success btn-sm" {{action "link" "twitter"}}>Link Twitter Account</button>
+						</div>
+					<% } %>
+					</div>
+				</div>
+			</div>
+			<div class="box-footer">
+				<div class="row">
+					<div class="col-md-12">
+						<p>&nbsp;</p>
+					</div>
+				</div>
+			</div>
+			</form>
+		</div>
+	</div>
+</div>
+</div>
+</script>
+

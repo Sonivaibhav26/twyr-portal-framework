@@ -1,0 +1,96 @@
+<script type="text/x-handlebars" data-template-name="resetPassword">
+<div class="box-header">
+	<h3 class="box-title">Reset Password</h3>
+</div>
+<div id="div-reset-password-alert-message" class="box-body alert alert-danger" style="display:none;">
+	<i class="fa fa-ban"></i>
+	<span id="reset-password-alert-message">Alert!</span>
+</div>
+<div id="div-reset-password-success-message" class="box-body alert alert-success" style="display:none; border-radius:0px">
+	<span id="reset-password-success-message">Success!</span>
+</div>
+<form role="form">
+<div class="box-body">
+
+	<div class="row">
+		<div id="main" class="col-md-3">
+			&nbsp;
+		</div>
+		<div id="main" class="col-md-6">
+			<div class="form-group" id="div-reset-password-username">
+				<label>Twy'r Portal Username</label>
+				{{input id="input-reset-password-username" type="text" value=resetUsername class="form-control" placeholder="username@twyrportal.com"}}
+			</div>
+			<div class="form-group">
+				<button id="button-reset-password" type="submit" class="btn btn-block btn-primary" {{action "resetPassword"}}>Reset Password</button>  
+			</div>
+		</div>
+		<div id="main" class="col-md-3">
+			&nbsp;
+		</div>
+	</div>
+</div>
+</form>
+<div class="box-footer">
+	&nbsp;
+</div>
+</script>
+
+<script type="text/x-handlebars" data-template-name="registerAccount">
+<div class="box-header">
+	<h3 class="box-title">Register New Account</h3>
+</div>
+<div id="div-register-account-alert-message" class="box-body alert alert-danger" style="display:none;">
+	<i class="fa fa-ban"></i>
+	<span id="register-account-alert-message">Alert!</span>
+</div>
+<div id="div-register-account-success-message" class="box-body alert alert-success" style="display:none; border-radius:0px">
+	<span id="register-account-success-message">Success!</span>
+</div>
+<form role="form">
+<div class="box-body">
+
+	<div class="row">
+		<div id="main" class="col-md-3">
+			&nbsp;
+		</div>
+		<div id="main" class="col-md-6">
+			<div class="form-group" id="div-register-account-username">
+				<label>Username / Login<sup>*</sup></label>
+				{{input id="input-register-account-username" type="email" value=username class="form-control" placeholder="username@twyrportal.com"}}
+			</div>
+			<div class="form-group" id="div-register-account-salutation">
+				<label>Salutation</label>
+				{{input id="input-register-account-salutation" type="text" value=salutation class="form-control" placeholder="Mr. / Ms. / Dr."}}
+			</div>
+			<div class="form-group" id="div-register-account-firstname">
+				<label>First Name<sup>*</sup></label>
+				{{input id="input-register-account-firstname" type="text" value=firstname class="form-control" placeholder="First/Given Name"}}
+			</div>
+			<div class="form-group" id="div-register-account-middlenames">
+				<label>Middle Names</label>
+				{{input id="input-register-account-middlenames" type="text" value=middlenames class="form-control" placeholder="Middle Name(s)"}}
+			</div>
+			<div class="form-group" id="div-register-account-lastname">
+				<label>Last Name<sup>*</sup></label>
+				{{input id="input-register-account-lastname" type="text" value=lastname class="form-control" placeholder="Last/Family Name or Surname"}}
+			</div>
+			<div class="form-group" id="div-register-account-suffix">
+				<label>Suffix</label>
+				{{input id="input-register-account-suffix" type="text" value=suffix class="form-control" placeholder="Jr. / II"}}
+			</div>
+			<div class="form-group">
+				<button id="button-register-account" type="submit" class="btn btn-block btn-primary" {{action "registerAccount"}}>Register</button>
+			</div>
+		</div>
+		<div id="main" class="col-md-3">
+			&nbsp;
+		</div>
+	</div>
+</div>
+</form>
+<div class="box-footer">
+	&nbsp;
+</div>
+</script>
+

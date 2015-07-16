@@ -1,0 +1,46 @@
+{
+  "name": "twyr-portal-framework",
+  "version": "0.6.1",
+  "authors": [
+    {
+      "name": "Vish Desai",
+      "email": "vishwakarma_d@hotmail.com"
+    }
+  ],
+  "description": "The Twy'r Portal Framework",
+  "main": [
+    "./bower_components/bootflat/bootstrap/bootstrap.min.css",
+    "./bower_components/bootflat/js/bootstrap.min.js"
+  ],
+  "keywords": [
+    "portal",
+    "framework"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/shadyvd/twyr-portal-server.git"
+  },
+  "license": "MIT",
+  "homepage": "https://twyr.github.io",
+  "private": false,
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components"
+  ],
+  "dependencies": {
+    "bootstrap": "*",
+	"curl": "*",
+    "ember": "*",
+    "ember-data": "*",
+    "ember-resolver": "*",
+    "loader.js": "ember-cli/loader.js",
+    "fastclick": "*",
+    "fontawesome": "*",
+    "handlebars": "*",
+    "ionicons": "*",
+    "jquery": "*",
+    "normalize-css": "*"
+  },
+  "devDependencies": {}
+}
