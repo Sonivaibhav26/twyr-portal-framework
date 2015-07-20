@@ -28,6 +28,8 @@ var footerComponent = prime({
 	},
 
 	'_getClientRouter': function(request, response, next) {
+		response.type('application/javascript');
+
 		filesystem.readFileAsync(path.join(__dirname, 'ember/router.js'))
 		.then(function(router) {
 			response.status(200).send(router);

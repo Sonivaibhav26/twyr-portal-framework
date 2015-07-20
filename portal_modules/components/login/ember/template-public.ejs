@@ -1,7 +1,7 @@
 <script type="text/x-handlebars" data-template-name="components/login-form">
 <form role="form">
-<div class="box" style="text-align:left;">
-	<div class="box-header">
+<div class="box box-default" style="text-align:left;">
+	<div class="box-header with-border">
 		<h3 class="box-title">Twy'r Login</h3>
 	</div>
 	<div id="div-alert-message" class="box-body alert alert-danger" style="display:none;">
@@ -11,7 +11,7 @@
 	<div id="div-success-message" class="box-body alert alert-success" style="display:none; border-radius:0px">
 		<span id="success-message">Alert!</span>
 	</div>
-	<div class="box-body" style="border-bottom: 1px solid #f4f4f4; border-radius:0px;">
+	<div class="box-body">
 		<div class="form-group" id="div-social-logins">
 			<div class="row" style="text-align:center;">
 				<i class="fa fa-facebook-square fa-3x" title="Facebook Login" style="margin:0px 5px; cursor:pointer;" {{action "doSocialLogin" "facebook"}}></i>
@@ -19,6 +19,7 @@
 				<i class="fa fa-google-plus-square fa-3x" title="Google+ Login" style="margin:0px 5px; cursor:pointer;" {{action "doSocialLogin" "google"}}></i>
 				<i class="fa fa-linkedin-square fa-3x" title="LinkedIn Login" style="margin:0px 5px; cursor:pointer;" {{action "doSocialLogin" "linkedin"}}></i>
 				<i class="fa fa-twitter-square fa-3x" title="Twitter Login" style="margin:0px 5px; cursor:pointer;" {{action "doSocialLogin" "twitter"}}></i>
+				{{#link-to 'register-account'}}<i class="fa fa-at fa-3x" title="Register via Email" style="margin:0px 5px; cursor:pointer; color:#333;"></i>{{/link-to}}
 			</div>
 		</div>
 	</div>
@@ -31,18 +32,16 @@
 			<label>Twy'r Portal Password</label>
 			{{input id="input-password" type="password" value=password class="form-control" placeholder="password"}}
 		</div>          
-		<div class="form-group" id="div-links">
-			<div class="pull-left" style="padding:5px 10px 5px 5px;">
-			{{#link-to 'resetPassword'}}Reset Password{{/link-to}}
-			</div>
-			<div class="pull-right" style="padding:5px 10px 5px 5px;">
-			{{#link-to 'registerAccount'}}Register Account{{/link-to}}
-			</div>
-			<div>&nbsp;</div>
-		</div>
 	</div>
-	<div class="box-footer">                                                               
-		<button id="button-login" type="submit" class="btn btn-block btn-primary" {{action "doLogin"}}>Login</button>  
+	<div class="box-footer">   
+		<div class="row">
+			<div class="col-lg-6" style="text-align:left; padding-top:8px;">
+				{{#link-to 'reset-password'}}Forgot Password{{/link-to}}  
+			</div>
+			<div class="col-lg-6" style="text-align:right;">
+				<button id="button-login" type="submit" class="btn btn-block" {{action "doLogin"}}>Login</button>  
+			</div>
+		</div>                                                            
 	</div>
 </div>
 </form>

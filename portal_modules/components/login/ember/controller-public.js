@@ -4,6 +4,25 @@ define(
 	function(exports) {
 		if(window.developmentMode) console.log('DEFINE: twyrPortal/components/login-form');
 		var LoginFormComponent = window.Ember.Component.extend({
+			'_initialize': function() {
+				window.Ember.run.scheduleOnce('afterRender', this, function() {
+					window.Ember.$('button#button-login').removeClass('btn-primary');
+					window.Ember.$('button#button-login').attr('disabled', 'disabled');
+
+					window.Ember.$('input#input-username').on('input', function(e) {
+						var username = window.Ember.$('input#input-username').val().trim();
+						if(username != '') {
+							window.Ember.$('button#button-login').addClass('btn-primary');
+							window.Ember.$('button#button-login').removeAttr('disabled', 'disabled');
+						}
+						else {
+							window.Ember.$('button#button-login').removeClass('btn-primary');
+							window.Ember.$('button#button-login').attr('disabled');
+						}
+					});
+				});
+			}.on('init'),
+			
 			'actions': {
 				'doLogin': function() {
 					window.Ember.$('span#alert-message').text('');

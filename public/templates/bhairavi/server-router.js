@@ -275,6 +275,7 @@ var serverRouter = (function() {
 	// Step 3: Process the template & route paths for the Portal
 	router.get('/route', function(request, response, next) {
 		loggerSrvc.silly('Template Router Rendering: ', request.path, ' with:\nQuery: ', request.query, '\nBody: ', request.body, '\nParams: ', request.params);
+		response.type('application/javascript');
 
 		filesystem.readFileAsync(path.join(__dirname, 'ember/router.js'))
 		.then(function(router) {
@@ -287,6 +288,7 @@ var serverRouter = (function() {
 
 	router.get('/mvc', function(request, response, next) {
 		loggerSrvc.silly('Template Router Rendering: ', request.path, ' with:\nQuery: ', request.query, '\nBody: ', request.body, '\nParams: ', request.params);
+		response.type('application/javascript');
 
 		filesystem.readFileAsync(path.join(__dirname, 'ember/controller.js'))
 		.then(function(controller) {

@@ -26,72 +26,39 @@ var profileComponent = prime({
 	'constructor': function() {
 		base.call(this);
 
-		this['publicRouter'] = path.join(__dirname, 'ember/router-public.js');
-		this['registeredRouter'] = path.join(__dirname, 'ember/router-registered.js');
-
-		this['publicModel'] = path.join(__dirname, 'ember/model-public.js');
-		this['registeredModel'] = path.join(__dirname, 'ember/model-registered.js');
+		this['publicRouter'] = path.join(__dirname, 'ember/router-public.ejs');
+		this['registeredRouter'] = path.join(__dirname, 'ember/router-registered.ejs');
 
 		this['publicTmpl'] = path.join(__dirname, 'ember/template-public.ejs');
 		this['registeredTmpl'] = path.join(__dirname, 'ember/template-registered.ejs');
 
-		this['publicCtrl'] = path.join(__dirname, 'ember/controller-public.js');
-		this['registeredCtrl'] = path.join(__dirname, 'ember/controller-registered.js');
+		this['resetPasswordCtrl'] = path.join(__dirname, 'ember/controller-reset-password.js');
+		this['registerAccountCtrl'] = path.join(__dirname, 'ember/controller-register-account.js');
+		this['manageProfileCtrl'] = path.join(__dirname, 'ember/controller-manage-profile.js');
 	},
 
 	'_getClientRouter': function(request, response, next) {
 		this.$dependencies.logger.silly('Servicing request "' + request.path + '":\nQuery: ', request.query, '\nBody: ', request.body, '\nParams: ', request.params);
 
 		var routerFile = '',
-			self = this;
+			renderOptions = {};
 
-		if(!request.user)
+		renderOptions.mountPath = path.join(this.$module.$config.componentMountPath, this.name);
+		if(!request.user) {
 			routerFile = this['publicRouter'];
-		else
+		}
+		else {
 			routerFile = this['registeredRouter'];
+			renderOptions.userId = request.user.id;
+		}
 
-		filesystem.readFileAsync(routerFile)
-		.then(function(router) {
-			response.status(200).send(router);
-		})
-		.catch(function(err) {
-			self.$dependencies.logger.error('Error servicing request "' + request.path + '":\nQuery: ', request.query, '\nBody: ', request.body, '\nParams: ', request.params, '\nError: ', err);
-
-			response.type('application/javascript');
-			response.status(500).json(err);
-		});
+		response.type('application/javascript');
+		response.render(routerFile, renderOptions);
 	},
 
 	'_getClientMVC': function(request, response, next) {
-		this.$dependencies.logger.silly('Servicing request "' + request.path + '":\nQuery: ', request.query, '\nBody: ', request.body, '\nParams: ', request.params);
-
-		var model = '',
-			controller = '',
-			self = this;
-
-		if(!request.user) {
-			model = this['publicModel'];
-			controller = this['publicCtrl'];
-		}
-		else {
-			model = this['registeredModel'];
-			controller = this['registeredCtrl'];
-		}
-
-		var promiseResolutions = [];
-		promiseResolutions.push(filesystem.readFileAsync(model));
-		promiseResolutions.push(filesystem.readFileAsync(controller));
-
-		promises.all(promiseResolutions)
-		.then(function(mvc) {
-			response.status(200).send(mvc[0] + '\n' + mvc[1]);
-		})
-		.catch(function(err) {
-			self.$dependencies.logger.error('Error servicing request "' + request.path + '":\nQuery: ', request.query, '\nBody: ', request.body, '\nParams: ', request.params, '\nError: ', err);
-
-			response.type('application/javascript');
-			response.status(500).json(err);
-		});
+		response.type('application/javascript');
+		response.status(200).send('');
 	},
 
 	'_getClientTemplate': function(request, response, next) {
@@ -109,6 +76,51 @@ var profileComponent = prime({
 
 			response.render(this['registeredTmpl'], renderOptions);
 		}
+	},
+
+	'_addRoutes': function() {
+		var self = this;
+
+		this.$router.get('/mvc/resetPassword', function(request, response, next) {
+			response.type('application/javascript');
+
+			filesystem.readFileAsync(self['resetPasswordCtrl'])
+			.then(function(controllerFile) {
+				response.status(200).send(controllerFile);
+			}).
+			catch(function(err) {
+				response.status(500).json(err);
+			});
+		});
+
+		this.$router.get('/mvc/registerAccount', function(request, response, next) {
+			response.type('application/javascript');
+
+			filesystem.readFileAsync(self['registerAccountCtrl'])
+			.then(function(controllerFile) {
+				response.status(200).send(controllerFile);
+			}).
+			catch(function(err) {
+				response.status(500).json(err);
+			});
+		});
+
+		this.$router.get('/mvc/manageProfile', function(request, response, next) {
+			response.type('application/javascript');
+
+			if(request.user) {
+				filesystem.readFileAsync(self['manageProfileCtrl'])
+				.then(function(controllerFile) {
+					response.status(200).send(controllerFile);
+				}).
+				catch(function(err) {
+					response.status(500).json(err);
+				});
+			}
+			else {
+				next();
+			}
+		});
 	},
 
 	'name': 'profile',

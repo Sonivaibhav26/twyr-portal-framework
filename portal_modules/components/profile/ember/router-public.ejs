@@ -1,0 +1,50 @@
+var Router = require('twyrPortal/router')['default'];
+Router.map(function() {
+	this.route('reset-password', { 'path': '/resetpassword' });
+	this.route('register-account', { 'path': '/registerAccount' });
+});
+
+define(
+	"twyrPortal/reset-password/route",
+	["exports"],
+	function(exports) {
+		if(window.developmentMode) console.log('DEFINE: twyrPortal/reset-password/route');
+		var ResetPasswordRoute = window.Ember.Route.extend({
+			'beforeModel': function() {
+				return window.Ember.$.getScript('<%= mountPath %>/mvc/resetPassword');
+			},
+
+			'model': function() {
+				return window.Ember.Object.extend({ 'resetUsername': '' });
+			}
+		});
+
+		exports['default'] = ResetPasswordRoute;
+	}
+);
+
+define(
+	"twyrPortal/register-account/route",
+	["exports"],
+	function(exports) {
+		if(window.developmentMode) console.log('DEFINE: twyrPortal/register-account/route');
+		var RegisterAccountRoute = window.Ember.Route.extend({
+			'beforeModel': function() {
+				return window.Ember.$.getScript('<%= mountPath %>/mvc/registerAccount');
+			},
+
+			'model': function() {
+				return window.Ember.Object.extend({
+					'username': '',
+					'salutation': '',
+					'firstname': '',
+					'middlenames': '',
+					'lastname': '',
+					'suffix': ''
+				});
+			}
+		});
+
+		exports['default'] = RegisterAccountRoute;
+	}
+);
