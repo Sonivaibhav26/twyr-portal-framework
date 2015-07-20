@@ -8,8 +8,7 @@ define(
 	"twyrPortal/application/route",
 	["exports"],
 	function(exports) {
-		console.log('DEFINE: twyrPortal/application/route');
-
+		if(window.developmentMode) console.log('DEFINE: twyrPortal/application/route');
 		var ApplicationRoute = window.Ember.Route.extend({
 			'beforeModel': function() {
 				return window.Ember.$.getScript('/mvc');

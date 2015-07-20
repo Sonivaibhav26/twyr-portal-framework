@@ -2,9 +2,9 @@ define(
 	"twyrPortal/application/controller",
 	["exports"],
 	function(exports) {
-		console.log('DEFINE: twyrPortal/application/controller');
+		if(window.developmentMode) console.log('DEFINE: twyrPortal/application/controller');
 		var ApplicationController = window.Ember.Controller.extend({
-			'componentChanger': function() {
+			'widgetFilter': function() {
 				var currPath = this.get('currentPath'),
 					sepIdx = currPath.indexOf('.');
 

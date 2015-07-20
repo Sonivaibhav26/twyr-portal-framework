@@ -77,12 +77,14 @@ var publicRootPathRenderer = function(request, response, next) {
 				if(!reorgedWidgets[thisWidget.position_name])
 					reorgedWidgets[thisWidget.position_name] = [];
 
-				var existingWidget = (reorgedWidgets[thisWidget.position_name]).find(function(item) {
-					return item.id == thisWidget.id;
-				});
-
-				if(existingWidget)
-					return;
+				if((reorgedWidgets[thisWidget.position_name]).length) {
+					var existingWidget = (reorgedWidgets[thisWidget.position_name]).find(function(item) {
+						return item.id == thisWidget.id;
+					});
+	
+					if(existingWidget)
+						return;
+				}
 
 				(reorgedWidgets[thisWidget.position_name]).push(thisWidget);
 			});
@@ -103,6 +105,35 @@ var publicRootPathRenderer = function(request, response, next) {
 				});
 			});
 
+			var numModulePositions = 0,
+				numFooterPositions = 1,
+				mainComponentWidth = 12;
+
+			if(reorgedWidgets.module1 && reorgedWidgets.module1.length)
+				numModulePositions++;
+
+			if(reorgedWidgets.module2 && reorgedWidgets.module2.length)
+				numModulePositions++;
+
+			if(reorgedWidgets.module3 && reorgedWidgets.module3.length)
+				numModulePositions++;
+
+			if(reorgedWidgets.footer1 && reorgedWidgets.footer1.length)
+				numFooterPositions++;
+
+			if(reorgedWidgets.footer2 && reorgedWidgets.footer2.length)
+				numFooterPositions++;
+
+			if(reorgedWidgets.leftsidebar && reorgedWidgets.leftsidebar.length)
+				mainComponentWidth = mainComponentWidth - 3;
+
+			if(reorgedWidgets.rightsidebar && reorgedWidgets.rightsidebar.length)
+				mainComponentWidth = mainComponentWidth - 3;
+
+			reorgedWidgets.moduleBar1ColWidth = (numModulePositions > 0 ) ? 12/numModulePositions : 12;
+			reorgedWidgets.moduleFooterColWidth = 12/numFooterPositions;
+			reorgedWidgets.mainComponentColWidth = mainComponentWidth;
+
 			deserializedUser.widgets = reorgedWidgets;
 		})
 		// Step 4: Store User data in the cache for quick retrieval next time
@@ -111,8 +142,6 @@ var publicRootPathRenderer = function(request, response, next) {
 		})
 		// Finally, send it back up...
 		.then(function() {
-			loggerSrvc.debug('Template Router Render Options (from Database): ', request.path, ' with:\nQuery: ', request.query, '\nBody: ', request.body, '\nParams: ', request.params, '\nOptions: ', deserializedUser);
-
 			response.render(path.join(self.$config.templates.path, self.$config.currentTemplate.name, self.$config.currentTemplate.client_index_file), deserializedUser, function(err, html) {
 				if(err) {
 					loggerSrvc.error('Template Router Render Error: ', request.path, ' with:\nQuery: ', request.query, '\nBody: ', request.body, '\nParams: ', request.params, '\nError: ', err, '\nHTML: ', html);
@@ -172,6 +201,37 @@ var registeredRootPathRenderer = function(request, response, next) {
 		// TODO: Add functionality to store "currentTenant" in the database, and use that always
 		var userTenant = cachedData.currentTenant || cachedData.tenants[(Object.keys(cachedData.tenants)[0])];
 		renderOptions.widgets = userTenant.widgets;
+
+		var numModulePositions = 0,
+			numFooterPositions = 1,
+			mainComponentWidth = 12;
+
+		if(userTenant.widgets.module1 && userTenant.widgets.module1.length)
+			numModulePositions++;
+
+		if(userTenant.widgets.module2 && userTenant.widgets.module2.length)
+			numModulePositions++;
+
+		if(userTenant.widgets.module3 && userTenant.widgets.module3.length)
+			numModulePositions++;
+
+		if(userTenant.widgets.footer1 && userTenant.widgets.footer1.length)
+			numFooterPositions++;
+
+		if(userTenant.widgets.footer2 && userTenant.widgets.footer2.length)
+			numFooterPositions++;
+
+		if(userTenant.widgets.leftsidebar && userTenant.widgets.leftsidebar.length)
+			mainComponentWidth = mainComponentWidth - 3;
+
+		if(userTenant.widgets.rightsidebar && userTenant.widgets.rightsidebar.length)
+			mainComponentWidth = mainComponentWidth - 3;
+
+		userTenant.widgets.moduleBar1ColWidth = (numModulePositions > 0) ? 12/numModulePositions : 12;
+		userTenant.widgets.moduleFooterColWidth = 12/numFooterPositions;
+		userTenant.widgets.mainComponentColWidth = mainComponentWidth;
+
+		cachedData.widgets = userTenant.widgets;
 
 		cachedData.currentTenant = userTenant;
 		return cacheSrvc.setAsync('twyr!portal!user!' + request.user.id, JSON.stringify(cachedData));

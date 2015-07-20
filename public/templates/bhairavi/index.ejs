@@ -49,33 +49,109 @@
 			<span class="logo-lg"><b>Twy&apos;r</b> Portal</span>
 		{{/link-to}}
 
-		<!-- Header Navbar -->
+		<!-- Position: settings -->
 		<nav class="navbar navbar-static-top" role="navigation">
-			<!-- Navbar Right Menu -->
-			<div class="navbar-custom-menu">
+			<div class="navbar-custom-menu" style="padding:10px;">
 				<ul class="nav navbar-nav">
-					{{outlet "settings"}}
+					<% if(widgets.settings) { %>
+						<% for(var widgetIdx = 0; widgetIdx < widgets.settings.length; widgetIdx++) { %>
+							{{<%= widgets.settings[widgetIdx].ember_component %>}}
+						<% } %>
+					<% } %>
 				</ul>
 			</div>
 		</nav>
 	</header>
 
-	<div class="row">
+	<div class="row" style="display:none;">
 		<div class="col-lg-12 col-md-12 col-sm-12 col-xs-12" style="text-align:center;">
-			{{componentChanger}}
+			{{widgetFilter}}
 		</div>
 	</div>
 
-	<div class="row">
-		<div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+	<!-- Position: menubar -->
+	<% if(widgets.menubar) { %>
+	<div id="bhairavi-menubar" class="row" style="min-height:0px; margin:0px; border:0px; padding:0px;">
+		<div class = "col-lg-12 col-md-12 col-sm-12 col-xs-12" style="min-height:0px; margin:0px; border:0px; padding:0px; text-align:center;">
+			<% for(var widgetIdx = 0; widgetIdx < widgets.menubar.length; widgetIdx++) { %>
+				{{<%= widgets.menubar[widgetIdx].ember_component %>}}
+			<% } %>
+		</div>
+	</div>
+	<% } %>
+
+	<!-- Position: module1, module2, module3 -->
+	<% if((widgets.module1 && widgets.module1.length) || (widgets.module2 && widgets.module2.length) || (widgets.module3 && widgets.module3.length)) { %>
+	<div id="bhairavi-modulebar-1" class="row" style="min-height:0px; margin:0px; border:0px; padding:0px;">
+		<% if(widgets.module1 && widgets.module1.length) { %>
+		<div id="div-bhairavi-module-1" class="col-lg-<%= widgets.moduleBar1ColWidth %> col-md-<%= widgets.moduleBar1ColWidth %> col-sm-<%= widgets.moduleBar1ColWidth %> col-xs-<%= widgets.moduleBar1ColWidth %>" style="text-align:center;">
+			<% for(var widgetIdx = 0; widgetIdx < widgets.module1.length; widgetIdx++) { %>
+				{{<%= widgets.module1[widgetIdx].ember_component %>}}
+			<% } %>
+		</div>
+		<% } %>
+
+		<% if(widgets.module2 && widgets.module2.length) { %>
+		<div id="div-bhairavi-module-2" class="col-lg-<%= widgets.moduleBar1ColWidth %> col-md-<%= widgets.moduleBar1ColWidth %> col-sm-<%= widgets.moduleBar1ColWidth %> col-xs-<%= widgets.moduleBar1ColWidth %>" style="text-align:center;">
+			<% for(var widgetIdx = 0; widgetIdx < widgets.module2.length; widgetIdx++) { %>
+				{{<%= widgets.module2[widgetIdx].ember_component %>}}
+			<% } %>
+		</div>
+		<% } %>
+
+		<% if(widgets.module3 && widgets.module3.length) { %>
+		<div id="div-bhairavi-module-3" class="col-lg-<%= widgets.moduleBar1ColWidth %> col-md-<%= widgets.moduleBar1ColWidth %> col-sm-<%= widgets.moduleBar1ColWidth %> col-xs-<%= widgets.moduleBar1ColWidth %>" style="text-align:center;">
+			<% for(var widgetIdx = 0; widgetIdx < widgets.module3.length; widgetIdx++) { %>
+				{{<%= widgets.module3[widgetIdx].ember_component %>}}
+			<% } %>
+		</div>
+		<% } %>
+	</div>
+	<% } %>
+
+	<!-- The main component area -->
+	<div class="row" style="padding:15px;">
+		<% if(widgets.leftsidebar && widgets.leftsidebar.length) { %>
+		<div id="div-bhairavi-left-sidebar" class="col-lg-3 col-md-3 col-sm-3 col-xs-3" style="text-align:center;">
+			<% for(var widgetIdx = 0; widgetIdx < widgets.leftsidebar.length; widgetIdx++) { %>
+				{{<%= widgets.leftsidebar[widgetIdx].ember_component %>}}
+			<% } %>
+		</div>
+		<% } %>
+
+		<div id="div-bhairavi-outlet" class="col-lg-<%= widgets.mainComponentColWidth %> col-md-<%= widgets.mainComponentColWidth %> col-sm-<%= widgets.mainComponentColWidth %> col-xs-<%= widgets.mainComponentColWidth %>">
 			{{outlet}}
 		</div>
+
+		<% if(widgets.rightsidebar && widgets.rightsidebar.length) { %>
+		<div id="div-bhairavi-right-sidebar" class="col-lg-3 col-md-3 col-sm-3 col-xs-3" style="text-align:center;">
+			<% for(var widgetIdx = 0; widgetIdx < widgets.rightsidebar.length; widgetIdx++) { %>
+				{{<%= widgets.rightsidebar[widgetIdx].ember_component %>}}
+			<% } %>
+		</div>
+		<% } %>
 	</div>
 
 	<footer class="main-footer" style="margin-left:0px!important;">
 		<div class="row">
-			<div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 hidden-xs" style="text-align:right;">
-				Copyright&copy; <%= baseYear %>-<%= currentYear %> <a href="https://twyr.github.io">Twy&apos;r Framework</a>. All rights reserved. 
+			<% if(widgets.footer1 && widgets.footer1.length) { %>
+			<div id="div-bhairavi-footer-1" class="col-lg-<%= widgets.moduleFooterColWidth %> col-md-<%= widgets.moduleFooterColWidth %> col-sm-<%= widgets.moduleFooterColWidth %> col-xs-<%= widgets.moduleFooterColWidth %>" style="text-align:left;">
+				<% for(var widgetIdx = 0; widgetIdx < widgets.footer1.length; widgetIdx++) { %>
+					{{<%= widgets.footer1[widgetIdx].ember_component %>}}
+				<% } %>
+			</div>
+			<% } %>
+
+			<% if(widgets.footer2 && widgets.footer2.length) { %>
+			<div id="div-bhairavi-footer-2" class="col-lg-<%= widgets.moduleFooterColWidth %> col-md-<%= widgets.moduleFooterColWidth %> col-sm-<%= widgets.moduleFooterColWidth %> col-xs-<%= widgets.moduleFooterColWidth %>" style="text-align:center;">
+				<% for(var widgetIdx = 0; widgetIdx < widgets.footer2.length; widgetIdx++) { %>
+					{{<%= widgets.footer2[widgetIdx].ember_component %>}}
+				<% } %>
+			</div>
+			<% } %>
+
+			<div id="div-bhairavi-footer-3" class="col-lg-<%= widgets.moduleFooterColWidth %> col-md-<%= widgets.moduleFooterColWidth %> col-sm-<%= widgets.moduleFooterColWidth %> col-xs-<%= widgets.moduleFooterColWidth %>" style="text-align:right;">
+				Copyright&copy; <%= baseYear %>-<%= currentYear %> {{#link-to "application"}}Twy&apos;r Framework{{/link-to}}. All rights reserved. 
 			</div>
 		</div>
 	</footer>
@@ -101,6 +177,7 @@
 <!-- Setup ALL Ajax Requests to send credential information -->
 <script type="application/javascript">
 $.ajaxSetup({
+	'cache': <%= !developmentMode %>,
 	'xhrFields': {
 		'withCredentials': true
 	}

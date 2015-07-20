@@ -26,7 +26,8 @@ var loginComponent = prime({
 	'constructor': function() {
 		base.call(this);
 
-		this['publicRouter'] = path.join(__dirname, 'ember/router-public.js');
+		this['publicRouter'] = path.join(__dirname, 'ember/router-public.ejs');
+		this['registeredRouter'] = path.join(__dirname, 'ember/router-registered.ejs');
 
 		this['publicTmpl'] = path.join(__dirname, 'ember/template-public.ejs');
 		this['registeredTmpl'] = path.join(__dirname, 'ember/template-registered.ejs');
@@ -38,22 +39,20 @@ var loginComponent = prime({
 	'_getClientRouter': function(request, response, next) {
 		this.$dependencies.logger.silly('Servicing request "' + request.path + '":\nQuery: ', request.query, '\nBody: ', request.body, '\nParams: ', request.params);
 
-		var self = this;
-		if(!request.user) {
-			filesystem.readFileAsync(this['publicRouter'])
-			.then(function(router) {
-				response.status(200).send(router);
-			})
-			.catch(function(err) {
-				self.$dependencies.logger.error('Error servicing request "' + request.path + '":\nQuery: ', request.query, '\nBody: ', request.body, '\nParams: ', request.params, '\nError: ', err);
+		var routerFile = '',
+			renderOptions = {},
+			self = this;
 
-				response.type('application/javascript');
-				response.status(500).json(err);
-			});
+		renderOptions.mountPath = path.join(this.$module.$config.componentMountPath, this.name);
+		if(!request.user) {
+			routerFile = this['publicRouter'];
 		}
 		else {
-			response.status(200).send('');
+			routerFile = this['registeredRouter'];
 		}
+
+		response.type('application/javascript');
+		response.render(routerFile, renderOptions);
 	},
 
 	'_getClientMVC': function(request, response, next) {
@@ -73,6 +72,7 @@ var loginComponent = prime({
 
 		filesystem.readFileAsync(controllerFile)
 		.then(function(controller) {
+			self.$dependencies.logger.silly('Servicing request "' + request.path + '":\nQuery: ', request.query, '\nBody: ', request.body, '\nParams: ', request.params, '\nResponse: ', controller);
 			response.status(200).send(controller);
 		})
 		.catch(function(err) {
