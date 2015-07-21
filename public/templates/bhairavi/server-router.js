@@ -125,10 +125,10 @@ var publicRootPathRenderer = function(request, response, next) {
 				numFooterPositions++;
 
 			if(reorgedWidgets.leftsidebar && reorgedWidgets.leftsidebar.length)
-				mainComponentWidth = mainComponentWidth - 3;
+				mainComponentWidth = mainComponentWidth - 2;
 
 			if(reorgedWidgets.rightsidebar && reorgedWidgets.rightsidebar.length)
-				mainComponentWidth = mainComponentWidth - 3;
+				mainComponentWidth = mainComponentWidth - 2;
 
 			reorgedWidgets.moduleBar1ColWidth = (numModulePositions > 0 ) ? 12/numModulePositions : 12;
 			reorgedWidgets.moduleFooterColWidth = 12/numFooterPositions;
@@ -222,10 +222,10 @@ var registeredRootPathRenderer = function(request, response, next) {
 			numFooterPositions++;
 
 		if(userTenant.widgets.leftsidebar && userTenant.widgets.leftsidebar.length)
-			mainComponentWidth = mainComponentWidth - 3;
+			mainComponentWidth = mainComponentWidth - 2;
 
 		if(userTenant.widgets.rightsidebar && userTenant.widgets.rightsidebar.length)
-			mainComponentWidth = mainComponentWidth - 3;
+			mainComponentWidth = mainComponentWidth - 2;
 
 		userTenant.widgets.moduleBar1ColWidth = (numModulePositions > 0) ? 12/numModulePositions : 12;
 		userTenant.widgets.moduleFooterColWidth = 12/numFooterPositions;

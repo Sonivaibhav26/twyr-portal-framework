@@ -40,7 +40,8 @@
     "handlebars": "*",
     "ionicons": "*",
     "jquery": "*",
-    "normalize-css": "*"
+    "normalize-css": "*",
+	"validatorjs": "*"
   },
   "devDependencies": {}
 }

@@ -7,13 +7,11 @@ define(
 		var ResetPasswordController = window.Ember.Controller.extend({
 			'actions': {
 				'resetPassword': function() {
-					console.log('Resetting password for: ' + this.get('resetUsername'));
-		
 					window.Ember.$('span#reset-password-alert-message').text('');
-					window.Ember.$('div#div-reset-password-alert-message').css('display', 'none');
+					window.Ember.$('div#div-reset-password-alert-message').hide(600);
 		
 					window.Ember.$('span#reset-password-success-message').text('');
-					window.Ember.$('div#div-reset-password-success-message').css('display', 'none');
+					window.Ember.$('div#div-reset-password-success-message').hide(600);
 		
 					window.Ember.$('div#div-reset-password-username').removeClass('has-error');
 					window.Ember.$('input#input-reset-password-username').attr('disabled', 'disabled');
@@ -30,11 +28,9 @@ define(
 						},
 		
 						'success': function(data) {
-							console.log('resetPassword returned: ', data);
-		
 							if(data.status) {
 								window.Ember.$('span#reset-password-success-message').text(data.responseText);
-								window.Ember.$('div#div-reset-password-success-message').css('display', 'block');
+								window.Ember.$('div#div-reset-password-success-message').show(600);
 		
 								window.Ember.$('div#div-reset-password-username').addClass('has-success');
 								window.Ember.$('input#input-reset-password-username').removeAttr('disabled');
@@ -43,7 +39,7 @@ define(
 							}
 							else {
 								window.Ember.$('span#reset-password-alert-message').text(data.responseText);
-								window.Ember.$('div#div-reset-password-alert-message').css('display', 'block');
+								window.Ember.$('div#div-reset-password-alert-message').show(600);
 		
 								window.Ember.$('div#div-reset-password-username').addClass('has-error');
 								window.Ember.$('input#input-reset-password-username').removeAttr('disabled');
@@ -54,10 +50,8 @@ define(
 						},
 		
 						'error': function(err) {
-							console.error('resetPassword returned: ', err);
-		
 							window.Ember.$('span#reset-password-alert-message').text(err.responseText);
-							window.Ember.$('div#div-reset-password-alert-message').css('display', 'block');
+							window.Ember.$('div#div-reset-password-alert-message').show(600);
 
 							window.Ember.$('div#div-reset-password-username').addClass('has-error');
 							window.Ember.$('input#input-reset-password-username').removeAttr('disabled');

@@ -110,21 +110,21 @@
 	<% } %>
 
 	<!-- The main component area -->
-	<div class="row" style="padding:15px;">
+	<div class="row" style="padding:0px 15px;">
 		<% if(widgets.leftsidebar && widgets.leftsidebar.length) { %>
-		<div id="div-bhairavi-left-sidebar" class="col-lg-3 col-md-3 col-sm-3 col-xs-3" style="text-align:center;">
+		<div id="div-bhairavi-left-sidebar" class="col-lg-2 col-md-2 col-sm-2 col-xs-2" style="border-top:3px solid #d2d6de; padding:10px; background-color:#f9fafc; text-align:center;">
 			<% for(var widgetIdx = 0; widgetIdx < widgets.leftsidebar.length; widgetIdx++) { %>
 				{{<%= widgets.leftsidebar[widgetIdx].ember_component %>}}
 			<% } %>
 		</div>
 		<% } %>
 
-		<div id="div-bhairavi-outlet" class="col-lg-<%= widgets.mainComponentColWidth %> col-md-<%= widgets.mainComponentColWidth %> col-sm-<%= widgets.mainComponentColWidth %> col-xs-<%= widgets.mainComponentColWidth %>">
+		<div id="div-bhairavi-outlet" class="col-lg-<%= widgets.mainComponentColWidth %> col-md-<%= widgets.mainComponentColWidth %> col-sm-<%= widgets.mainComponentColWidth %> col-xs-<%= widgets.mainComponentColWidth %>" style="background-color:#ecf0f5; margin:0px; border:0px; padding:0px;">
 			{{outlet}}
 		</div>
 
 		<% if(widgets.rightsidebar && widgets.rightsidebar.length) { %>
-		<div id="div-bhairavi-right-sidebar" class="col-lg-3 col-md-3 col-sm-3 col-xs-3" style="text-align:center;">
+		<div id="div-bhairavi-right-sidebar" class="col-lg-2 col-md-2 col-sm-2 col-xs-2" style="border-top:3px solid #d2d6de; padding:10px; background-color:#f9fafc; text-align:center;">
 			<% for(var widgetIdx = 0; widgetIdx < widgets.rightsidebar.length; widgetIdx++) { %>
 				{{<%= widgets.rightsidebar[widgetIdx].ember_component %>}}
 			<% } %>
@@ -167,7 +167,11 @@
 <!-- Portal JS Library - the AdminLTE theme stuff -->
 <script type="application/javascript" src="/<%= template %>/js/base-scripts.min.js"></script>
 
+<!-- CURL - download Ember resolvers asynchronously -->
 <script type="application/javascript" src="/bower_components/curl/dist/curl-kitchen-sink/curl.js"></script>
+
+<!-- Validator - client-side quick/easy/dirty validation -->
+<script type="application/javascript" src="/bower_components/validatorjs/dist/validator.js"></script>
 
 <!-- Ember.js, for the client-side MVC Framework -->
 <script type="application/javascript" src="/bower_components/ember/ember.min.js"></script>

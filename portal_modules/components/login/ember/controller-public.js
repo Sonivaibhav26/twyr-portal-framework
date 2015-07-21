@@ -26,7 +26,7 @@ define(
 			'actions': {
 				'doLogin': function() {
 					window.Ember.$('span#alert-message').text('');
-					window.Ember.$('div#div-alert-message').css('display', 'none');
+					window.Ember.$('div#div-alert-message').hide(600);
 				
 					window.Ember.$('div#div-input-username').removeClass('has-error');
 					window.Ember.$('div#div-input-password').removeClass('has-error');
@@ -46,11 +46,9 @@ define(
 						},
 				
 						'success': function(data) {
-							console.log('doLogin returned: ', data);
-				
 							if(data.status) {
 								window.Ember.$('span#success-message').text(data.responseText);
-								window.Ember.$('div#div-success-message').css('display', 'block');
+								window.Ember.$('div#div-success-message').show(600);
 				
 								window.Ember.$('div#div-input-username').addClass('has-success');
 								window.Ember.$('div#div-input-password').addClass('has-success');
@@ -61,7 +59,7 @@ define(
 							}
 							else {
 								window.Ember.$('span#alert-message').text(data.responseText);
-								window.Ember.$('div#div-alert-message').css('display', 'block');
+								window.Ember.$('div#div-alert-message').show(600);
 				
 								window.Ember.$('div#div-input-username').addClass('has-error');
 								window.Ember.$('div#div-input-password').addClass('has-error');
@@ -78,7 +76,7 @@ define(
 							console.error('doLogin returned: ', err);
 				
 							window.Ember.$('span#alert-message').text(err.responseText);
-							window.Ember.$('div#div-alert-message').css('display', 'block');
+							window.Ember.$('div#div-alert-message').show(600);
 				
 							window.Ember.$('div#div-input-username').addClass('has-error');
 							window.Ember.$('div#div-input-password').addClass('has-error');

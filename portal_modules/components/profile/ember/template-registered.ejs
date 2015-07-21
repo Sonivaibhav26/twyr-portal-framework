@@ -10,16 +10,16 @@
 			<div class="box-header">
 				<h3 class="box-title">Manage Personal Details</h3>
 			</div>
-			<div id="div-manage-profile-alert-message" class="box-body alert alert-danger" style="display:none;">
+			<div id="div-manage-profile-alert-message" class="box-body callout callout-danger" style="display:none;">
 				<i class="fa fa-ban"></i>
 				<span id="manage-profile-alert-message">Alert!</span>
 			</div>
-			<div id="div-manage-profile-failed-message" class="box-body alert alert-danger" style="display:none;">
+			<div id="div-manage-profile-failed-message" class="box-body callout callout-danger" style="display:none;">
 				{{#each model.errors.firstname as |error|}}
 					<span id="manage-profile-failed-message">{{error.message}}</span>
 				{{/each}}
 			</div>
-			<div id="div-manage-profile-success-message" class="box-body alert alert-success" style="display:none; border-radius:0px">
+			<div id="div-manage-profile-success-message" class="box-body callout callout-success" style="display:none; border-radius:0px">
 				<span id="manage-profile-success-message">Success!</span>
 			</div>
 			<div class="box-body">
@@ -87,11 +87,11 @@
 			<div class="box-header">
 				<h3 class="box-title">Manage Social Logins</h3>
 			</div>
-			<div id="div-manage-social-alert-message" class="box-body alert alert-danger" style="display:none;">
+			<div id="div-manage-social-alert-message" class="box-body callout callout-danger" style="display:none;">
 				<i class="fa fa-ban"></i>
 				<span id="manage-social-alert-message">Alert!</span>
 			</div>
-			<div id="div-manage-social-success-message" class="box-body alert alert-success" style="display:none; border-radius:0px">
+			<div id="div-manage-social-success-message" class="box-body callout callout-success" style="display:none; border-radius:0px">
 				<span id="manage-social-success-message">Success!</span>
 			</div>
 			<div class="box-body">

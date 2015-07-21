@@ -7,34 +7,22 @@ define(
 		var RegisterAccountController = window.Ember.Controller.extend({
 			'resetForm': function() {
 				window.Ember.$('span#register-account-alert-message').text('');
-				window.Ember.$('div#div-register-account-alert-message').css('display', 'none');
+				window.Ember.$('div#div-register-account-alert-message').hide(600);
 		
 				window.Ember.$('span#register-account-success-message').text('');
-				window.Ember.$('div#div-register-account-success-message').css('display', 'none');
+				window.Ember.$('div#div-register-account-success-message').hide(600);
 		
 				window.Ember.$('div#div-register-account-username').removeClass('has-error');
 				window.Ember.$('div#div-register-account-username').removeClass('has-success');
 				window.Ember.$('input#input-register-account-username').removeAttr('disabled');
 		
-				window.Ember.$('div#div-register-account-salutation').removeClass('has-error');
-				window.Ember.$('div#div-register-account-salutation').removeClass('has-success');
-				window.Ember.$('input#input-register-account-salutation').removeAttr('disabled');
-		
 				window.Ember.$('div#div-register-account-firstname').removeClass('has-error');
 				window.Ember.$('div#div-register-account-firstname').removeClass('has-success');
 				window.Ember.$('input#input-register-account-firstname').removeAttr('disabled');
 		
-				window.Ember.$('div#div-register-account-middlenames').removeClass('has-error');
-				window.Ember.$('div#div-register-account-firstname').removeClass('has-success');
-				window.Ember.$('input#input-register-account-middlenames').removeAttr('disabled');
-		
 				window.Ember.$('div#div-register-account-lastname').removeClass('has-error');
 				window.Ember.$('div#div-register-account-firstname').removeClass('has-success');
 				window.Ember.$('input#input-register-account-lastname').removeAttr('disabled');
-		
-				window.Ember.$('div#div-register-account-suffix').removeClass('has-error');
-				window.Ember.$('div#div-register-account-firstname').removeClass('has-success');
-				window.Ember.$('input#input-register-account-suffix').removeAttr('disabled');
 		
 				window.Ember.$('button#button-register-account').removeAttr('disabled');
 				window.Ember.$('input#input-register-account-username').focus();
@@ -44,22 +32,29 @@ define(
 				this.resetForm();
 		
 				window.Ember.$('input#input-register-account-username').attr('disabled', 'disabled');
-				window.Ember.$('input#input-register-account-salutation').attr('disabled', 'disabled');
 				window.Ember.$('input#input-register-account-firstname').attr('disabled', 'disabled');
-				window.Ember.$('input#input-register-account-middlenames').attr('disabled', 'disabled');
 				window.Ember.$('input#input-register-account-lastname').attr('disabled', 'disabled');
-				window.Ember.$('input#input-register-account-suffix').attr('disabled', 'disabled');
 				window.Ember.$('button#button-register-account').attr('disabled', 'disabled');
 			},
 		
 			'showSuccess': function(message) {
 				window.Ember.$('span#register-account-success-message').text(message);
-				window.Ember.$('div#div-register-account-success-message').css('display', 'block');
+				window.Ember.$('div#div-register-account-success-message').show(600);
 			},
 		
 			'showError': function(message, element) {
-				window.Ember.$('span#register-account-alert-message').text(message);
-				window.Ember.$('div#div-register-account-alert-message').css('display', 'block');
+				var displayMessages = '';
+				Object.keys(message).forEach(function(key) {
+					if(!(message[key]).length)
+						return;
+
+					for(var idx = 0; idx < message[key].length; idx++) {
+						displayMessages += ('<i class="fa fa-ban" style="margin-right:5px;"></i>' + message[key][idx] + '<br />');
+					}
+				});
+
+				window.Ember.$('span#register-account-alert-message').html(displayMessages);
+				window.Ember.$('div#div-register-account-alert-message').show(600);
 		
 				if(element) {
 					window.Ember.$(element).removeClass('has-success');
@@ -69,36 +64,25 @@ define(
 		
 			'actions': {
 				'registerAccount': function() {
-					var self = this;
-					var formData = {
-						'username': self.get('username'),
-		
-						'salutation': self.get('salutation'),
-						'firstname': self.get('firstname'),
-						'middlenames': self.get('middlenames'),
-						'lastname': self.get('lastname'),
-						'suffix': self.get('suffix')
-					};
-		
+					var self = this,
+						formData = {
+							'username': self.get('username'),
+							'firstname': self.get('firstname'),
+							'lastname': self.get('lastname')
+						},
+						rules = {
+							'username': 'required|email',
+							'firstname': 'required',
+							'lastname': 'required'
+						};
+
 					// Client-side Input Data Validations
-					var dataInputError = false;
-					if(formData.username.trim() == '') {
-						self.showError('Please fill in the required fields before submitting', 'div#div-register-account-username');
-						dataInputError = true;
-					}
-		
-					if(formData.firstname.trim() == '') {
-						self.showError('Please fill in the required fields before submitting', 'div#div-register-account-firstname');
-						dataInputError = true;
-					}
-		
-					if(formData.lastname.trim() == '') {
-						self.showError('Please fill in the required fields before submitting', 'div#div-register-account-lastname');
-						dataInputError = true;
-					}
-		
-					if(dataInputError)
+					var dataInputError = window.Validator.make(formData, rules);
+					if(dataInputError.fails()) {
+						self.showError(dataInputError.errors.all(), 'div#div-register-account-username');
+						window.Ember.run.later(self, self.resetForm, 2500);
 						return;
+					}
 		
 					self.lockForm();
 					window.Ember.$.ajax({
@@ -112,13 +96,13 @@ define(
 							if(data.status)
 								self.showSuccess(data.responseText);
 							else
-								self.showError(data.responseText);
+								self.showError({ 'username': [data.responseText] });
 		
 							window.Ember.run.later(self, self.resetForm, 7500);
 						},
 		
 						'error': function(err) {
-							self.showError(err.responseJSON.responseText);
+							self.showError({ 'username': [err.responseJSON.responseText] });
 							window.Ember.run.later(self, self.resetForm, 7500);
 						}
 					});
