@@ -17,7 +17,7 @@
 var prime = require('prime'),
 	promises = require('bluebird');
 
-var baseService = prime({
+var simpleService = prime({
 	'constructor': function() {
 		console.log('Constructor of the ' + this.name + ' Service');
 	},
@@ -121,8 +121,8 @@ var baseService = prime({
 		this['$config'] = config;
 	},
 
-	'name': 'baseService',
+	'name': 'simpleService',
 	'dependencies': []
 });
 
-exports.baseService = baseService;
+exports.baseService = simpleService;

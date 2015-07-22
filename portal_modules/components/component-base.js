@@ -18,7 +18,7 @@ var path = require('path'),
 	prime = require('prime'),
 	promises = require('bluebird');
 
-var baseComponent = prime({
+var simpleComponent = prime({
 	'constructor': function() {
 		console.log('Constructor of the ' + this.name + ' Component');
 	},
@@ -191,9 +191,9 @@ var baseComponent = prime({
 		return true;
 	},
 
-	'name': 'baseComponent',
+	'name': 'simpleComponent',
 	'dependencies': ['logger']
 });
 
-exports.baseComponent = baseComponent;
+exports.baseComponent = simpleComponent;
 

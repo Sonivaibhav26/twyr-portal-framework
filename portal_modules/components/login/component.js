@@ -40,8 +40,7 @@ var loginComponent = prime({
 		this.$dependencies.logger.silly('Servicing request "' + request.path + '":\nQuery: ', request.query, '\nBody: ', request.body, '\nParams: ', request.params);
 
 		var routerFile = '',
-			renderOptions = {},
-			self = this;
+			renderOptions = {};
 
 		renderOptions.mountPath = path.join(this.$module.$config.componentMountPath, this.name);
 		if(!request.user) {
