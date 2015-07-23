@@ -174,9 +174,13 @@
 <script type="application/javascript" src="/bower_components/validatorjs/dist/validator.js"></script>
 
 <!-- Ember.js, for the client-side MVC Framework -->
-<script type="application/javascript" src="/bower_components/ember/ember.min.js"></script>
+<% if(developmentMode) { %>
+	<script type="application/javascript" src="/bower_components/ember/ember.debug.js"></script>
+<% } else { %>
+	<script type="application/javascript" src="/bower_components/ember/ember.min.js"></script>
+<% } %>
+<script type="application/javascript" src="/bower_components/ember-data/ember-data.min.js"></script>
 <script type="application/javascript" src="/bower_components/ember/ember-template-compiler.js"></script>
-<script type="application/javascript" src="/bower_components/ember-data/ember-data.js"></script>
 
 <!-- Setup ALL Ajax Requests to send credential information -->
 <script type="application/javascript">
