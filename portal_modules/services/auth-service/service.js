@@ -11,13 +11,17 @@
 "use strict";
 
 /**
- * Module dependencies.
+ * Module dependencies, required for ALL Twy'r modules
  */
 var base = require('./../service-base').baseService,
-	filesystem = require('fs'),
-	path = require('path'),
 	prime = require('prime'),
 	promises = require('bluebird');
+
+/**
+ * Module dependencies, required for this module
+ */
+var filesystem = require('fs'),
+	path = require('path');
 
 var authService = prime({
 	'inherits': base,

@@ -11,14 +11,18 @@
 "use strict";
 
 /**
- * Module dependencies.
+ * Module dependencies, required for ALL Twy'r modules
  */
 var base = require('./../component-base').baseComponent,
-	path = require('path'),
 	prime = require('prime'),
-	promises = require('bluebird'),
-	uuid = require('node-uuid'),
-	filesystem = promises.promisifyAll(require('fs'));
+	promises = require('bluebird');
+
+/**
+ * Module dependencies, required for this module
+ */
+var filesystem = promises.promisifyAll(require('fs')),
+	path = require('path'),
+	uuid = require('node-uuid');
 
 var profileComponent = prime({
 	'inherits': base,

@@ -11,7 +11,7 @@
 "use strict";
 
 /**
- * Module dependencies.
+ * Module dependencies, required for ALL Twy'r modules
  */
 var base = require('./../service-base').baseService,
 	prime = require('prime'),
