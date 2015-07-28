@@ -33,8 +33,8 @@ var loginComponent = prime({
 		this['publicRouter'] = path.join(__dirname, 'ember/router-public.ejs');
 		this['registeredRouter'] = path.join(__dirname, 'ember/router-registered.ejs');
 
-		this['publicTmpl'] = path.join(__dirname, 'ember/template-public.ejs');
-		this['registeredTmpl'] = path.join(__dirname, 'ember/template-registered.ejs');
+		this['publicTmpl'] = path.join(__dirname, 'ember/template-public.hbs');
+		this['registeredTmpl'] = path.join(__dirname, 'ember/template-registered.hbs');
 
 		this['publicCtrl'] = path.join(__dirname, 'ember/controller-public.js');
 		this['registeredCtrl'] = path.join(__dirname, 'ember/controller-registered.js');
@@ -87,17 +87,21 @@ var loginComponent = prime({
 	'_getClientTemplate': function(request, response, next) {
 		response.type('application/javascript');
 
+		var tmplFile = '';
 		if(!request.user) {
-			response.render(this['publicTmpl']);
+			tmplFile = this['publicTmpl'];
 		}
 		else {
-			var renderOptions = {
-				'userId': request.user.id,
-				'userName': request.user.first_name + ' ' + request.user.last_name
-			};
-
-			response.render(this['registeredTmpl'], renderOptions);
+			tmplFile = this['registeredTmpl'];
 		}
+
+		filesystem.readFileAsync(tmplFile)
+		.then(function(tmpl) {
+			response.status(200).send(tmpl);
+		})
+		.catch(function(err) {
+			response.status(500).json(err);
+		});
 	},
 
 	'name': 'login',

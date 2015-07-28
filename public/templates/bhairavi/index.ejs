@@ -32,6 +32,24 @@
 	<!-- Portal AdminLTE Skin CSS Styles -->
 	<link href="/<%= template %>/css/skin-black-light.min.css" rel="stylesheet" type="text/css" />
 
+	<!-- Override the one style that is caausing us pain -->
+	<style>
+	div.navbar-custom-menu > ul.navbar-nav > div.ember-view {
+		position: relative;
+		display: block;
+		float: left!important;
+
+		border-left: 1px solid #eee;
+		padding: 15px;
+	}
+	
+	div.navbar-custom-menu > ul.navbar-nav > div.ember-view li > a {
+		color: #333;
+		line-height: 20px;
+		font-size: 14px;
+	}
+	</style>
+
 	<!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
 	<!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
 	<!--[if lt IE 9]>
@@ -51,7 +69,7 @@
 
 		<!-- Position: settings -->
 		<nav class="navbar navbar-static-top" role="navigation">
-			<div class="navbar-custom-menu" style="padding:10px;">
+			<div class="navbar-custom-menu">
 				<ul class="nav navbar-nav">
 					<% if(widgets.settings) { %>
 						<% for(var widgetIdx = 0; widgetIdx < widgets.settings.length; widgetIdx++) { %>
@@ -119,7 +137,7 @@
 		</div>
 		<% } %>
 
-		<div id="div-bhairavi-outlet" class="col-lg-<%= widgets.mainComponentColWidth %> col-md-<%= widgets.mainComponentColWidth %> col-sm-<%= widgets.mainComponentColWidth %> col-xs-<%= widgets.mainComponentColWidth %>" style="background-color:#ecf0f5; margin:0px; border:0px; padding:0px;">
+		<div id="div-bhairavi-outlet" class="col-lg-<%= widgets.mainComponentColWidth %> col-md-<%= widgets.mainComponentColWidth %> col-sm-<%= widgets.mainComponentColWidth %> col-xs-<%= widgets.mainComponentColWidth %>" style="margin:0px; border:0px; padding:0px;">
 			{{outlet}}
 		</div>
 
@@ -150,7 +168,7 @@
 			</div>
 			<% } %>
 
-			<div id="div-bhairavi-footer-3" class="col-lg-<%= widgets.moduleFooterColWidth %> col-md-<%= widgets.moduleFooterColWidth %> col-sm-<%= widgets.moduleFooterColWidth %> col-xs-<%= widgets.moduleFooterColWidth %>" style="text-align:right;">
+			<div id="div-bhairavi-footer-3" class="col-lg-<%= widgets.moduleFooterColWidth %> col-md-<%= widgets.moduleFooterColWidth %> col-sm-<%= widgets.moduleFooterColWidth %> col-xs-<%= widgets.moduleFooterColWidth %>" style="text-align:right; padding:15px;">
 				Copyright&copy; <%= baseYear %>-<%= currentYear %> {{#link-to "application"}}Twy&apos;r Framework{{/link-to}}. All rights reserved. 
 			</div>
 		</div>

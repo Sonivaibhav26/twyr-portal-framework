@@ -1,0 +1,37 @@
+<script type="text/x-handlebars" data-template-name="components/<%= componentName %>">
+<ul class="nav navbar-nav">
+<% for(var idx = 0; idx < menuItems.length; idx++) { %>
+	<% if (menuItems[idx].subRoutes.length > 0) { %>
+		<li class="dropdown">
+			<a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
+				<% if(menuItems[idx].icon_class) { %>
+					<i class="<%= menuItems[idx].icon_class %>"></i>
+				<% } %>
+				<%= menuItems[idx].display_name %>
+			</a>
+			<ul class="dropdown-menu">
+				<% for(var subIdx = 0; subIdx < menuItems[idx].subRoutes.length; subIdx++) { %>
+					<li>
+						{{#link-to "<%= menuItems[idx].subRoutes[subIdx].ember_route %>"}}
+							<% if(menuItems[idx].subRoutes[subIdx].icon_class) { %>
+								<i class="<%= menuItems[idx].subRoutes[subIdx].icon_class %>"></i>
+							<% } %>
+							<%= menuItems[idx].subRoutes[subIdx].display_name %>
+						{{/link-to}}
+					</li>
+				<% } %>
+			</ul>
+		</li>
+	<% } else { %>
+		<li>
+			{{#link-to "<%= menuItems[idx].ember_route %>"}}
+				<% if(menuItems[idx].icon_class) { %>
+					<i class="<%= menuItems[idx].icon_class %>"></i>
+				<% } %>
+				<%= menuItems[idx].display_name %>
+			{{/link-to}}
+		</li>
+	<% } %>
+<% } %>
+</ul>
+</script>

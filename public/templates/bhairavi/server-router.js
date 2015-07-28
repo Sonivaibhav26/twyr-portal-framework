@@ -67,22 +67,30 @@ var publicRootPathRenderer = function(request, response, next) {
 			deserializedUser.components.push({ 'name': path.join(mountPath, idx) });
 		}
 
-		databaseSrvc.knex.raw('SELECT * FROM fn_get_component_widgets(\'ffffffff-ffff-ffff-ffff-ffffffffffff\');')
-		// Step 3: Fetch, and process, public widgets
-		.then(function(componentWidgets) {
-			// Re-organize widgets according to display position, and order of display within that position
-			var reorgedWidgets = {};
+		var promiseResolutions = [];
 
+		promiseResolutions.push(databaseSrvc.knex.raw('SELECT * FROM fn_get_component_menus(\'ffffffff-ffff-ffff-ffff-ffffffffffff\', 10);'));
+		promiseResolutions.push(databaseSrvc.knex.raw('SELECT * FROM fn_get_component_widgets(\'ffffffff-ffff-ffff-ffff-ffffffffffff\');'));
+
+		// Step 3: Fetch, and process, public widgets
+		promises.all(promiseResolutions)
+		.then(function(results) {
+			var componentMenus = results[0],
+				componentWidgets = results[1],
+				reorgedMenus = [],
+				reorgedWidgets = {};
+
+			// Re-organize widgets according to display position, and order of display within that position
 			componentWidgets.rows.forEach(function(thisWidget) {
 				if(!reorgedWidgets[thisWidget.position_name])
 					reorgedWidgets[thisWidget.position_name] = [];
 
 				if((reorgedWidgets[thisWidget.position_name]).length) {
-					var existingWidget = (reorgedWidgets[thisWidget.position_name]).find(function(item) {
+					var existingWidget = (reorgedWidgets[thisWidget.position_name]).filter(function(item) {
 						return item.id == thisWidget.id;
 					});
 	
-					if(existingWidget)
+					if(existingWidget.length)
 						return;
 				}
 
@@ -103,6 +111,102 @@ var publicRootPathRenderer = function(request, response, next) {
 
 					return retVal;
 				});
+			});
+
+			// Re-organize menus according to parent-child replationships...
+			componentMenus.rows.forEach(function(thisMenu) {
+				if(!reorgedMenus.length) {
+					if(!thisMenu.parent_id) {
+						reorgedMenus.push({
+							'id': thisMenu.id,
+							'icon_class': thisMenu.icon_class,
+							'display_name': thisMenu.display_name,
+							'ember_route': thisMenu.ember_route,
+							'subRoutes': []
+						});
+					}
+					else {
+						var parentMenu = {
+							'id': thisMenu.parent_id,
+							'subRoutes': []
+						};
+
+						parentMenu.subRoutes.push({
+							'id': thisMenu.id,
+							'icon_class': thisMenu.icon_class,
+							'display_name': thisMenu.display_name,
+							'ember_route': thisMenu.ember_route
+						});
+
+						reorgedMenus.push(parentMenu);
+					}
+				}
+				else {
+					if(!thisMenu.parent_id) {
+						var existingMenus = reorgedMenus.filter(function(item) {
+							if(item.id == thisMenu.id) {
+								return true;
+							}
+
+							return false;
+						});
+
+						if(!existingMenus.length) {
+							reorgedMenus.push({
+								'id': thisMenu.id,
+								'icon_class': thisMenu.icon_class,
+								'display_name': thisMenu.display_name,
+								'ember_route': thisMenu.ember_route,
+								'subRoutes': []
+							});
+						}
+						else {
+							existingMenus[0].display_name = thisMenu.display_name;
+							existingMenus[0].ember_route = thisMenu.ember_route;
+						}
+					}
+					else {
+						var parentMenus = reorgedMenus.filter(function(item) {
+							if(item.id == thisMenu.parent_id) {
+								return true;
+							}
+
+							return false;
+						});
+
+						var parentMenu = null;
+						if(!parentMenus.length) {
+							parentMenu = {
+								'id': thisMenu.parent_id,
+								'subRoutes': []
+							};
+
+							reorgedMenus.push(parentMenu);
+						}
+						else {
+							parentMenu = parentMenus[0];
+						}
+
+						if(parentMenu.subRoutes.length) {
+							var existingSubMenus = parentMenu.subRoutes.filter(function(item) {
+								if(item.id == thisMenu.id) {
+									return true;
+								}
+
+								return false;
+							});
+
+							if(!existingSubMenus.length) {
+								parentMenu.subRoutes.push({
+									'id': thisMenu.id,
+									'icon_class': thisMenu.icon_class,
+									'display_name': thisMenu.display_name,
+									'ember_route': thisMenu.ember_route
+								});
+							}
+						}
+					}
+				}
 			});
 
 			var numModulePositions = 0,
@@ -135,6 +239,7 @@ var publicRootPathRenderer = function(request, response, next) {
 			reorgedWidgets.mainComponentColWidth = mainComponentWidth;
 
 			deserializedUser.widgets = reorgedWidgets;
+			deserializedUser.menus = reorgedMenus;
 		})
 		// Step 4: Store User data in the cache for quick retrieval next time
 		.then(function() {
@@ -142,6 +247,8 @@ var publicRootPathRenderer = function(request, response, next) {
 		})
 		// Finally, send it back up...
 		.then(function() {
+			loggerSrvc.debug('Template Router Render Options (from Database): ', request.path, ' with:\nQuery: ', request.query, '\nBody: ', request.body, '\nParams: ', request.params, '\nOptions: ', deserializedUser);
+
 			response.render(path.join(self.$config.templates.path, self.$config.currentTemplate.name, self.$config.currentTemplate.client_index_file), deserializedUser, function(err, html) {
 				if(err) {
 					loggerSrvc.error('Template Router Render Error: ', request.path, ' with:\nQuery: ', request.query, '\nBody: ', request.body, '\nParams: ', request.params, '\nError: ', err, '\nHTML: ', html);
@@ -231,10 +338,13 @@ var registeredRootPathRenderer = function(request, response, next) {
 		userTenant.widgets.moduleFooterColWidth = 12/numFooterPositions;
 		userTenant.widgets.mainComponentColWidth = mainComponentWidth;
 
-		cachedData.widgets = userTenant.widgets;
-
 		cachedData.currentTenant = userTenant;
-		return cacheSrvc.setAsync('twyr!portal!user!' + request.user.id, JSON.stringify(cachedData));
+
+		var cacheMulti = promises.promisifyAll(cacheSrvc.multi());
+		cacheMulti.setAsync('twyr!portal!user!' + request.user.id, JSON.stringify(cachedData));
+		cacheMulti.expireAsync('twyr!portal!user!' + request.user.id, self.$config.session.ttl);
+	
+		return cacheMulti.execAsync();
 	})
 	.then(function() {
 		response.render(path.join(self.$config.templates.path, self.$config.currentTemplate.name, self.$config.currentTemplate.client_index_file), renderOptions, function(err, html) {

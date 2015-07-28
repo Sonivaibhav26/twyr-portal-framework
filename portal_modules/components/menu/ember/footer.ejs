@@ -1,0 +1,39 @@
+<script type="text/x-handlebars" data-template-name="components/<%= componentName %>">
+<ul class="nav navbar-nav">
+<% for(var idx = 0; idx < menuItems.length; idx++) { %>
+	<% if (menuItems[idx].subRoutes.length > 0) { %>
+		<ul>
+			<li>
+				{{#link-to "<%= menuItems[idx].ember_route %>"}}
+					<% if(menuItems[idx].icon_class) { %>
+						<i class="<%= menuItems[idx].icon_class %>"></i>
+					<% } %>
+					<%= menuItems[idx].display_name %>
+				{{/link-to}}
+			</li>
+			<ul>
+				<% for(var subIdx = 0; subIdx < menuItems[idx].subRoutes.length; subIdx++) { %>
+					<li>
+						{{#link-to "<%= menuItems[idx].subRoutes[subIdx].ember_route %>"}}
+							<% if(menuItems[idx].subRoutes[subIdx].icon_class) { %>
+								<i class="<%= menuItems[idx].subRoutes[subIdx].icon_class %>"></i>
+							<% } %>
+							<%= menuItems[idx].subRoutes[subIdx].display_name %>
+						{{/link-to}}
+					</li>
+				<% } %>
+			</ul>
+		</ul>
+	<% } else { %>
+		<li>
+			{{#link-to "<%= menuItems[idx].ember_route %>"}}
+				<% if(menuItems[idx].icon_class) { %>
+					<i class="<%= menuItems[idx].icon_class %>"></i>
+				<% } %>
+				<%= menuItems[idx].display_name %>
+			{{/link-to}}
+		</li>
+	<% } %>
+<% } %>
+</ul>
+</script>
