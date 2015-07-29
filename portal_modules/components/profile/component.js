@@ -1,10 +1,10 @@
 /*
- * Name			: portal_modules/components/profile/component.js
+ * Name			: portal_modules/components/login/component.js
  * Author		: Vish Desai (vishwakarma_d@hotmail.com)
  * Version		: 0.6.1
  * Copyright	: Copyright (c) 2014 Vish Desai (https://www.linkedin.com/in/vishdesai).
  * License		: The MIT License (http://opensource.org/licenses/MIT).
- * Description	: The Twy'r Portal Profile Manager Component
+ * Description	: The Twy'r Portal Login Component
  *
  */
 
@@ -36,9 +36,9 @@ var profileComponent = prime({
 		this['publicTmpl'] = path.join(__dirname, 'ember/template-public.ejs');
 		this['registeredTmpl'] = path.join(__dirname, 'ember/template-registered.ejs');
 
-		this['resetPasswordCtrl'] = path.join(__dirname, 'ember/controller-reset-password.js');
-		this['registerAccountCtrl'] = path.join(__dirname, 'ember/controller-register-account.js');
-		this['manageProfileCtrl'] = path.join(__dirname, 'ember/controller-manage-profile.js');
+		this['publicCtrl'] = path.join(__dirname, 'ember/controller-public.js');
+		this['registeredCtrl'] = path.join(__dirname, 'ember/controller-registered.js');
+		this['profileCtrl'] = path.join(__dirname, 'ember/controller-manage-profile.js');
 	},
 
 	'_getClientRouter': function(request, response, next) {
@@ -61,69 +61,66 @@ var profileComponent = prime({
 	},
 
 	'_getClientMVC': function(request, response, next) {
+		this.$dependencies.logger.silly('Servicing request "' + request.path + '":\nQuery: ', request.query, '\nBody: ', request.body, '\nParams: ', request.params);
+
+		var controllerFile = '',
+			self = this;
+
+		if(!request.user) {
+			controllerFile = this['publicCtrl'];
+		}
+		else {
+			controllerFile = this['registeredCtrl'];
+		}
+
 		response.type('application/javascript');
-		response.status(200).send('');
+
+		filesystem.readFileAsync(controllerFile)
+		.then(function(controller) {
+			self.$dependencies.logger.silly('Servicing request "' + request.path + '":\nQuery: ', request.query, '\nBody: ', request.body, '\nParams: ', request.params, '\nResponse: ', controller);
+			response.status(200).send(controller);
+		})
+		.catch(function(err) {
+			self.$dependencies.logger.error('Error servicing request "' + request.path + '":\nQuery: ', request.query, '\nBody: ', request.body, '\nParams: ', request.params, '\nError: ', err);
+			response.status(500).json(err);
+		});
 	},
 
 	'_getClientTemplate': function(request, response, next) {
 		response.type('application/javascript');
 
+		var tmplFile = '',
+			renderOptions = null;
+
 		if(!request.user) {
-			response.render(this['publicTmpl']);
+			tmplFile = this['publicTmpl'];
+			renderOptions = {};
 		}
 		else {
-			var renderOptions = {
+			tmplFile = this['registeredTmpl'];
+			renderOptions = {
 				'userId': request.user.id,
 				'userName': request.user.first_name + ' ' + request.user.last_name,
 				'social': request.user.social || {}
 			};
-
-			response.render(this['registeredTmpl'], renderOptions);
 		}
+
+		response.render(tmplFile, renderOptions);
 	},
 
 	'_addRoutes': function() {
 		var self = this;
 
-		this.$router.get('/mvc/resetPassword', function(request, response, next) {
-			response.type('application/javascript');
-
-			filesystem.readFileAsync(self['resetPasswordCtrl'])
-			.then(function(controllerFile) {
-				response.status(200).send(controllerFile);
-			}).
-			catch(function(err) {
-				response.status(500).json(err);
-			});
-		});
-
-		this.$router.get('/mvc/registerAccount', function(request, response, next) {
-			response.type('application/javascript');
-
-			filesystem.readFileAsync(self['registerAccountCtrl'])
-			.then(function(controllerFile) {
-				response.status(200).send(controllerFile);
-			}).
-			catch(function(err) {
-				response.status(500).json(err);
-			});
-		});
-
 		this.$router.get('/mvc/manageProfile', function(request, response, next) {
-			response.type('application/javascript');
-
-			if(request.user) {
-				filesystem.readFileAsync(self['manageProfileCtrl'])
-				.then(function(controllerFile) {
-					response.status(200).send(controllerFile);
-				}).
-				catch(function(err) {
-					response.status(500).json(err);
-				});
-			}
-			else {
-				next();
-			}
+			filesystem.readFileAsync(self['profileCtrl'])
+			.then(function(controller) {
+				self.$dependencies.logger.silly('Servicing request "' + request.path + '":\nQuery: ', request.query, '\nBody: ', request.body, '\nParams: ', request.params, '\nResponse: ', controller);
+				response.status(200).send(controller);
+			})
+			.catch(function(err) {
+				self.$dependencies.logger.error('Error servicing request "' + request.path + '":\nQuery: ', request.query, '\nBody: ', request.body, '\nParams: ', request.params, '\nError: ', err);
+				response.status(500).json(err);
+			});
 		});
 	},
 

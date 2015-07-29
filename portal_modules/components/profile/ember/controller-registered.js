@@ -9,12 +9,20 @@ define(
 				'doLogout': function() {
 					window.Ember.$.ajax({
 						'type': 'GET',
-						'url': window.apiServer + 'login/doLogout',
+						'url': window.apiServer + 'profiles/doLogout',
+						'dataType': 'json',
 
 						'success': function(data) {
-							if(data.status) {
-								window.location.href = '/';
+							if(!data.status) {
+								console.error('Logout Error: ', data);
 							}
+
+							window.location.href = '/';
+						},
+
+						'error': function(err) {
+							console.error('Logout Error: ', err);
+							window.location.href = '/';
 						}
 					});
 				}

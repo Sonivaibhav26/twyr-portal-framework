@@ -1,80 +1,97 @@
-<script type="text/x-handlebars" data-template-name="reset-password">
-<div class="row" style="margin:0px; padding:100px 0px; background-color:#ecf0f5;">
-<div class="col-lg-4 col-md-4 col-sm-4 col-xs-4">
-	&nbsp;
+<script type="text/x-handlebars" data-template-name="components/login-form">
+<div class="box box-solid box-default" style="text-align:left; margin-bottom:0px;">
+<div class="box-header with-border">
+	<h3 class="box-title">Twy'r Login</h3>
 </div>
-<div class="col-lg-4 col-md-4 col-sm-4 col-xs-4">
-	<div class="box box-solid box-primary" style="text-align:left;">
-	<div class="box-header with-border">
-		<h3 class="box-title">Reset Password</h3>
+<div id="div-login-component-alert-message" class="box-body callout callout-danger" style="display:none;">
+	<i class="fa fa-ban"></i>
+	<span id="login-component-alert-message">Alert!</span>
+</div>
+<div id="div-login-component-progress-message" class="box-body callout callout-info" style="display:none;">
+	<i class="fa fa-spinner fa-spin"></i>
+	<span id="login-component-progress-message">Progress...</span>
+</div>
+<div id="div-login-component-success-message" class="box-body callout callout-success" style="display:none; border-radius:0px">
+	<span id="login-component-success-message">Success!</span>
+</div>
+<div class="box-body">
+	<div class="form-group" id="div-social-logins">
+		<div class="row" style="text-align:center;">
+			<i class="fa fa-facebook-square fa-2x" title="Facebook Login" style="margin:0px 5px; cursor:pointer;" {{action "doSocialLogin" "facebook"}}></i>
+			<i class="fa fa-github-square fa-2x" title="Github Login" style="margin:0px 5px; cursor:pointer;" {{action "doSocialLogin" "github"}}></i>
+			<i class="fa fa-google-plus-square fa-2x" title="Google+ Login" style="margin:0px 5px; cursor:pointer;" {{action "doSocialLogin" "google"}}></i>
+			<i class="fa fa-linkedin-square fa-2x" title="LinkedIn Login" style="margin:0px 5px; cursor:pointer;" {{action "doSocialLogin" "linkedin"}}></i>
+			<i class="fa fa-twitter-square fa-2x" title="Twitter Login" style="margin:0px 5px; cursor:pointer;" {{action "doSocialLogin" "twitter"}}></i>
+		</div>
 	</div>
-	<div id="div-reset-password-alert-message" class="box-body callout callout-danger" style="display:none;">
-		<span id="reset-password-alert-message">Alert!</span>
-	</div>
-	<div id="div-reset-password-success-message" class="box-body callout callout-success" style="display:none; border-radius:0px">
-		<span id="reset-password-success-message">Success!</span>
-	</div>
+</div>
+<div id="div-box-body-login" class="box-body">
 	<form role="form">
-	<div class="box-body">
-		<div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
-			<div class="form-group" id="div-reset-password-username">
-				<label>Twy'r Portal Username</label>
-				{{input id="input-reset-password-username" type="text" value=resetUsername class="form-control" placeholder="username@twyrportal.com"}}
-			</div>
-			<div class="form-group">
-				<button id="button-reset-password" type="submit" class="btn btn-block btn-primary" {{action "resetPassword"}}>Reset Password</button>  
-			</div>
+	<div class="form-group" id="div-input-username">
+		<label>Twy'r Portal Username</label>
+		{{input id="login-input-username" type="text" value=username class="form-control" placeholder="username@twyrportal.com"}}
+	</div>
+	<div class="form-group" id="div-input-password">
+		<label>Twy'r Portal Password</label>
+		{{input id="login-input-password" type="password" value=password class="form-control" placeholder="password"}}
+	</div>          
+	<div class="row" style="margin:0px -10px; border-top:1px solid #eee; padding-top:10px;">
+		<div class="col-lg-8" style="text-align:left; height:45px;">
+			<a href="#" {{action "showResetPasswordForm"}}>Forgot Password</a>
+			<br />
+			<a href="#" {{action "showNewAccountForm"}}>Register Account</a>
+		</div>
+		<div class="col-lg-4" style="text-align:right; height:45px;">
+			<button id="login-button-submit" type="submit" class="btn btn-block" style="margin-top:5px;" {{action "doLogin"}}>Login</button>  
 		</div>
 	</div>
 	</form>
+</div>
+<div id="div-box-body-reset-password" class="box-body" style="display:none;">
+	<form role="form">
+	<div class="form-group" id="div-reset-password-username">
+		<label>Twy'r Portal Username</label>
+		{{input id="reset-password-input-username" type="text" value=resetUsername class="form-control" placeholder="username@twyrportal.com"}}
 	</div>
+	<div class="row" style="margin:0px -10px; border-top:1px solid #eee; padding-top:10px;">
+		<div class="col-lg-8" style="text-align:left; height:45px;">
+			<a href="#" {{action "showLoginForm"}}>Back to Login</a>
+			<br />
+			<a href="#" {{action "showNewAccountForm"}}>Register Account</a>
+		</div>
+		<div class="col-lg-4" style="text-align:right; height:45px;">
+			<button id="reset-password-button-submit" type="submit" class="btn btn-block" style="margin-top:5px;" {{action "resetPassword"}}>Reset</button>  
+		</div>
+	</div>                                                            
+	</form>
 </div>
-<div class="col-lg-4 col-md-4 col-sm-4 col-xs-4">
-	&nbsp;
+<div id="div-box-body-register-account" class="box-body" style="display:none;">
+	<form role="form">
+	<div class="form-group" id="div-register-account-username">
+		<label>Username / Login<sup>*</sup></label>
+		{{input id="register-account-input-username" type="email" value=registerUsername class="form-control" placeholder="username@twyrportal.com"}}
+	</div>
+	<div class="form-group" id="div-register-account-firstname">
+		<label>First Name<sup>*</sup></label>
+		{{input id="register-account-input-firstname" type="text" value=registerFirstname class="form-control" placeholder="First/Given Name"}}
+	</div>
+	<div class="form-group" id="div-register-account-lastname">
+		<label>Last Name<sup>*</sup></label>
+		{{input id="register-account-input-lastname" type="text" value=registerLastname class="form-control" placeholder="Last/Family Name or Surname"}}
+	</div>
+	<div class="row" style="margin:0px -10px; border-top:1px solid #eee; padding-top:10px;">
+		<div class="col-lg-6" style="text-align:left; height:45px;">
+			<a href="#" {{action "showLoginForm"}}>Back to Login</a>
+			<br />
+			<a href="#" {{action "showResetPasswordForm"}}>Forgot Password</a>
+		</div>
+		<div class="col-lg-6" style="text-align:right; height:45px;">
+			<button id="register-account-button-submit" type="submit" class="btn btn-block" style="margin-top:5px;" {{action "registerAccount"}}>Register</button>
+		</div>
+	</div>                                                            
+	</form>
 </div>
 </div>
-</script>
 
-<script type="text/x-handlebars" data-template-name="register-account">
-<div class="row" style="margin:0px; padding:100px 0px; background-color:#ecf0f5;">
-<div class="col-lg-4 col-md-4 col-sm-4 col-xs-4">
-	&nbsp;
-</div>
-<div class="col-lg-4 col-md-4 col-sm-4 col-xs-4">
-	<div class="box box-solid box-primary" style="text-align:left;">
-		<div class="box-header with-border">
-			<h3 class="box-title">Register New Account</h3>
-		</div>
-		<div id="div-register-account-alert-message" class="box-body callout callout-danger" style="display:none;">
-			<span id="register-account-alert-message">Alert!</span>
-		</div>
-		<div id="div-register-account-success-message" class="box-body callout callout-success" style="display:none; border-radius:0px">
-			<span id="register-account-success-message">Success!</span>
-		</div>
-		<form role="form">
-		<div class="box-body">
-			<div class="form-group" id="div-register-account-username">
-				<label>Username / Login<sup>*</sup></label>
-				{{input id="input-register-account-username" type="email" value=username class="form-control" placeholder="username@twyrportal.com"}}
-			</div>
-			<div class="form-group" id="div-register-account-firstname">
-				<label>First Name<sup>*</sup></label>
-				{{input id="input-register-account-firstname" type="text" value=firstname class="form-control" placeholder="First/Given Name"}}
-			</div>
-			<div class="form-group" id="div-register-account-lastname">
-				<label>Last Name<sup>*</sup></label>
-				{{input id="input-register-account-lastname" type="text" value=lastname class="form-control" placeholder="Last/Family Name or Surname"}}
-			</div>
-			<div class="form-group">
-				<button id="button-register-account" type="submit" class="btn btn-block btn-primary" {{action "registerAccount"}}>Register</button>
-			</div>
-		</div>
-		</form>
-	</div>
-</div>
-<div class="col-lg-4 col-md-4 col-sm-4 col-xs-4">
-	&nbsp;
-</div>
-</div>
 </script>
 
