@@ -17,6 +17,10 @@ define(
 
 			'model': function() {
 				return this.store.find('profile', '<%= userId %>');
+			},
+
+			'setupController': function(controller, model) {
+				controller.set('model', model);
 			}
 		});
 

@@ -30,6 +30,7 @@
   ],
   "dependencies": {
     "bootstrap": "*",
+    "bootstrap-datepicker": "*",
 	"curl": "*",
     "ember": "*",
     "ember-data": "*",
@@ -40,6 +41,7 @@
     "handlebars": "*",
     "ionicons": "*",
     "jquery": "*",
+	"moment": "*",
     "normalize-css": "*",
 	"validatorjs": "*"
   },

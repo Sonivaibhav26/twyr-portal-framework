@@ -14,14 +14,14 @@ define(
 
 						'success': function(data) {
 							if(!data.status) {
-								console.error('Logout Error: ', data);
+								alert(data);
 							}
 
 							window.location.href = '/';
 						},
 
 						'error': function(err) {
-							console.error('Logout Error: ', err);
+							alert(err.responseJSON ? err.responseJSON.responseText : (err.responseText || 'Unknown error' ));
 							window.location.href = '/';
 						}
 					});

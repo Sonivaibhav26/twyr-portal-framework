@@ -65,12 +65,10 @@ define(
 
 			'resetLoginForm': function() {
 				this.resetStatusMessages();
+				this.lockLoginForm();
 
 				window.Ember.$('input#login-input-username').val('');
 				window.Ember.$('input#login-input-password').val('');
-
-				window.Ember.$('button#login-button-submit').removeClass('btn-primary');
-				window.Ember.$('button#login-button-submit').attr('disabled', 'disabled');
 			},
 
 			'lockLoginForm': function() {
@@ -80,11 +78,9 @@ define(
 
 			'resetForgotPasswordForm': function() {
 				this.resetStatusMessages();
+				this.lockForgotPasswordForm();
 
 				window.Ember.$('input#reset-password-input-username').val('');
-
-				window.Ember.$('button#reset-password-button-submit').removeClass('btn-primary');
-				window.Ember.$('button#reset-password-button-submit').attr('disabled', 'disabled');
 			},
 
 			'lockForgotPasswordForm': function() {
@@ -94,13 +90,11 @@ define(
 
 			'resetRegisterAccountForm': function() {
 				this.resetStatusMessages();
+				this.lockRegisterAccountForm();
 
 				window.Ember.$('input#register-account-input-username').val('');
 				window.Ember.$('input#register-account-input-firstname').val('');
 				window.Ember.$('input#register-account-input-lastname').val('');
-
-				window.Ember.$('button#register-account-button-submit').removeClass('btn-primary');
-				window.Ember.$('button#register-account-button-submit').attr('disabled', 'disabled');
 			},
 
 			'lockRegisterAccountForm': function() {
@@ -109,13 +103,13 @@ define(
 			},
 
 			'resetStatusMessages': function(timeout) {
-				window.Ember.$('div#div-login-component-alert-message').hide(timeout || 600);
+				window.Ember.$('div#div-login-component-alert-message').slideUp(timeout || 600);
 				window.Ember.$('span#login-component-alert-message').text('');
 
-				window.Ember.$('div#div-login-component-progress-message').hide(timeout || 600);
+				window.Ember.$('div#div-login-component-progress-message').slideUp(timeout || 600);
 				window.Ember.$('span#login-component-progress-message').text('');
 
-				window.Ember.$('div#div-login-component-success-message').hide(timeout || 600);
+				window.Ember.$('div#div-login-component-success-message').slideUp(timeout || 600);
 				window.Ember.$('span#login-component-success-message').text('');
 			},
 
@@ -123,32 +117,32 @@ define(
 				this.resetStatusMessages(2);
 
 				window.Ember.$('span#login-component-' + statusMessageType + '-message').html(messageText);
-				window.Ember.$('div#div-login-component-' + statusMessageType + '-message').show(600);
+				window.Ember.$('div#div-login-component-' + statusMessageType + '-message').slideDown(600);
 			},
 
 			'actions': {
 				'showLoginForm': function() {
-					window.Ember.$('div#div-box-body-register-account').hide(600);
-					window.Ember.$('div#div-box-body-reset-password').hide(600);
+					window.Ember.$('div#div-box-body-register-account').slideUp(600);
+					window.Ember.$('div#div-box-body-reset-password').slideUp(600);
 
 					this.resetLoginForm();
-					window.Ember.$('div#div-box-body-login').show(600);
+					window.Ember.$('div#div-box-body-login').slideDown(600);
 				},
 
 				'showResetPasswordForm': function() {
-					window.Ember.$('div#div-box-body-login').hide(600);
-					window.Ember.$('div#div-box-body-register-account').hide(600);
+					window.Ember.$('div#div-box-body-login').slideUp(600);
+					window.Ember.$('div#div-box-body-register-account').slideUp(600);
 
 					this.resetForgotPasswordForm();
-					window.Ember.$('div#div-box-body-reset-password').show(600);
+					window.Ember.$('div#div-box-body-reset-password').slideDown(600);
 				},
 
 				'showNewAccountForm': function() {
-					window.Ember.$('div#div-box-body-login').hide(600);
-					window.Ember.$('div#div-box-body-reset-password').hide(600);
+					window.Ember.$('div#div-box-body-login').slideUp(600);
+					window.Ember.$('div#div-box-body-reset-password').slideUp(600);
 
 					this.resetRegisterAccountForm();
-					window.Ember.$('div#div-box-body-register-account').show(600);
+					window.Ember.$('div#div-box-body-register-account').slideDown(600);
 				},
 
 				'doLogin': function() {
@@ -188,7 +182,7 @@ define(
 				
 						'error': function(err) {
 							self.resetLoginForm();
-							self.showStatusMessage('alert', err.responseJSON.responseText);
+							self.showStatusMessage('alert', (err.responseJSON ? err.responseJSON.responseText : (err.responseText || 'Unknown error' )));
 
 							window.Ember.run.later(self, function() {
 								self.resetStatusMessages();
@@ -240,7 +234,7 @@ define(
 							console.error(err);
 
 							self.resetForgotPasswordForm();
-							self.showStatusMessage('alert', err.responseJSON.responseText);
+							self.showStatusMessage('alert', (err.responseJSON ? err.responseJSON.responseText : (err.responseText || 'Unknown error' )));
 
 							window.Ember.run.later(self, function() {
 								self.resetStatusMessages();
@@ -287,7 +281,7 @@ define(
 				
 						'error': function(err) {
 							self.resetRegisterAccountForm();
-							self.showStatusMessage('alert', err.responseJSON.responseText);
+							self.showStatusMessage('alert', (err.responseJSON ? err.responseJSON.responseText : (err.responseText || 'Unknown error' )));
 
 							window.Ember.run.later(self, function() {
 								self.resetStatusMessages();

@@ -1,117 +1,289 @@
 define(
-	"twyrPortal/profile/model",
+	"twyrPortal/components/change-password",
 	["exports"],
 	function(exports) {
-		var ProfileModel = window.DS.Model.extend({
-			'salutation': window.DS.attr('string'),
-			'firstname': window.DS.attr('string'),
-			'middlenames': window.DS.attr('string'),
-			'lastname': window.DS.attr('string'),
-			'suffix': window.DS.attr('string'),
-			'username': window.DS.attr('string'),
-			'password1': window.DS.attr('string'),
-			'password2': window.DS.attr('string'),
-			'createdon': window.DS.attr('date')
-		});
+		if(window.developmentMode) console.log('DEFINE: twyrPortal/components/change-password');
 
-		exports['default'] = ProfileModel;
-	}
-);
+		var ChangePasswordComponent = window.Ember.Component.extend({
+			'_initialize': function() {
+				var self = this;
+				window.Ember.run.scheduleOnce('afterRender', this, function() {
+					self.resetChangePasswordForm();
 
-define(
-	"twyrPortal/profile/controller",
-	["exports"],
-	function(exports) {
-		if(window.developmentMode) console.log('DEFINE: twyrPortal/profile/controller');
-
-		var ProfileController = window.Ember.Controller.extend({
-			'actions': {
-				'saveChanges': function() {
-					window.Ember.$('#div-manage-profile-alert-message').hide(600);
-					window.Ember.$('#div-manage-profile-success-message').hide(600);
-					window.Ember.$('#div-manage-profile-failed-message').hide(600);
-		
-					window.Ember.$('#div-portal-main-area input').attr('disabled', 'disabled')
-					window.Ember.$('#div-portal-main-area button').attr('disabled', 'disabled')
-		
-					var self = this;
-					this.model.save()
-					.then(function() {
-						window.Ember.$('#manage-profile-success-message').text('Saved Profile Successfully');
-						window.Ember.$('#div-manage-profile-success-message').show(600);
-		
-						window.Ember.$('#div-portal-main-area input').removeAttr('disabled')
-						window.Ember.$('#div-portal-main-area button').removeAttr('disabled')
-		
-						window.Ember.run.later(self, function() {
-							window.Ember.$('#div-manage-profile-success-message').hide(600);
-						}, 10000);
-		
-					}, function(response) {
-						window.Ember.$('#div-manage-profile-failed-message').show(600);
-		
-						window.Ember.$('#div-portal-main-area input').removeAttr('disabled')
-						window.Ember.$('#div-portal-main-area button').removeAttr('disabled')
-		
-						window.Ember.run.later(self, function() {
-							window.Ember.$('#div-manage-profile-failed-message').hide(600);
-						}, 10000);
+					window.Ember.$('div#div-box-body-component-change-password input.form-control').on('input', function(e) {
+						var currentPassword = window.Ember.$('input#component-change-password-input-current-password').val().trim(),
+							newPassword1 = window.Ember.$('input#component-change-password-input-new-password-1').val().trim(),
+							newPassword2 = window.Ember.$('input#component-change-password-input-new-password-2').val().trim();
+	
+						if((currentPassword != '') && (newPassword1 != '') && (newPassword2 != '') && (newPassword1 == newPassword2)) {
+							window.Ember.$('button#component-change-password-button-submit').addClass('btn-primary');
+							window.Ember.$('button#component-change-password-button-submit').removeAttr('disabled', 'disabled');
+						}
+						else {
+							window.Ember.$('button#component-change-password-button-submit').removeClass('btn-primary');
+							window.Ember.$('button#component-change-password-button-submit').attr('disabled');
+						}
 					});
-				},
-		
-				'cancelChanges': function() {
-					this.model.rollback();
-				},
-		
-				'link': function(socialNetwork) {
-					var currentLocation = window.location.href;
-					window.location.href = window.apiServer + 'login/' + socialNetwork + '?currentLocation=' + currentLocation;
-				},
-		
-				'unlink': function(socialNetwork) {
-					window.Ember.$('#div-manage-profile-alert-message').hide(600);
-					window.Ember.$('#div-manage-profile-success-message').hide(600);
-					window.Ember.$('#div-manage-profile-failed-message').hide(600);
-		
+				});
+			}.on('init'),
+
+			'resetChangePasswordForm': function() {
+				this.lockChangePasswordForm();
+
+				window.Ember.$('input#component-change-password-input-current-password').val('');
+				window.Ember.$('input#component-change-password-input-new-password-1').val('');
+				window.Ember.$('input#component-change-password-input-new-password-2').val('');
+			},
+
+			'lockChangePasswordForm': function() {
+				window.Ember.$('button#component-change-password-button-submit').removeClass('btn-primary');
+				window.Ember.$('button#component-change-password-button-submit').attr('disabled', 'disabled');
+			},
+
+			'resetStatusMessages': function(timeout) {
+				window.Ember.$('div#div-profile-component-alert-message').slideUp(timeout || 600);
+				window.Ember.$('span#profile-component-alert-message').text('');
+
+				window.Ember.$('div#div-profile-component-progress-message').slideUp(timeout || 600);
+				window.Ember.$('span#profile-component-progress-message').text('');
+
+				window.Ember.$('div#div-profile-component-success-message').slideUp(timeout || 600);
+				window.Ember.$('span#profile-component-success-message').text('');
+			},
+
+			'showStatusMessage': function(statusMessageType, messageText) {
+				this.resetStatusMessages(2);
+
+				window.Ember.$('span#profile-component-' + statusMessageType + '-message').html(messageText);
+				window.Ember.$('div#div-profile-component-' + statusMessageType + '-message').slideDown(600);
+			},
+
+			'actions': {
+				'changePassword': function() {
+					var self = this;
+
+					self.lockChangePasswordForm();
+					self.showStatusMessage('progress', 'Changing your password...');
+
 					window.Ember.$.ajax({
 						'type': 'POST',
-						'url': window.apiServer + 'profiles/unlink/' + socialNetwork,
-		
+						'url': window.apiServer + 'profiles/changePassword',
+
+						'dataType': 'json',
+						'data': {
+							'currentPassword': self.currentPassword,
+							'newPassword1': self.newPassword1,
+							'newPassword2': self.newPassword2
+						},
+
 						'success': function(data) {
 							if(data.status) {
-								window.Ember.$('#manage-social-success-message').text(data.responseText);
-								window.Ember.$('#div-manage-social-success-message').show(600);
-		
-								window.Ember.run.later(self, function() {
-									window.Ember.$('#div-manage-social-success-message').hide(600);
-									window.location.reload();
-								}, 3000);
+								self.showStatusMessage('success', data.responseText);
 							}
 							else {
-								window.Ember.$('span#manage-social-alert-message').text(data.responseText);
-								window.Ember.$('#div-manage-social-alert-message').show(600);
-		
-								window.Ember.run.later(self, function() {
-									window.Ember.$('#div-manage-social-alert-message').hide(600);
-								}, 10000);
+								self.showStatusMessage('alert', data.responseText);
 							}
-						},
-		
-						'error': function(err) {
-							console.error('unlink returned: ', err);
-		
-							window.Ember.$('span#manage-social-alert-message').text(err.responseText);
-							window.Ember.$('#div-manage-social-alert-message').show(600);
-		
+
 							window.Ember.run.later(self, function() {
-								window.Ember.$('#div-manage-social-alert-message').hide(600);
-							}, 10000);
+								self.resetChangePasswordForm();
+								self.resetStatusMessages();
+							}, 5000);
+						},
+
+						'error': function(err) {
+							self.resetChangePasswordForm();
+							self.showStatusMessage('alert', (err.responseJSON ? err.responseJSON.responseText : (err.responseText || 'Unknown error' )));
+
+							window.Ember.run.later(self, function() {
+								self.resetStatusMessages();
+							}, 5000);
 						}
 					});
 				}
 			}
 		});
 
-		exports['default'] = ProfileController;
+		exports['default'] = ChangePasswordComponent;
+	}
+);
+
+define(
+	"twyrPortal/components/manage-personal-details",
+	["exports"],
+	function(exports) {
+		if(window.developmentMode) console.log('DEFINE: twyrPortal/components/manage-personal-details');
+
+		var ManagePersonalDetailsComponent = window.Ember.Component.extend({
+			'_initialize': function() {
+				var self = this;
+				self.resetManagePersonalDetailsForm();
+
+				window.Ember.run.scheduleOnce('afterRender', function() {
+					window.Ember.$('div#component-manage-personal-details-div-image-drop').on('dragover', function(e) {
+						e.stopPropagation();
+						e.preventDefault();
+						return false;
+					});
+	
+					window.Ember.$('div#component-manage-personal-details-div-image-drop').on('dragenter', function(e) {
+						e.stopPropagation();
+						e.preventDefault();
+						return false;
+					});
+	
+					window.Ember.$('div#component-manage-personal-details-div-image-drop').on('drop', function(e) {
+						e.stopPropagation();
+						e.preventDefault();
+	
+						var file = e.dataTransfer.files[0],
+							reader = new FileReader();
+	
+						reader.addEventListener('loadend', function(e) {
+							window.Ember.$('img#component-manage-personal-details-img-profile-image').attr('src', e.target.result);
+							self.set('profileImage', {
+								'fileName': file.name,
+								'image': e.target.result
+							});
+
+							self.storeImage();
+						});
+	
+						reader.readAsDataURL(file);
+						return false;
+					});
+
+					window.Ember.$('div#div-box-body-component-manage-personal-details input.form-control').on('input', function(e) {
+						var firstName = window.Ember.$('input#component-manage-personal-details-input-first-name').val().trim(),
+							lastName = window.Ember.$('input#component-manage-personal-details-input-last-name').val().trim();
+	
+						if((firstName != '') && (lastName != '')) {
+							window.Ember.$('button#component-manage-personal-details-button-submit').addClass('btn-primary');
+							window.Ember.$('button#component-manage-personal-details-button-submit').removeAttr('disabled', 'disabled');
+						}
+						else {
+							window.Ember.$('button#component-manage-personal-details-button-submit').removeClass('btn-primary');
+							window.Ember.$('button#component-manage-personal-details-button-submit').attr('disabled');
+						}
+					});
+
+					window.Ember.$('input#component-manage-personal-details-input-dob').datepicker({
+						'format': 'dd M yyyy',
+						'startDate': '01 Jan 1900',
+						'endDate': '0d',
+						'clearBtn': true,
+						'autoClose': true
+					});
+	
+				});
+			}.on('init'),
+
+			'resetManagePersonalDetailsForm': function() {
+				this.lockManagePersonalDetailsForm();
+
+				window.Ember.$('img#component-manage-personal-details-img-profile-image').attr('src', 'profile/profileImage');
+				this.get('model').rollback();
+			},
+
+			'lockManagePersonalDetailsForm': function() {
+				window.Ember.$('button#component-manage-personal-details-button-submit').removeClass('btn-primary');
+				window.Ember.$('button#component-manage-personal-details-button-submit').attr('disabled', 'disabled');
+			},
+
+			'resetStatusMessages': function(timeout) {
+				window.Ember.$('div#div-profile-component-failure-message').slideUp(timeout || 600);
+
+				window.Ember.$('div#div-profile-component-alert-message').slideUp(timeout || 600);
+				window.Ember.$('span#profile-component-alert-message').text('');
+
+				window.Ember.$('div#div-profile-component-progress-message').slideUp(timeout || 600);
+				window.Ember.$('span#profile-component-progress-message').text('');
+
+				window.Ember.$('div#div-profile-component-success-message').slideUp(timeout || 600);
+				window.Ember.$('span#profile-component-success-message').text('');
+			},
+
+			'showStatusMessage': function(statusMessageType, messageText) {
+				this.resetStatusMessages(2);
+
+				window.Ember.$('div#div-profile-component-' + statusMessageType + '-message').slideDown(600);
+				if(statusMessageType != 'failure') {
+					window.Ember.$('span#profile-component-' + statusMessageType + '-message').html(messageText);
+				}
+			},
+
+			'storeImage': function() {
+				var self = this;
+				if(!self.get('profileImage'))
+					return;
+
+				window.Ember.$.ajax({
+					'type': 'PUT',
+					'url': 'profile/profileImage',
+		
+					'dataType': 'json',
+					'data': self.get('profileImage'),
+		
+					'success': function(data) {
+						if(data.status) {
+							self.showStatusMessage('success', data.responseText);
+						}
+						else {
+							self.showStatusMessage('alert', data.responseText);
+						}
+
+						window.Ember.$('img#component-manage-personal-details-img-profile-image').attr('src', 'profile/profileImage');
+						window.Ember.run.later(self, function() {
+							self.resetStatusMessages();
+						}, 5000);
+					},
+		
+					'error': function(err) {
+						self.showStatusMessage('alert', (err.responseJSON ? err.responseJSON.responseText : (err.responseText || 'Unknown error' )));
+
+						window.Ember.$('img#component-manage-personal-details-img-profile-image').attr('src', 'profile/profileImage');
+						window.Ember.run.later(self, function() {
+							self.resetStatusMessages();
+						}, 5000);
+					}
+				});
+			},
+
+			'actions': {
+				'cancelPersonalDetails': function() {
+					this.resetManagePersonalDetailsForm();
+				},
+
+				'savePersonalDetails': function() {
+					var self = this;
+	
+					self.lockManagePersonalDetailsForm();
+					self.showStatusMessage('progress', 'Saving personal information...');
+	
+					self.get('model')
+					.save()
+					.then(function() {
+						self.showStatusMessage('success', 'Your personal information has been updated');
+						console.log('savePersonalDetails::success: ', arguments);
+	
+						window.Ember.run.later(self, function() {
+							self.resetStatusMessages();
+						}, 5000);
+					})
+					.catch(function(reason) {
+						console.log('savePersonalDetails::error: ', reason);
+	
+						self.showStatusMessage('failure');
+						window.Ember.run.later(self, function() {
+							self.resetStatusMessages();
+
+							self.get('model').rollback();
+							self.get('model').transitionTo('loaded.saved');
+						}, 5000);
+					});
+				}
+			}
+		});
+
+		exports['default'] = ManagePersonalDetailsComponent;
 	}
 );

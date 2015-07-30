@@ -3,15 +3,15 @@
 <div class="box-header with-border">
 	<h3 class="box-title">Twy'r Login</h3>
 </div>
-<div id="div-login-component-alert-message" class="box-body callout callout-danger" style="display:none;">
+<div id="div-login-component-alert-message" class="box-body callout callout-danger" style="display:none; border-radius:0px;">
 	<i class="fa fa-ban"></i>
 	<span id="login-component-alert-message">Alert!</span>
 </div>
-<div id="div-login-component-progress-message" class="box-body callout callout-info" style="display:none;">
+<div id="div-login-component-progress-message" class="box-body callout callout-info" style="display:none; border-radius:0px;">
 	<i class="fa fa-spinner fa-spin"></i>
 	<span id="login-component-progress-message">Progress...</span>
 </div>
-<div id="div-login-component-success-message" class="box-body callout callout-success" style="display:none; border-radius:0px">
+<div id="div-login-component-success-message" class="box-body callout callout-success" style="display:none; border-radius:0px;">
 	<span id="login-component-success-message">Success!</span>
 </div>
 <div class="box-body">
@@ -27,11 +27,11 @@
 </div>
 <div id="div-box-body-login" class="box-body">
 	<form role="form">
-	<div class="form-group" id="div-input-username">
+	<div class="form-group">
 		<label>Twy'r Portal Username</label>
 		{{input id="login-input-username" type="text" value=username class="form-control" placeholder="username@twyrportal.com"}}
 	</div>
-	<div class="form-group" id="div-input-password">
+	<div class="form-group">
 		<label>Twy'r Portal Password</label>
 		{{input id="login-input-password" type="password" value=password class="form-control" placeholder="password"}}
 	</div>          
@@ -49,7 +49,7 @@
 </div>
 <div id="div-box-body-reset-password" class="box-body" style="display:none;">
 	<form role="form">
-	<div class="form-group" id="div-reset-password-username">
+	<div class="form-group">
 		<label>Twy'r Portal Username</label>
 		{{input id="reset-password-input-username" type="text" value=resetUsername class="form-control" placeholder="username@twyrportal.com"}}
 	</div>
@@ -62,20 +62,20 @@
 		<div class="col-lg-4" style="text-align:right; height:45px;">
 			<button id="reset-password-button-submit" type="submit" class="btn btn-block" style="margin-top:5px;" {{action "resetPassword"}}>Reset</button>  
 		</div>
-	</div>                                                            
+	</div>
 	</form>
 </div>
 <div id="div-box-body-register-account" class="box-body" style="display:none;">
 	<form role="form">
-	<div class="form-group" id="div-register-account-username">
+	<div class="form-group">
 		<label>Username / Login<sup>*</sup></label>
 		{{input id="register-account-input-username" type="email" value=registerUsername class="form-control" placeholder="username@twyrportal.com"}}
 	</div>
-	<div class="form-group" id="div-register-account-firstname">
+	<div class="form-group">
 		<label>First Name<sup>*</sup></label>
 		{{input id="register-account-input-firstname" type="text" value=registerFirstname class="form-control" placeholder="First/Given Name"}}
 	</div>
-	<div class="form-group" id="div-register-account-lastname">
+	<div class="form-group">
 		<label>Last Name<sup>*</sup></label>
 		{{input id="register-account-input-lastname" type="text" value=registerLastname class="form-control" placeholder="Last/Family Name or Surname"}}
 	</div>
@@ -88,7 +88,7 @@
 		<div class="col-lg-6" style="text-align:right; height:45px;">
 			<button id="register-account-button-submit" type="submit" class="btn btn-block" style="margin-top:5px;" {{action "registerAccount"}}>Register</button>
 		</div>
-	</div>                                                            
+	</div>
 	</form>
 </div>
 </div>
