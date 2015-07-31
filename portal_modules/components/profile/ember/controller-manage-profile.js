@@ -119,6 +119,8 @@ define(
 				self.resetManagePersonalDetailsForm();
 
 				window.Ember.run.scheduleOnce('afterRender', function() {
+					var genderSelectElem = window.Ember.$('select#component-manage-personal-details-select-gender');
+
 					window.Ember.$('div#component-manage-personal-details-div-image-drop').on('dragover', function(e) {
 						e.stopPropagation();
 						e.preventDefault();
@@ -166,21 +168,12 @@ define(
 						}
 					});
 
-					var genderSelectElem = window.Ember.$('select#component-manage-personal-details-select-gender');
 					genderSelectElem.select2({
 						'ajax': {
-							'delay': 250,
-
 							'url': window.apiServer + 'masterdata/genders',
 							'dataType': 'json',
 		
 							'processResults': function (data) {
-								window.Ember.$.each(data, function(index, item) {
-									var thisOption = new Option(item, item, false, false);
-									genderSelectElem.append(thisOption);
-								});
-
-								genderSelectElem.val(self.get('model').get('sex')).trigger('change');
 								return  {
 									'results': window.Ember.$.map(data, function(item) {
 										return {
@@ -205,9 +198,7 @@ define(
 					})
 					.on('change', function() {
 						self.get('model').set('sex', genderSelectElem.val());
-					})
-					.select2('open')
-					.select2('close');
+					});
 
 					window.Ember.$('input#component-manage-personal-details-input-dob').datepicker({
 						'format': 'dd M yyyy',
@@ -215,6 +206,24 @@ define(
 						'endDate': '0d',
 						'clearBtn': true,
 						'autoClose': true
+					});
+
+					window.Ember.$
+					.ajax({
+						'url': window.apiServer + 'masterdata/genders',
+						'dataType': 'json',
+						'cache': true
+					})
+					.done(function(data) {
+						window.Ember.$.each(data, function(index, item) {
+							var thisOption = new Option(item, item, false, false);
+							genderSelectElem.append(thisOption);
+						});
+
+						genderSelectElem.val(self.get('model').get('sex')).trigger('change');
+					})
+					.fail(function() {
+						console.error(window.apiServer + 'masterdata/genders error:\n', arguments);
 					});
 				});
 			}.on('init'),
