@@ -13,17 +13,21 @@ define(
 			'email': window.DS.attr('string'),
 			'createdOn': window.DS.attr('date'),
 
-			'formattedDOB': function(key, newValue, oldValue) {
-				if(arguments.length > 1) {
+			'formattedDOB': window.Ember.computed('dob', {
+				'get': function(key) {
+					return window.moment(this.get('dob')).format('DD MMM YYYY');
+				},
+
+				'set': function(key, newValue) {
 					this.set('dob', (new Date(newValue)));
 				}
-		
-				return window.moment(this.get('dob')).format('DD MMM YYYY');
-			}.property('dob'),
+			}),
 
-			'formattedCreatedOn': function() {
-				return window.moment(this.get('createdOn')).format('Do MMM YYYY');
-			}.property('createdOn').readOnly()
+			'formattedCreatedOn': window.Ember.computed('createdOn', {
+				'get': function(key) {
+					return window.moment(this.get('createdOn')).format('Do MMM YYYY');
+				}
+			}).readOnly()
 		});
 
 		exports['default'] = ProfileModel;

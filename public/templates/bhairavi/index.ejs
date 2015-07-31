@@ -18,7 +18,8 @@
 
 	<!-- Bootstrap plugin styles -->
 	<link href="/bower_components/bootstrap-datepicker/dist/css/bootstrap-datepicker3.min.css" rel="stylesheet" type="text/css" />
-
+	<link href="/bower_components/select2/dist/css/select2.min.css" rel="stylesheet" type="text/css" />
+	
 	<!-- Font Awesome, for the Glyphs -->
 	<link href="/bower_components/fontawesome/css/font-awesome.min.css" rel="stylesheet" type="text/css" />
 
@@ -35,7 +36,7 @@
 	<!-- Portal AdminLTE Skin CSS Styles -->
 	<link href="/<%= template %>/css/skin-black-light.min.css" rel="stylesheet" type="text/css" />
 
-	<!-- Override the one style that is causing us pain -->
+	<!-- Override the styles that are causing us pain -->
 	<style>
 	div.navbar-custom-menu > ul.navbar-nav > div.ember-view {
 		position: relative;
@@ -50,6 +51,24 @@
 		color: #333;
 		line-height: 20px;
 		font-size: 14px;
+	}
+
+	.form-group .select2 .select2-selection {
+		border-radius: 0px!important;
+		box-shadow: none;
+		border-color: #d2d6de;
+
+		padding: 0px;
+
+		height: 34px;
+	}
+
+	.form-group .select2 .select2-selection__rendered {
+		line-height: 34px;
+	}
+
+	.form-group .select2 .select2-selection__arrow {
+		height: 34px;
 	}
 	</style>
 
@@ -181,6 +200,9 @@
 
 <!-- jQuery JS Library - everything depends on it -->
 <script type="application/javascript" src="/bower_components/jquery/dist/jquery.min.js"></script>
+
+<!-- jQuery Plugins -->
+<script type="application/javascript" src="/bower_components/select2/dist/js/select2.full.min.js"></script>
 
 <!-- Bootstrap JS Library - the base theme stuff -->
 <script type="application/javascript" src="/bower_components/bootstrap/dist/js/bootstrap.min.js"></script>

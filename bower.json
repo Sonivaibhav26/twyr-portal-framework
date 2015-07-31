@@ -43,6 +43,8 @@
     "jquery": "*",
 	"moment": "*",
     "normalize-css": "*",
+	"select2": "*",
+	"select2-bootstrap": "*",
 	"validatorjs": "*"
   },
   "devDependencies": {}

@@ -166,6 +166,49 @@ define(
 						}
 					});
 
+					var genderSelectElem = window.Ember.$('select#component-manage-personal-details-select-gender');
+					genderSelectElem.select2({
+						'ajax': {
+							'delay': 250,
+
+							'url': window.apiServer + 'masterdata/genders',
+							'dataType': 'json',
+		
+							'processResults': function (data) {
+								window.Ember.$.each(data, function(index, item) {
+									var thisOption = new Option(item, item, false, false);
+									genderSelectElem.append(thisOption);
+								});
+
+								genderSelectElem.val(self.get('model').get('sex')).trigger('change');
+								return  {
+									'results': window.Ember.$.map(data, function(item) {
+										return {
+											'text': item,
+											'slug': item,
+											'id': item
+										};
+									})
+								};
+							},
+
+							'cache': true
+						},
+			
+						'minimumInputLength': 0,
+						'minimumResultsForSearch': 10,
+
+						'allowClear': true,
+						'closeOnSelect': true,
+
+						'placeholder': 'Gender'
+					})
+					.on('change', function() {
+						self.get('model').set('sex', genderSelectElem.val());
+					})
+					.select2('open')
+					.select2('close');
+
 					window.Ember.$('input#component-manage-personal-details-input-dob').datepicker({
 						'format': 'dd M yyyy',
 						'startDate': '01 Jan 1900',
@@ -173,7 +216,6 @@ define(
 						'clearBtn': true,
 						'autoClose': true
 					});
-	
 				});
 			}.on('init'),
 
