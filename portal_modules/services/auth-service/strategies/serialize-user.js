@@ -243,7 +243,6 @@ exports.strategy = (function() {
 								});
 
 								reorgedMenus.push(parentMenu);
-								
 							}
 						}
 						else {
@@ -279,6 +278,8 @@ exports.strategy = (function() {
 									return false;
 								});
 
+								logger.debug('Menu Item with Parent: ', thisMenu, '\Parent Menu: ', parentMenus);
+
 								var parentMenu = null;
 								if(!parentMenus.length) {
 									parentMenu = {
@@ -309,6 +310,14 @@ exports.strategy = (function() {
 											'ember_route': thisMenu.ember_route
 										});
 									}
+								}
+								else {
+									parentMenu.subRoutes.push({
+										'id': thisMenu.id,
+										'icon_class': thisMenu.icon_class,
+										'display_name': thisMenu.display_name,
+										'ember_route': thisMenu.ember_route
+									});
 								}
 							}
 						}

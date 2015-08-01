@@ -152,7 +152,7 @@
 	<!-- The main component area -->
 	<div class="row" style="padding:0px 15px;">
 		<% if(widgets.leftsidebar && widgets.leftsidebar.length) { %>
-		<div id="div-bhairavi-left-sidebar" class="col-lg-2 col-md-2 col-sm-2 col-xs-2" style="border-top:3px solid #d2d6de; padding:10px; background-color:#f9fafc; text-align:center;">
+		<div id="div-bhairavi-left-sidebar" class="col-lg-2 col-md-2 col-sm-2 col-xs-2 sidebar" style="border-top:3px solid #d2d6de; border-right:1px solid #d2d6de; padding:0px; background-color:#f9fafc; text-align:left;">
 			<% for(var widgetIdx = 0; widgetIdx < widgets.leftsidebar.length; widgetIdx++) { %>
 				{{<%= widgets.leftsidebar[widgetIdx].ember_component %>}}
 			<% } %>
@@ -164,7 +164,7 @@
 		</div>
 
 		<% if(widgets.rightsidebar && widgets.rightsidebar.length) { %>
-		<div id="div-bhairavi-right-sidebar" class="col-lg-2 col-md-2 col-sm-2 col-xs-2" style="border-top:3px solid #d2d6de; padding:10px; background-color:#f9fafc; text-align:center;">
+		<div id="div-bhairavi-right-sidebar" class="col-lg-2 col-md-2 col-sm-2 col-xs-2" style="border-top:3px solid #d2d6de; border-left:1px solid #d2d6de; padding:10px; background-color:#f9fafc; text-align:center;">
 			<% for(var widgetIdx = 0; widgetIdx < widgets.rightsidebar.length; widgetIdx++) { %>
 				{{<%= widgets.rightsidebar[widgetIdx].ember_component %>}}
 			<% } %>

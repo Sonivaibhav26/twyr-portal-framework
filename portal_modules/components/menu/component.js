@@ -21,6 +21,7 @@ var base = require('./../component-base').baseComponent,
  * Module dependencies, required for this module
  */
 var filesystem = promises.promisifyAll(require('fs')),
+	inflection = require('inflection'),
 	path = require('path');
 
 var menuComponent = prime({
@@ -31,11 +32,35 @@ var menuComponent = prime({
 
 		// Promisify what we need...
 		this._renderMenuTemplatesAsync = promises.promisify(this._renderMenuTemplates);
+		this._renderMenuComponentsAsync = promises.promisify(this._renderMenuComponents);
 	},
 
 	'_getClientRouter': function(request, response, next) {
+		this.$dependencies.logger.debug('Servicing request "' + request.path + '":\nQuery: ', request.query, '\nBody: ', request.body, '\nParams: ', request.params);
 		response.type('application/javascript');
-		response.status(200).send('');
+
+		var cacheSrvc = this.$dependencies.cacheService,
+			self = this,
+			userId = ((request.user && request.user.id) ? request.user.id : 'public');
+
+		cacheSrvc.getAsync('twyr!portal!user!' + userId)
+		.then(function(userData) {
+			userData = JSON.parse(userData);
+			if(!userData) {
+				throw({ 'code': 404, 'message': 'User not found' })
+				return;
+			}
+
+			var currentTenantData = ((request.user && request.user.id) ? userData.currentTenant : userData);
+			return self._renderMenuComponentsAsync(currentTenantData.sessionData[self.name], response);
+		})
+		.then(function(tmpl) {
+			response.status(200).send(tmpl);
+		})
+		.catch(function(err) {
+			self.$dependencies.logger.error('Error Servicing request "' + request.path + '":\nQuery: ', request.query, '\nBody: ', request.body, '\nParams: ', request.params, '\nError: ', err);
+			response.status(500).json(err);
+		});
 	},
 
 	'_getClientMVC': function(request, response, next) {
@@ -171,11 +196,44 @@ var menuComponent = prime({
 			promiseResolutions = [];
 
 		Object.keys(menuData).forEach(function(componentName) {
-			var templatePath = path.join(__dirname, 'ember/' + menuData[componentName].template + '.ejs'),
+			var emberComponentName = inflection.camelize(componentName.replace(/-/g, '_')) + 'Component',
+				templatePath = path.join(__dirname, 'ember/' + menuData[componentName].template + '.ejs'),
 				renderOptions = {
 					'componentName': componentName,
+					'emberComponentName': emberComponentName,
 					'menuItems': menuData[componentName].menuItems
 				};
+
+
+			promiseResolutions.push(renderAsync(templatePath, renderOptions));
+		});
+
+		promises.all(promiseResolutions)
+		.then(function(renderedMenus) {
+			callback(null, renderedMenus.join('\n'));
+		})
+		.catch(function(err) {
+			callback(err);
+		});
+	},
+
+	'_renderMenuComponents': function(menuData, response, callback) {
+		var renderAsync = promises.promisify(response.render.bind(response)),
+			promiseResolutions = [];
+
+		Object.keys(menuData).forEach(function(componentName) {
+			console.log(menuData[componentName]);
+			if(menuData[componentName].template != 'vertical')
+				return;
+
+			var emberComponentName = inflection.camelize(componentName.replace(/-/g, '_')) + 'Component',
+				templatePath = path.join(__dirname, 'ember/' + menuData[componentName].template + '_menu_component.ejs'),
+				renderOptions = {
+					'componentName': componentName,
+					'emberComponentName': emberComponentName,
+					'menuItems': menuData[componentName].menuItems
+				};
+
 
 			promiseResolutions.push(renderAsync(templatePath, renderOptions));
 		});

@@ -1,7 +1,7 @@
 define(
 	"twyrPortal/profile/model",
 	["exports"],
-	function(exports, moment) {
+	function(exports) {
 		var ProfileModel = window.DS.Model.extend({
 			'salutation': window.DS.attr('string'),
 			'firstName': window.DS.attr('string'),

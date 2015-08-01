@@ -1,0 +1,47 @@
+<script type="text/x-handlebars" data-template-name="components/<%= componentName %>">
+<ul class="sidebar-menu" style="text-align:left;">
+<% for(var idx = 0; idx < menuItems.length; idx++) { %>
+	<% if (menuItems[idx].subRoutes.length > 0) { %>
+		<li class="treeview">
+			<a href="#">
+				<% if(menuItems[idx].icon_class) { %>
+					<i class="<%= menuItems[idx].icon_class %>"></i>
+				<% } %>
+				<span><%= menuItems[idx].display_name %></span>
+				<i class="fa fa-angle-left pull-right"></i>
+			</a>
+			<ul class="treeview-menu" style="display:none;">
+				<% for(var subIdx = 0; subIdx < menuItems[idx].subRoutes.length; subIdx++) { %>
+					<li>
+						{{#link-to "<%= menuItems[idx].subRoutes[subIdx].ember_route %>"}}
+							<% if(menuItems[idx].subRoutes[subIdx].icon_class) { %>
+								<i class="<%= menuItems[idx].subRoutes[subIdx].icon_class %>"></i>
+							<% } %>
+							<span><%= menuItems[idx].subRoutes[subIdx].display_name %></span>
+						{{/link-to}}
+					</li>
+				<% } %>
+			</ul>
+		</li>
+	<% } else { %>
+		<li class="treeview">
+			<% if(menuItems[idx].ember_route) { %>
+				{{#link-to "<%= menuItems[idx].ember_route %>"}}
+					<% if(menuItems[idx].icon_class) { %>
+						<i class="<%= menuItems[idx].icon_class %>"></i>
+					<% } %>
+					<span><%= menuItems[idx].display_name %></span>
+				{{/link-to}}
+			<% } else { %>
+				<a href="#">
+					<% if(menuItems[idx].icon_class) { %>
+						<i class="<%= menuItems[idx].icon_class %>"></i>
+					<% } %>
+					<span><%= menuItems[idx].display_name %></span>
+				</a>
+			<% } %>
+		</li>
+	<% } %>
+<% } %>
+</ul>
+</script>
