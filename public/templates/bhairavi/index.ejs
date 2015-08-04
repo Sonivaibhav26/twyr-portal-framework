@@ -222,10 +222,11 @@
 <!-- Ember.js, for the client-side MVC Framework -->
 <% if(developmentMode) { %>
 	<script type="application/javascript" src="/bower_components/ember/ember.debug.js"></script>
+	<script type="application/javascript" src="/bower_components/ember-data/ember-data.js"></script>
 <% } else { %>
 	<script type="application/javascript" src="/bower_components/ember/ember.min.js"></script>
+	<script type="application/javascript" src="/bower_components/ember-data/ember-data.min.js"></script>
 <% } %>
-<script type="application/javascript" src="/bower_components/ember-data/ember-data.min.js"></script>
 <script type="application/javascript" src="/bower_components/ember/ember-template-compiler.js"></script>
 
 <!-- Setup ALL Ajax Requests to send credential information -->

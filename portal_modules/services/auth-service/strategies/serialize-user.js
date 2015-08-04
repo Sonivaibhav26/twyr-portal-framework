@@ -39,8 +39,6 @@ exports.strategy = (function() {
 	});
 	
 	auth.serializeUser(function(user, done) {
-		logger.debug('Serializing user: ', user);
-
 		var cacheMulti = promises.promisifyAll(cache.multi());
 		cacheMulti.setAsync('twyr!portal!user!' + user.id, JSON.stringify(user));
 		cacheMulti.expireAsync('twyr!portal!user!' + user.id, self.$module.$config.session.ttl);
@@ -115,6 +113,7 @@ exports.strategy = (function() {
 
 					if(!deserializedUser.tenants[thisTenantId]) {
 						deserializedUser.tenants[thisTenantId] = {};
+						(deserializedUser.tenants[thisTenantId]).id = thisTenantId;
 						(deserializedUser.tenants[thisTenantId]).permissions = [];
 						(deserializedUser.tenants[thisTenantId]).menus = [];
 						(deserializedUser.tenants[thisTenantId]).widgets = [];

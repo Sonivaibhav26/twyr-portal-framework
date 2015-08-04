@@ -45,7 +45,7 @@
 <div class="box box-primary">
 	<div class="box-header with-border" style="height:50px;">
 		<h3 class="box-title">Personal Details</h3>
-		{{#if model.isDirty}}
+		{{#if model.hasDirtyAttributes}}
 		<div class="pull-right" style="cursor:pointer; margin:0px 5px;" {{action "savePersonalDetails" bubbles=false}}>
 		    <button class="btn btn-primary btn-sm">
 				<i class="fa fa-save" style="margin-right:5px;" /><span>Save</span>	

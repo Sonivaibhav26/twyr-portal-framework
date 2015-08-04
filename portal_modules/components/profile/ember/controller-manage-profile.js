@@ -232,7 +232,7 @@ define(
 				this.lockManagePersonalDetailsForm();
 
 				window.Ember.$('img#component-manage-personal-details-img-profile-image').attr('src', 'profile/profileImage');
-				this.get('model').rollback();
+				this.get('model').rollbackAttributes();
 			},
 
 			'lockManagePersonalDetailsForm': function() {
@@ -321,13 +321,13 @@ define(
 						}, 5000);
 					})
 					.catch(function(reason) {
-						console.log('savePersonalDetails::error: ', reason);
+						console.error('savePersonalDetails::error: ', reason);
 	
 						self.showStatusMessage('failure');
 						window.Ember.run.later(self, function() {
 							self.resetStatusMessages();
 
-							self.get('model').rollback();
+							self.get('model').rollbackAttributes();
 							self.get('model').transitionTo('loaded.saved');
 						}, 5000);
 					});

@@ -284,7 +284,7 @@ var registeredRootPathRenderer = function(request, response, next) {
 		'template': path.relative(self.$config.publicDir, path.join(self.$config.templates.path, self.$config.currentTemplate.name)),
 		'clientLoader': path.relative(self.$config.publicDir, path.join(self.$config.templates.path, self.$config.currentTemplate.name, self.$config.currentTemplate.client_loader)),
 
-		'developmentMode': ((process.env.NODE_ENV || 'development') == 'development'),
+		'developmentMode': false, // ((process.env.NODE_ENV || 'development') == 'development'),
 		'apiServer': self.$config.apiServer,
 
 		'components': [],

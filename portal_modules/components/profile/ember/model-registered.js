@@ -1,5 +1,5 @@
 define(
-	"twyrPortal/profile/model",
+	"twyrPortal/models/profile",
 	["exports"],
 	function(exports) {
 		var ProfileModel = window.DS.Model.extend({

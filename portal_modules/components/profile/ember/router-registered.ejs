@@ -6,10 +6,10 @@ Router.map(function() {
 });
 
 define(
-	"twyrPortal/profile/route",
+	"twyrPortal/routes/profile",
 	["exports"],
 	function(exports) {
-		if(window.developmentMode) console.log('DEFINE: twyrPortal/profile/route');
+		if(window.developmentMode) console.log('DEFINE: twyrPortal/routes/profile');
 		var ManageProfileRoute = window.Ember.Route.extend({
 			'beforeModel': function() {
 				return window.Ember.$.getScript('<%= mountPath %>/mvc/manageProfile');

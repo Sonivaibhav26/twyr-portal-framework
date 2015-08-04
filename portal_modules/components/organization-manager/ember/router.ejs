@@ -1,0 +1,23 @@
+var Router = require('twyrPortal/router')['default'];
+Router.map(function() {
+	this.route('organization-manager-basic-information', { 'path': '/organization/basics' });
+});
+
+define(
+	"twyrPortal/organization-manager-basic-information/route",
+	["exports"],
+	function(exports) {
+		if(window.developmentMode) console.log('DEFINE: twyrPortal/organization-manager-basic-information/route');
+		var OrganizationManagerBasicInformationRoute = window.Ember.Route.extend({
+			'beforeModel': function() {
+				return window.Ember.$.getScript('<%= mountPath %>/mvc/organization-manager-basic-information');
+			},
+
+			'model': function() {
+				return this.store.find('organization-manager-basic-information', '<%= tenantId %>');
+			}
+		});
+
+		exports['default'] = OrganizationManagerBasicInformationRoute;
+	}
+);

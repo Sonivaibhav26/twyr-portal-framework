@@ -52,7 +52,7 @@ window.curl(window.templates)
 				"twyrPortal/router",
 				["exports"],
 				function(exports) {
-					console.log('DEFINE: twyrPortal/router');
+					if(window.developmentMode) console.log('DEFINE: twyrPortal/router');
 					var Router = window.Ember.Router.extend();
 
 					Router.reopen({
@@ -64,10 +64,10 @@ window.curl(window.templates)
 			);
 
 			define(
-				"twyrPortal/app",
+				"twyrPortal/application",
 				["ember/resolver","exports"],
 				function(emberResolver, exports) {
-					console.log('DEFINE: twyrPortal/app');
+					if(window.developmentMode) console.log('DEFINE: twyrPortal/application');
 					var Resolver = emberResolver['default'];
 
 					var TwyrApplication = window.Ember.Application.extend({
@@ -75,7 +75,17 @@ window.curl(window.templates)
 						'Resolver': Resolver['default']
 					});
 
-					var App = TwyrApplication.create({
+					exports['default'] = TwyrApplication;
+				}
+			);
+
+			define(
+				"twyrPortal/app",
+				["exports", "twyrPortal/application"],
+				function(exports, application) {
+					if(window.developmentMode) console.log('DEFINE: twyrPortal/app');
+
+					var App = application.default.create({
 						LOG_RESOLVER: window.developmentMode,
 						LOG_ACTIVE_GENERATION: window.developmentMode, 
 						LOG_TRANSITIONS: window.developmentMode, 
