@@ -60,7 +60,7 @@ var organizationManagerComponent = prime({
 			return;
 		}
 
-		var basicInformationTmpl = path.join(__dirname, 'ember/organization-manager-basic-information-template.js'),
+		var basicInformationTmpl = path.join(__dirname, 'ember/organization-manager-organization-structure-template.js'),
 			promiseResolutions = [];
 
 		promiseResolutions.push(filesystem.readFileAsync(basicInformationTmpl));
@@ -77,7 +77,7 @@ var organizationManagerComponent = prime({
 	'_addRoutes': function() {
 		var self = this;
 
-		this.$router.get('/mvc/organization-manager-basic-information', function(request, response, next) {
+		this.$router.get('/mvc/organization-manager-organization-structure', function(request, response, next) {
 			self.$dependencies.logger.silly('Servicing request "' + request.path + '":\nQuery: ', request.query, '\nBody: ', request.body, '\nParams: ', request.params);
 			response.type('application/javascript');
 			if(!request.user) {
@@ -87,8 +87,8 @@ var organizationManagerComponent = prime({
 
 			var promiseResolutions = [];
 
-			promiseResolutions.push(filesystem.readFileAsync(path.join(__dirname, 'ember/organization-manager-basic-information-model.js')));
-			promiseResolutions.push(filesystem.readFileAsync(path.join(__dirname, 'ember/organization-manager-basic-information-controller.js')));
+			promiseResolutions.push(filesystem.readFileAsync(path.join(__dirname, 'ember/organization-manager-organization-structure-model.js')));
+			promiseResolutions.push(filesystem.readFileAsync(path.join(__dirname, 'ember/organization-manager-organization-structure-controller.js')));
 
 			promises.all(promiseResolutions)
 			.then(function(mvcFiles) {

@@ -1,26 +1,31 @@
 define(
-	"twyrPortal/adapters/organization-manager-basic-information",
+	"twyrPortal/adapters/organization-manager-organization-structure",
 	["exports", "twyrPortal/app"],
 	function(exports, app) {
-		var OrganizationManagerBasicInformationAdapter = app.default.ApplicationAdapter.extend({
+		var OrganizationManagerOrganizationStructureAdapter = app.default.ApplicationAdapter.extend({
 			'namespace': 'organization-manager',
 		});
 
-		exports['default'] = OrganizationManagerBasicInformationAdapter;
+		exports['default'] = OrganizationManagerOrganizationStructureAdapter;
 	}
 );
 
 define(
-	"twyrPortal/models/organization-manager-basic-information",
+	"twyrPortal/models/organization-manager-organization-structure",
 	["exports"],
 	function(exports) {
-		var OrganizationManagerBasicInformationModel = window.DS.Model.extend({
+		var OrganizationManagerOrganizationStructureModel = window.DS.Model.extend({
 			'name': window.DS.attr('string'),
+
+			'parentId': window.DS.attr('string'),
+			'parentName': window.DS.attr('string'),
+
 			'tenantType': window.DS.attr('string', { 'defaultValue': 'Department' }),
-			'parent': window.DS.belongsTo('organization-manager-basic-information', { 'async': true, 'inverse': 'departments' }),
 			'createdOn': window.DS.attr('date', { 'defaultValue': (new Date()) }),
 
-			'departments': window.DS.hasMany('organization-manager-basic-information', { 'async': true, 'inverse': 'parent' }),
+			'departments': window.DS.hasMany('organization-manager-organization-structure', { 'async': true, 'inverse': null }),
+			'subTenants': window.DS.hasMany('organization-manager-organization-structure', { 'async': true, 'inverse': null }),
+
 			'partners': window.DS.hasMany('organization-manager-business-partner', { 'async': true, 'inverse': null }),
 
 			'formattedCreatedOn': window.Ember.computed('createdOn', {
@@ -30,7 +35,7 @@ define(
 			})
 		});
 
-		exports['default'] = OrganizationManagerBasicInformationModel;
+		exports['default'] = OrganizationManagerOrganizationStructureModel;
 	}
 );
 

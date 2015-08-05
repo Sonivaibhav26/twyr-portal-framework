@@ -41,6 +41,7 @@
     "handlebars": "*",
     "ionicons": "*",
     "jquery": "*",
+	"jquery-confirm": "*",
 	"moment": "*",
     "normalize-css": "*",
 	"select2": "*",
