@@ -47,10 +47,7 @@ var organizationManagerComponent = prime({
 
 	'_getClientMVC': function(request, response, next) {
 		response.type('application/javascript');
-		if(!request.user) {
-			response.status(200).send('');
-			return;
-		}
+		response.status(200).send('');
 	},
 
 	'_getClientTemplate': function(request, response, next) {
@@ -60,10 +57,16 @@ var organizationManagerComponent = prime({
 			return;
 		}
 
-		var basicInformationTmpl = path.join(__dirname, 'ember/organization-manager-organization-structure-template.js'),
+		var organizationStructureTmpl = path.join(__dirname, 'ember/organization-manager-organization-structure-template.js'),
+			organizationStructureAboutTmpl = path.join(__dirname, 'ember/organization-manager-organization-structure-about-template.js'),
+			organizationStructurePartnerTmpl = path.join(__dirname, 'ember/organization-manager-organization-structure-partner-template.js'),
+			organizationStructureTreeTmpl = path.join(__dirname, 'ember/organization-manager-organization-structure-tree-template.js'),
 			promiseResolutions = [];
 
-		promiseResolutions.push(filesystem.readFileAsync(basicInformationTmpl));
+		promiseResolutions.push(filesystem.readFileAsync(organizationStructureTmpl));
+		promiseResolutions.push(filesystem.readFileAsync(organizationStructureAboutTmpl));
+		promiseResolutions.push(filesystem.readFileAsync(organizationStructurePartnerTmpl));
+		promiseResolutions.push(filesystem.readFileAsync(organizationStructureTreeTmpl));
 
 		promises.all(promiseResolutions)
 		.then(function(tmplFiles) {
@@ -88,6 +91,7 @@ var organizationManagerComponent = prime({
 			var promiseResolutions = [];
 
 			promiseResolutions.push(filesystem.readFileAsync(path.join(__dirname, 'ember/organization-manager-organization-structure-model.js')));
+			promiseResolutions.push(filesystem.readFileAsync(path.join(__dirname, 'ember/organization-manager-organization-structure-view.js')));
 			promiseResolutions.push(filesystem.readFileAsync(path.join(__dirname, 'ember/organization-manager-organization-structure-controller.js')));
 
 			promises.all(promiseResolutions)

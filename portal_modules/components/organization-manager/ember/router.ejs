@@ -1,6 +1,6 @@
 var Router = require('twyrPortal/router')['default'];
 Router.map(function() {
-	this.route('organization-manager-organization-structure', { 'path': '/organization/basics' });
+	this.route('organization-manager-organization-structure', { 'path': '/organization/structure' });
 });
 
 define(
@@ -15,6 +15,10 @@ define(
 
 			'model': function() {
 				return this.store.find('organization-manager-organization-structure', '<%= tenantId %>');
+			},
+
+			'setupController': function(controller, model) {
+				controller.set('model', model);
 			}
 		});
 
