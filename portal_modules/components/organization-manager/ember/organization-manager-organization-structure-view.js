@@ -64,29 +64,11 @@ define(
 				},
 
 				'deleteOrganization': function(parent, organization) {
-					organization.destroyRecord()
-					.then(function() {
-						parent.get('suborganizations').removeObject(organization);
-					})
-					.catch(function(err) {
-						console.error('Delete organization failed: ', err);
-
-						organization.rollbackAttributes();
-						organization.transitionTo('loaded.saved');
-					});
+					this.sendAction('deleteEntity', 'organization', parent, organization);
 				},
 
 				'deletePartner': function(organization, partner) {
-					partner.destroyRecord()
-					.then(function() {
-						organization.get('partners').removeObject(partner);
-					})
-					.catch(function(err) {
-						console.error('Delete partner failed: ', err);
-
-						partner.rollbackAttributes();
-						partner.transitionTo('loaded.saved');
-					});
+					this.sendAction('deleteEntity', 'partner', organization, partner);
 				}
 			}
 		});
@@ -189,28 +171,176 @@ define(
 					'placeholder': 'Partner'
 				})
 				.on('change', function() {
-					console.log('Retrieving Partner Org: ' + partnerSelectElem.val() + '/' + partnerSelectElem.text());
-					
-					self.get('model').store.find('organization-manager-organization-structure', partnerSelectElem.val())
+					var model = self.get('model');
+					model.store.find('organization-manager-organization-structure', partnerSelectElem.val())
 					.then(function(partnerOrg) {
-						console.log('Partner Org: ', partnerOrg);
-
-						self.get('model').set('partner', partnerOrg);
-						partnerOrg.get('partners').addObject(self.get('model'));
-
-						return self.get('model').save();
+						model.set('partner', partnerOrg);
+						return model.save();
 					})
 					.then(function() {
-						console.log('Successfully saved ' + self.get('model').get('tenant').get('name') + '/' + self.get('model').get('partner').get('name') + ' succesfully');
+						console.log('Successfully saved ' + model.get('tenant').get('name') + '/' + model.get('partner').get('name') + ' succesfully');
 					})
 					.catch(function(err) {
 						console.error('Error retrieving partner organization data: ', err);
-						self.get('model').rollbackAttributes();
+						model.rollbackAttributes();
 					});
 				});
 			}.on('didInsertElement')
 		});
 
 		exports['default'] = OrganizationManagerOrganizationStructurePartnerComponent;
+	}
+);
+
+define(
+	"twyrPortal/components/organization-manager-organization-structure-user-manager",
+	["exports", "twyrPortal/app"],
+	function(exports, app) {
+		if(window.developmentMode) console.log('DEFINE: twyrPortal/components/organization-manager-organization-structure-user-manager');
+
+		var OrganizationManagerOrganizationStructureUserManagerComponent = window.Ember.Component.extend({
+			'_initialize': window.Ember.observer('model', function() {
+				var self = this;
+
+				window.Ember.run.scheduleOnce('afterRender', this, function() {
+					if(!self.get('model')) return;
+
+					self.get('model').get('users').forEach(function(user) {
+						if(!user.get('isNew'))
+							return;
+
+						self._initSelect(user);
+					});
+				});
+			}),
+
+			'isUserRemovable': window.Ember.computed('model.users.@each.isNew', {
+				'get': function() {
+					var oldUsers = this.get('model').get('users').filter(function(user) {
+						return !user.get('isNew');
+					});
+
+					return (oldUsers.get('length') > 1);
+				}
+			}),
+
+			'_initSelect': function(user) {
+				var self = this,
+					selectElem = self.$('select#organization-manager-organization-structure-user-manager-select-' + user.get('id'));
+
+				if(!selectElem)
+					return;
+
+				selectElem.select2({
+					'ajax': {
+						'delay': 250,
+						'dataType': 'json',
+	
+						'url': window.apiServer + 'masterdata/emails',
+
+						'data': function (params) {
+							var queryParameters = {
+								'filter': params.term
+							}
+
+							return queryParameters;
+						},
+
+						'processResults': function (data) {
+							var processedResult =  {
+								'results': window.Ember.$.map(data, function(item) {
+									return {
+										'text': item.email + ' (' + item.name + ')',
+										'slug': item.email,
+										'id': item.id
+									};
+								})
+							};
+
+							return processedResult;
+						},
+
+						'cache': true
+					},
+		
+					'minimumInputLength': 2,
+					'minimumResultsForSearch': 10,
+
+					'allowClear': false,
+					'closeOnSelect': true,
+
+					'placeholder': 'Users\' email'
+				})
+				.on('change', function() {
+					user.store.find('organization-manager-user', selectElem.val())
+					.then(function(orgUser) {
+						user.set('user', orgUser);
+						return user.save();
+					})
+					.then(function() {
+						console.log('Successfully added user');
+					})
+					.catch(function(err) {
+						console.error('Error retrieving user data: ', err);
+						user.rollbackAttributes();
+					});
+				});
+			},
+
+			'actions': {
+				'add': function() {
+					var parent = this.get('model'),
+						self = this,
+						newUserRel = parent.store.createRecord('organization-manager-organization-user', {
+							'id': app.default.generateUUID(),
+							'tenant': parent
+						});
+
+					parent.get('users').addObject(newUserRel);
+					window.Ember.run.scheduleOnce('afterRender', self, function() {
+						self._initSelect(newUserRel);
+					})
+				},
+
+				'delete': function(user) {
+					var parent = this.get('model'),
+						delFn = function() {
+							user.destroyRecord()
+							.then(function() {
+								console.log('Deleted ' + user.get('user').get('firstName') + ' successfully');
+								parent.get('users').removeObject(user);
+							})
+							.catch(function(err) {
+								console.error('Error deleting ' + user.get('user').get('firstName') + ': ', err);
+		
+								user.rollbackAttributes();
+								user.transitionTo('loaded.saved');
+							});
+						};
+
+					if(!user.get('isNew')) {
+						window.Ember.$.confirm({
+							'text': 'Are you sure that you want to remove <strong>"' + user.get('user').get('fullName') + '"</strong> from the list of Users?',
+							'title': 'Delete User',
+	
+							'confirm': delFn,
+	
+							'cancel': function() {
+								// Nothing to do...
+							}
+						});
+					}
+					else {
+						delFn();
+					}
+				},
+
+				'cancel': function() {
+					this.get('model').rollbackAttributes();
+				}
+			}
+		});
+
+		exports['default'] = OrganizationManagerOrganizationStructureUserManagerComponent;
 	}
 );

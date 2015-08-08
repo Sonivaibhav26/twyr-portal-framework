@@ -32,6 +32,8 @@
     "bootstrap": "*",
     "bootstrap-datepicker": "*",
 	"curl": "*",
+	"DataTables": "*",
+	"datatables-bootstrap3-plugin": "*",
     "ember": "*",
     "ember-data": "*",
     "ember-resolver": "*",

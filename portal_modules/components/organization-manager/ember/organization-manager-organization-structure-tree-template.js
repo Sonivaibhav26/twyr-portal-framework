@@ -9,7 +9,7 @@
 				<h3 class="box-title">{{model.name}}</h3>
 			{{/if}}
 
-			{{#if model.partner}}
+			{{#if model.tenant}}
 				<h3 class="box-title">Business Partner</h3>
 			{{/if}}
 
@@ -27,7 +27,7 @@
 		</div>
 
 		{{#if model.isDepartment}}
-		<div class="box-body no-padding collapse in">
+		<div class="box-body no-padding collapse in" style="margin-bottom:2px;">
 			<ul class="nav nav-pills nav-stacked">
 				<li><a href="#" {{action "setCurrentWidget" "about" null model bubbles=false}}>About {{model.name}}</a></li>
 			</ul>
@@ -35,7 +35,7 @@
 		{{/if}}
 
 		{{#if model.isOrganization}}
-		<div class="box-body no-padding collapse in">
+		<div class="box-body no-padding collapse in" style="margin-bottom:2px;">
 			<ul class="nav nav-pills nav-stacked">
 				<li><a href="#" {{action "setCurrentWidget" "about" null model bubbles=false}}>About {{model.name}}</a></li>
 			</ul>
@@ -79,7 +79,7 @@
 	{{/if}}
 
 	{{#if model.isOrganization}}
-	<div class="box box-solid box-default" style="text-align:left; margin-bottom:0px; border-radius:0px;">
+	<div class="box box-solid box-default" style="text-align:left; margin-bottom:2px; border-radius:0px;">
 		<div class="box-header with-border">
 			<h3 class="box-title">Departments</h3>
 			<div class="box-tools">
@@ -112,7 +112,7 @@
 		</div>
 	</div>
 
-	<div class="box box-solid box-default" style="text-align:left; margin-bottom:0px; border-radius:0px;">
+	<div class="box box-solid box-default" style="text-align:left; margin-bottom:2px; border-radius:0px;">
 		<div class="box-header with-border">
 			<h3 class="box-title">Subsidiaries</h3>
 			<div class="box-tools">

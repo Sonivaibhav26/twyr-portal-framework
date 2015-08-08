@@ -34,6 +34,8 @@ define(
 					var self = this,
 						tenantType = '';
 
+					parent = parent || self.get('model');
+
 					switch(widgetName) {
 						case 'department':
 							tenantType = 'Department';
@@ -76,6 +78,47 @@ define(
 						self.set('_displayParentModel', parent);
 						self.set('_displayModel', model);
 					});
+				},
+
+				'deleteEntity': function(entity, parent, model) {
+					var modelCollectionField = '',
+						entityName = '',
+						title = '';
+
+					switch(entity) {
+						case 'organization':
+							modelCollectionField = 'suborganizations';
+							entityName = model.get('name') || 'New Organization';
+							title = 'Delete ' + (model.get('isDepartment') ? 'Department': 'Subsidiary');
+						break;
+
+						case 'partner':
+							modelCollectionField = 'partners';
+							entityName = model.get('partner').get('name') || 'New Business Partner';
+							title = 'Delete Business Partner';
+						break;
+					};
+
+					window.Ember.$.confirm({
+						'text': 'Are you sure that you want to remove <strong>"' + entityName + '"</strong>?',
+						'title': title,
+
+						'confirm': function() {
+							model.destroyRecord()
+							.then(function() {
+								parent.get(modelCollectionField).removeObject(model);
+							})
+							.catch(function(err) {
+								model.rollbackAttributes();
+								model.transitionTo('loaded.saved');
+							});
+						},
+
+						'cancel': function() {
+							// Nothing to do...
+						}
+					});
+
 				}
 			}
 		});

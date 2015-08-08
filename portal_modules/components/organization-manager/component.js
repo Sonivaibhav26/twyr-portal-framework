@@ -60,12 +60,14 @@ var organizationManagerComponent = prime({
 		var organizationStructureTmpl = path.join(__dirname, 'ember/organization-manager-organization-structure-template.js'),
 			organizationStructureAboutTmpl = path.join(__dirname, 'ember/organization-manager-organization-structure-about-template.js'),
 			organizationStructurePartnerTmpl = path.join(__dirname, 'ember/organization-manager-organization-structure-partner-template.js'),
+			organizationStructureUserManagerTmpl = path.join(__dirname, 'ember/organization-manager-organization-structure-user-manager-template.js'),
 			organizationStructureTreeTmpl = path.join(__dirname, 'ember/organization-manager-organization-structure-tree-template.js'),
 			promiseResolutions = [];
 
 		promiseResolutions.push(filesystem.readFileAsync(organizationStructureTmpl));
 		promiseResolutions.push(filesystem.readFileAsync(organizationStructureAboutTmpl));
 		promiseResolutions.push(filesystem.readFileAsync(organizationStructurePartnerTmpl));
+		promiseResolutions.push(filesystem.readFileAsync(organizationStructureUserManagerTmpl));
 		promiseResolutions.push(filesystem.readFileAsync(organizationStructureTreeTmpl));
 
 		promises.all(promiseResolutions)
