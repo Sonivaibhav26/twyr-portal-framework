@@ -24,6 +24,11 @@ var filesystem = promises.promisifyAll(require('fs')),
 	path = require('path'),
 	uuid = require('node-uuid');
 
+/**
+ * Magic Numbers
+ */
+ var requiredPermission = '00000000-0000-0000-0000-000000000000';
+
 var organizationManagerComponent = prime({
 	'inherits': base,
 
@@ -33,7 +38,7 @@ var organizationManagerComponent = prime({
 
 	'_getClientRouter': function(request, response, next) {
 		response.type('application/javascript');
-		if(!request.user) {
+		if(!this._checkPermission(request, requiredPermission)) {
 			response.status(200).send('');
 			return;
 		}
@@ -52,23 +57,30 @@ var organizationManagerComponent = prime({
 
 	'_getClientTemplate': function(request, response, next) {
 		response.type('application/javascript');
-		if(!request.user) {
+		if(!this._checkPermission(request, requiredPermission)) {
 			response.status(200).send('');
 			return;
 		}
 
-		var organizationStructureTmpl = path.join(__dirname, 'ember/organization-manager-organization-structure-template.js'),
-			organizationStructureAboutTmpl = path.join(__dirname, 'ember/organization-manager-organization-structure-about-template.js'),
-			organizationStructurePartnerTmpl = path.join(__dirname, 'ember/organization-manager-organization-structure-partner-template.js'),
-			organizationStructureUserManagerTmpl = path.join(__dirname, 'ember/organization-manager-organization-structure-user-manager-template.js'),
-			organizationStructureTreeTmpl = path.join(__dirname, 'ember/organization-manager-organization-structure-tree-template.js'),
-			promiseResolutions = [];
+		var organizationStructureTmpl = path.join(__dirname, 'ember/organization-manager-organization-structure-template-index.js'),
+			organizationStructureTreeTmpl = path.join(__dirname, 'ember/organization-manager-organization-structure-template-tree.js'),
+			organizationStructureAboutTmpl = path.join(__dirname, 'ember/organization-manager-organization-structure-template-about.js'),
+			organizationStructureSubsidiaryTmpl = path.join(__dirname, 'ember/organization-manager-organization-structure-template-subsidiaries.js'),
+			organizationStructureDepartmentTmpl = path.join(__dirname, 'ember/organization-manager-organization-structure-template-departments.js'),
+			organizationStructurePartnerTmpl = path.join(__dirname, 'ember/organization-manager-organization-structure-template-partners.js');
+
+		var groupManagementTmpl = path.join(__dirname, 'ember/organization-manager-group-management-template-index.js');
+
+		var promiseResolutions = [];
 
 		promiseResolutions.push(filesystem.readFileAsync(organizationStructureTmpl));
 		promiseResolutions.push(filesystem.readFileAsync(organizationStructureAboutTmpl));
-		promiseResolutions.push(filesystem.readFileAsync(organizationStructurePartnerTmpl));
-		promiseResolutions.push(filesystem.readFileAsync(organizationStructureUserManagerTmpl));
 		promiseResolutions.push(filesystem.readFileAsync(organizationStructureTreeTmpl));
+		promiseResolutions.push(filesystem.readFileAsync(organizationStructureSubsidiaryTmpl));
+		promiseResolutions.push(filesystem.readFileAsync(organizationStructureDepartmentTmpl));
+		promiseResolutions.push(filesystem.readFileAsync(organizationStructurePartnerTmpl));
+
+		promiseResolutions.push(filesystem.readFileAsync(groupManagementTmpl));
 
 		promises.all(promiseResolutions)
 		.then(function(tmplFiles) {
@@ -85,7 +97,7 @@ var organizationManagerComponent = prime({
 		this.$router.get('/mvc/organization-manager-organization-structure', function(request, response, next) {
 			self.$dependencies.logger.silly('Servicing request "' + request.path + '":\nQuery: ', request.query, '\nBody: ', request.body, '\nParams: ', request.params);
 			response.type('application/javascript');
-			if(!request.user) {
+			if(!self._checkPermission(request, requiredPermission)) {
 				response.status(200).send('');
 				return;
 			}
@@ -95,6 +107,28 @@ var organizationManagerComponent = prime({
 			promiseResolutions.push(filesystem.readFileAsync(path.join(__dirname, 'ember/organization-manager-organization-structure-model.js')));
 			promiseResolutions.push(filesystem.readFileAsync(path.join(__dirname, 'ember/organization-manager-organization-structure-view.js')));
 			promiseResolutions.push(filesystem.readFileAsync(path.join(__dirname, 'ember/organization-manager-organization-structure-controller.js')));
+
+			promises.all(promiseResolutions)
+			.then(function(mvcFiles) {
+				response.status(200).send(mvcFiles.join('\n'));
+			})
+			.catch(function(err) {
+				self.$dependencies.logger.error('Error servicing request "' + request.path + '":\nQuery: ', request.query, '\nBody: ', request.body, '\nParams: ', request.params, '\nError: ', err);
+				response.status(err.code || err.number || 500).json(err);
+			});
+		});
+
+		this.$router.get('/mvc/organization-manager-group-management', function(request, response, next) {
+			self.$dependencies.logger.silly('Servicing request "' + request.path + '":\nQuery: ', request.query, '\nBody: ', request.body, '\nParams: ', request.params);
+			response.type('application/javascript');
+			if(!self._checkPermission(request, requiredPermission)) {
+				response.status(200).send('');
+				return;
+			}
+
+			var promiseResolutions = [];
+
+			promiseResolutions.push(filesystem.readFileAsync(path.join(__dirname, 'ember/organization-manager-group-management-model.js')));
 
 			promises.all(promiseResolutions)
 			.then(function(mvcFiles) {

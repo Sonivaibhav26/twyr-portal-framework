@@ -1,16 +1,21 @@
-<script type="text/x-handlebars" data-template-name="components/organization-manager-organization-structure-about">
+<script type="text/x-handlebars" data-template-name="components/organization-manager-sub-organization-structure-about">
 <div class="box box-primary" style="text-align:left;">
 <form role="form">
 	<div class="box-header with-border" style="height:50px;">
 		<h3 class="box-title">About {{model.name}}</h3>
+		<div class="pull-right" style="cursor:pointer; margin:0px 5px;" {{action "delete" bubbles=false}}>
+		    <button type="button" class="btn btn-danger btn-sm">
+				<i class="fa fa-remove" style="margin-right:5px;" /><span>Delete</span>
+		    </button>
+		</div>
 		{{#if model.hasDirtyAttributes}}
 		<div class="pull-right" style="cursor:pointer; margin:0px 5px;" {{action "cancel" bubbles=false}}>
-		    <button class="btn btn-warning btn-sm">
+		    <button type="button" class="btn btn-warning btn-sm">
 				<i class="fa fa-undo" style="margin-right:5px;" /><span>Cancel</span>
 		    </button>
 		</div>
 		<div class="pull-right" style="cursor:pointer; margin:0px 5px;" {{action "save" bubbles=false}}>
-		    <button class="btn btn-primary btn-sm">
+		    <button type="submit" class="btn btn-primary btn-sm">
 				<i class="fa fa-save" style="margin-right:5px;" /><span>Save</span>	
 		    </button>
 		</div>

@@ -314,15 +314,11 @@ define(
 					.save()
 					.then(function() {
 						self.showStatusMessage('success', 'Your personal information has been updated');
-						console.log('savePersonalDetails::success: ', arguments);
-	
 						window.Ember.run.later(self, function() {
 							self.resetStatusMessages();
 						}, 5000);
 					})
 					.catch(function(reason) {
-						console.error('savePersonalDetails::error: ', reason);
-	
 						self.showStatusMessage('failure');
 						window.Ember.run.later(self, function() {
 							self.resetStatusMessages();
@@ -330,6 +326,33 @@ define(
 							self.get('model').rollbackAttributes();
 							self.get('model').transitionTo('loaded.saved');
 						}, 5000);
+					});
+				},
+
+				'deleteAccount': function() {
+					var self = this;
+
+					window.Ember.$.confirm({
+						'text': 'Are you sure that you want to delete your account?',
+						'title': 'Delete Account',
+
+						'confirm': function() {
+							self.get('model')
+							.destroyRecord()
+							.then(function() {
+								self.showStatusMessage('success', 'Your personal information has been deleted');
+								window.Ember.run.later(self, function() {
+									window.location.href = '/';
+								}, 2500);
+							})
+							.catch(function(reason) {
+								self.showStatusMessage('failure');
+							});
+						},
+
+						'cancel': function() {
+							// Nothing to do...
+						}
 					});
 				}
 			}

@@ -11,6 +11,7 @@ define(
 			'sex': window.DS.attr('string'),
 			'dob': window.DS.attr('date'),
 			'email': window.DS.attr('string'),
+			'isSearchable': window.DS.attr('boolean', { 'defaultValue': true }),
 			'createdOn': window.DS.attr('date'),
 
 			'formattedDOB': window.Ember.computed('dob', {

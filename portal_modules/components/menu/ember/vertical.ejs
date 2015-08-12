@@ -17,7 +17,9 @@
 							<% if(menuItems[idx].subRoutes[subIdx].icon_class) { %>
 								<i class="<%= menuItems[idx].subRoutes[subIdx].icon_class %>"></i>
 							<% } %>
-							<span><%= menuItems[idx].subRoutes[subIdx].display_name %></span>
+							<% if(menuItems[idx].subRoutes[subIdx].display_name) { %>
+								<span><%= menuItems[idx].subRoutes[subIdx].display_name %></span>
+							<% } %>
 						{{/link-to}}
 					</li>
 				<% } %>
@@ -30,14 +32,18 @@
 					<% if(menuItems[idx].icon_class) { %>
 						<i class="<%= menuItems[idx].icon_class %>"></i>
 					<% } %>
-					<span><%= menuItems[idx].display_name %></span>
+					<% if(menuItems[idx].display_name) { %>
+						<span><%= menuItems[idx].display_name %></span>
+					<% } %>
 				{{/link-to}}
 			<% } else { %>
 				<a href="#">
 					<% if(menuItems[idx].icon_class) { %>
 						<i class="<%= menuItems[idx].icon_class %>"></i>
 					<% } %>
-					<span><%= menuItems[idx].display_name %></span>
+					<% if(menuItems[idx].display_name) { %>
+						<span><%= menuItems[idx].display_name %></span>
+					<% } %>
 				</a>
 			<% } %>
 		</li>

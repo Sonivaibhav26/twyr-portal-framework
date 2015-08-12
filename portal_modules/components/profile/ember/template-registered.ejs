@@ -75,10 +75,6 @@
 			<div class="col-lg-8 col-md-8 col-sm-8 col-xs-6">
 			<form role="form" id="component-manage-personal-details-form-details">
 				<div class="form-group">
-					<label>Salutation</label>
-					{{input id="component-manage-personal-details-input-salutation" type="text" value=model.salutation class="form-control"}}
-				</div>
-				<div class="form-group">
 					<label>First Name<sup>*</sup></label>
 					{{input id="component-manage-personal-details-input-first-name" type="text" value=model.firstName class="form-control"}}
 				</div>
@@ -107,6 +103,15 @@
 						    </div>
 						</div>
 					</div>
+				</div>
+				<div class="form-group">
+					{{input id="component-manage-account-preferences-input-is-visible" type="checkbox" name="isSearchable" checked=model.isSearchable}}
+					<label style="margin-left:5px;">My profile is searchable</label>
+				</div>
+				<div class="form-group">
+					<button id="component-manage-account-preferences-button-delete-account" type="submit" class="btn btn-block btn-danger btn-sm" {{action "deleteAccount" bubbles=false}}>
+						<i class="fa fa-remove" style="margin-right:5px;" /><span>Delete Account</span>	
+					</button>
 				</div>
 			</form>
 			</div>
@@ -148,16 +153,13 @@
 </div>
 <div class="box-body" style="text-align:left;">
 	<div class="row">
-		<div class="col-lg-1 col-md-1 col-sm-1 col-xs-1">
-			&nbsp;
-		</div>
-		<div class="col-lg-4 col-md-4 col-sm-4 col-xs-10">
+		<div class="col-lg-6 col-md-6 col-sm-6 col-xs-12">
 			{{manage-personal-details model=model}}
 		</div>
-		<div class="col-lg-3 col-md-3 col-sm-3 col-xs-10">
+		<div class="col-lg-3 col-md-3 col-sm-3 col-xs-6">
 			{{change-password model=model}}
 		</div>
-		<div class="col-lg-3 col-md-3 col-sm-3 col-xs-10">
+		<div class="col-lg-3 col-md-3 col-sm-3 col-xs-6">
 			{{manage-linked-accounts}}
 		</div>
 	</div>
