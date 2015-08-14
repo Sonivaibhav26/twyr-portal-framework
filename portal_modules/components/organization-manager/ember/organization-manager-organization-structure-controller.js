@@ -1,18 +1,10 @@
 define(
-	"twyrPortal/controllers/organization-manager-sub-organization-structure",
-	["exports"],
-	function(exports) {
-		if(window.developmentMode) console.log('DEFINE: twyrPortal/controllers/organization-manager-sub-organization-structure');
+	"twyrPortal/controllers/organization-manager-organization-structure",
+	["exports", "twyrPortal/app"],
+	function(exports, app) {
+		if(window.developmentMode) console.log('DEFINE: twyrPortal/controllers/organization-manager-organization-structure');
 
-		var OrganizationManagerSubOrganizationStructureController = window.Ember.Controller.extend({
-			'rootOrganizationId': '',
-
-			'isChild': window.Ember.computed('model.id', {
-				'get': function(key) {
-					return (this.get('model').get('id') != this.get('rootOrganizationId'));
-				}
-			}),
-
+		var OrganizationManagerOrganizationStructureController = window.Ember.Controller.extend({
 			'resetStatusMessages': function(timeout) {
 				window.Ember.$('div#div-organization-manager-organization-structure-failure-message').slideUp(timeout || 600);
 
@@ -35,10 +27,52 @@ define(
 				}
 			},
 
-			'save': function() {
+			'add-entity': function(data) {
+				var recordData = null,
+					self = this;
+
+				switch(data.type) {
+					case 'subsidiary':
+						data.type = 'organization-manager-organization-structure';
+						recordData = {
+							'id': app.default.generateUUID(),
+							'name': 'New Subsidiary',
+							'tenantType': 'Organization'
+						};
+						break;
+
+					case 'department':
+						data.type = 'organization-manager-organization-structure';
+						recordData = {
+							'id': app.default.generateUUID(),
+							'parent': this.get('currentModel').get('id'),
+							'name': 'New Department',
+							'tenantType': 'Department'
+						};
+						break;
+
+					case 'vendor':
+						data.type = 'organization-manager-organization-partner';
+						recordData = {
+							'id': app.default.generateUUID(),
+							'tenant': this.get('currentModel').get('id')
+						};
+						break;
+				};
+
+				var newEntity = this.get('currentModel').store.createRecord(data.type, recordData);
+				if(recordData.tenantType)
+					self.get('currentModel').get('suborganizations').addObject(newEntity);
+				else
+					self.get('currentModel').get('partners').addObject(newEntity);
+
+				self.get('currentModel').set('contextChange', newEntity);
+			},
+
+			'save-org': function(data) {
 				var self = this;
 
-				self.get('model').save()
+				self.get('currentModel').save()
 				.then(function() {
 					self.showStatusMessage('success', 'Organization information has been updated');
 					window.Ember.run.later(self, function() {
@@ -50,150 +84,97 @@ define(
 					window.Ember.run.later(self, function() {
 						self.resetStatusMessages();
 
-						self.get('model').rollbackAttributes();
-						self.get('model').transitionTo('loaded.saved');
+						self.get('currentModel').rollbackAttributes();
+						self.get('currentModel').transitionTo('loaded.saved');
 					}, 5000);
 				});
 			},
 
-			'cancel': function() {
-				this.get('model').rollbackAttributes();
-			},
+			'delete-org': function(data) {
+				if(data.id.indexOf('--') > 0)
+					return;
 
-			'delete': function() {
-				var self = this;
-
-				window.Ember.$.confirm({
-					'text': 'Are you sure that you want to delete organization account for <strong>"' + self.get('model').get('name') + '"</strong>?',
-					'title': 'Delete Organization',
-
-					'confirm': function() {
-						var parentOrganization = self.get('model').get('parent');
-
-						self.get('model')
-						.destroyRecord()
+				var self = this,
+					delFn = function() {
+						self.get('currentModel').destroyRecord()
 						.then(function() {
 							self.showStatusMessage('success', 'Organization information has been deleted');
 							window.Ember.run.later(self, function() {
 								self.resetStatusMessages();
-
-								if(self.get('isChild')) {
-									self.transitionToRoute('organization-manager-sub-organization-structure', parentOrganization);
-								}
-								else {
-									self.transitionToRoute('application');
-								}
 							}, 5000);
 						})
 						.catch(function(reason) {
 							self.showStatusMessage('failure');
-							console.error('Error Deleting Organization: ', reason);
-
 							window.Ember.run.later(self, function() {
 								self.resetStatusMessages();
-	
-								self.get('model').rollbackAttributes();
-								self.get('model').transitionTo('loaded.saved');
+		
+								self.get('currentModel').rollbackAttributes();
+								self.get('currentModel').transitionTo('loaded.saved');
 							}, 5000);
 						});
-					},
+					};
 
-					'cancel': function() {
-						// Do nothing...
-					}
+				if(self.get('currentModel').get('isNew')) {
+					delFn();
+				}
+				else {
+					window.Ember.$.confirm({
+						'text': 'Are you sure that you want to delete <strong>"' + (self.get('currentModel').get('name') || self.get('currentModel').get('partner').get('name')) + '"</strong>?',
+						'title': 'Delete',
+	
+						'confirm': delFn,
+	
+						'cancel': function() {
+							// Do nothing...
+						}
+					});
+				}
+			},
+
+			'selected-org-changed': function(data) {
+				var self = this,
+					tmplType = data.type,
+					recordType = 'organization-manager-organization-structure';
+
+				switch(data.type) {
+					case 'subsidiaries':
+					case 'departments':
+						tmplType = 'organization';
+						break;
+
+					case 'vendors':
+						tmplType = 'vendors';
+						recordType = 'organization-manager-organization-partner';
+						break;
+
+					case 'list-subsidiaries':
+					case 'list-departments':
+					case 'list-vendors':
+						break;
+
+					default:
+						tmplType = 'organization';
+						break;
+				}
+
+				this.get('model').store.findRecord(recordType, data.id)
+				.then(function(organizationData) {
+					self.set('currentModel', organizationData);
+					self.set('currentComponent', 'organization-manager-organization-structure-' + tmplType);
+				})
+				.catch(function(err) {
+					console.error(err);
 				});
 			},
 
 			'actions': {
-				'controller-action': function(action) {
-					this[action]();
+				'controller-action': function(action, data) {
+					console.log('OrganizationManagerOrganizationStructureController::controller-action: ', arguments);
+					this[action](data);
 				}
 			}
 		});
 
-		exports['default'] = OrganizationManagerSubOrganizationStructureController;
-	}
-);
-
-define(
-	"twyrPortal/controllers/organization-manager-sub-organization-partner",
-	["exports"],
-	function(exports) {
-		if(window.developmentMode) console.log('DEFINE: twyrPortal/controllers/organization-manager-sub-organization-partner');
-
-		var OrganizationManagerSubOrganizationPartnerController = window.Ember.Controller.extend({
-			'_onModelChange': window.Ember.observer('model', function() {
-				var self = this;
-				window.Ember.run.scheduleOnce('afterRender', self, function() {
-					if(!self.get('model').get('isNew')) return;
-					self._initSelect();
-				});
-			}),
-
-			'_initSelect': function() {
-				var self = this,
-					vendor = self.get('model'),
-					selectElem = window.Ember.$('select#select-organization-manager-sub-organization-structure-partners-new-' + vendor.get('id'));
-
-				if(!selectElem) return;
-
-				selectElem.select2({
-					'ajax': {
-						'delay': 250,
-						'dataType': 'json',
-
-						'url': window.apiServer + 'masterdata/partners',
-
-						'data': function (params) {
-							var queryParameters = {
-								'filter': params.term
-							}
-
-							return queryParameters;
-						},
-
-						'processResults': function (data) {
-							var processedResult =  {
-								'results': window.Ember.$.map(data, function(item) {
-									return {
-										'text': item.name,
-										'slug': item.name,
-										'id': item.id
-									};
-								})
-							};
-
-							return processedResult;
-						},
-
-						'cache': true
-					},
-
-					'minimumInputLength': 2,
-					'minimumResultsForSearch': 10,
-
-					'allowClear': false,
-					'closeOnSelect': true,
-
-					'placeholder': 'Vendor'
-				})
-				.on('change', function() {
-					vendor.store.find('organization-manager-organization-structure', selectElem.val())
-					.then(function(partnerOrg) {
-						vendor.set('partner', partnerOrg);
-						return vendor.save();
-					})
-					.then(function() {
-						console.log('Successfully saved ' + vendor.get('tenant').get('name') + '/' + vendor.get('partner').get('name') + ' relationship');
-					})
-					.catch(function(err) {
-						console.error('Error retrieving partner organization data: ', err);
-						vendor.rollbackAttributes();
-					});
-				});
-			},
-		});
-
-		exports['default'] = OrganizationManagerSubOrganizationPartnerController;
+		exports['default'] = OrganizationManagerOrganizationStructureController;
 	}
 );

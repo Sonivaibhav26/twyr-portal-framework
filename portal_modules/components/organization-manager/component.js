@@ -57,34 +57,10 @@ var organizationManagerComponent = prime({
 
 	'_getClientTemplate': function(request, response, next) {
 		response.type('application/javascript');
-		if(!this._checkPermission(request, requiredPermission)) {
-			response.status(200).send('');
-			return;
-		}
 
-		var organizationStructureTmpl = path.join(__dirname, 'ember/organization-manager-organization-structure-template-index.js'),
-			organizationStructureTreeTmpl = path.join(__dirname, 'ember/organization-manager-organization-structure-template-tree.js'),
-			organizationStructureAboutTmpl = path.join(__dirname, 'ember/organization-manager-organization-structure-template-about.js'),
-			organizationStructureSubsidiaryTmpl = path.join(__dirname, 'ember/organization-manager-organization-structure-template-subsidiaries.js'),
-			organizationStructureDepartmentTmpl = path.join(__dirname, 'ember/organization-manager-organization-structure-template-departments.js'),
-			organizationStructurePartnerTmpl = path.join(__dirname, 'ember/organization-manager-organization-structure-template-partners.js');
-
-		var groupManagementTmpl = path.join(__dirname, 'ember/organization-manager-group-management-template-index.js');
-
-		var promiseResolutions = [];
-
-		promiseResolutions.push(filesystem.readFileAsync(organizationStructureTmpl));
-		promiseResolutions.push(filesystem.readFileAsync(organizationStructureAboutTmpl));
-		promiseResolutions.push(filesystem.readFileAsync(organizationStructureTreeTmpl));
-		promiseResolutions.push(filesystem.readFileAsync(organizationStructureSubsidiaryTmpl));
-		promiseResolutions.push(filesystem.readFileAsync(organizationStructureDepartmentTmpl));
-		promiseResolutions.push(filesystem.readFileAsync(organizationStructurePartnerTmpl));
-
-		promiseResolutions.push(filesystem.readFileAsync(groupManagementTmpl));
-
-		promises.all(promiseResolutions)
-		.then(function(tmplFiles) {
-			response.status(200).send(tmplFiles.join('\n'));
+		filesystem.readFileAsync(path.join(__dirname, 'ember/organization-manager-organization-structure-template.js'))
+		.then(function(tmplFile) {
+			response.status(200).send(tmplFile);
 		})
 		.catch(function(err) {
 			response.status(err.code || err.number || 500).json(err);
@@ -94,13 +70,8 @@ var organizationManagerComponent = prime({
 	'_addRoutes': function() {
 		var self = this;
 
-		this.$router.get('/mvc/organization-manager-organization-structure', function(request, response, next) {
-			self.$dependencies.logger.silly('Servicing request "' + request.path + '":\nQuery: ', request.query, '\nBody: ', request.body, '\nParams: ', request.params);
+		this.$router.get('/mvc/organizationManagerOrganizationStructure', function(request, response, next) {
 			response.type('application/javascript');
-			if(!self._checkPermission(request, requiredPermission)) {
-				response.status(200).send('');
-				return;
-			}
 
 			var promiseResolutions = [];
 
@@ -113,29 +84,6 @@ var organizationManagerComponent = prime({
 				response.status(200).send(mvcFiles.join('\n'));
 			})
 			.catch(function(err) {
-				self.$dependencies.logger.error('Error servicing request "' + request.path + '":\nQuery: ', request.query, '\nBody: ', request.body, '\nParams: ', request.params, '\nError: ', err);
-				response.status(err.code || err.number || 500).json(err);
-			});
-		});
-
-		this.$router.get('/mvc/organization-manager-group-management', function(request, response, next) {
-			self.$dependencies.logger.silly('Servicing request "' + request.path + '":\nQuery: ', request.query, '\nBody: ', request.body, '\nParams: ', request.params);
-			response.type('application/javascript');
-			if(!self._checkPermission(request, requiredPermission)) {
-				response.status(200).send('');
-				return;
-			}
-
-			var promiseResolutions = [];
-
-			promiseResolutions.push(filesystem.readFileAsync(path.join(__dirname, 'ember/organization-manager-group-management-model.js')));
-
-			promises.all(promiseResolutions)
-			.then(function(mvcFiles) {
-				response.status(200).send(mvcFiles.join('\n'));
-			})
-			.catch(function(err) {
-				self.$dependencies.logger.error('Error servicing request "' + request.path + '":\nQuery: ', request.query, '\nBody: ', request.body, '\nParams: ', request.params, '\nError: ', err);
 				response.status(err.code || err.number || 500).json(err);
 			});
 		});

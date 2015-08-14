@@ -31,9 +31,9 @@
   "dependencies": {
     "bootstrap": "*",
     "bootstrap-datepicker": "*",
-	"curl": "*",
-	"datatables": "*",
-	"datatables-bootstrap3-plugin": "*",
+    "curl": "*",
+    "datatables": "*",
+    "datatables-bootstrap3-plugin": "*",
     "ember": "*",
     "ember-data": "*",
     "ember-resolver": "*",
@@ -42,12 +42,17 @@
     "fontawesome": "*",
     "handlebars": "*",
     "ionicons": "*",
+    "jstree": "*",
+    "bootstrap-jstree-theme": "*",
     "jquery": "*",
-	"jquery-confirm": "*",
-	"moment": "*",
+    "jquery-confirm": "*",
+    "moment": "*",
     "normalize-css": "*",
-	"select2": "*",
-	"validatorjs": "*"
+    "select2": "*",
+    "validatorjs": "*"
   },
-  "devDependencies": {}
+  "devDependencies": {},
+  "resolutions": {
+    "bootstrap": "3.3.5"
+  }
 }

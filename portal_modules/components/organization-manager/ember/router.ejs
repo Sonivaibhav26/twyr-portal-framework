@@ -1,15 +1,6 @@
 var Router = require('twyrPortal/router')['default'];
 Router.map(function() {
-	this.route('organization-manager-organization-structure', { 'path': '/orgstructure' });
-
-	this.route('organization-manager-sub-organization-structure', { 'path': '/organization/structure/:organization-manager-organization-structure_id' }, function() {
-		this.route('subsidiaries', { 'path': '/subsidiaries' });
-		this.route('departments', { 'path': '/departments' });
-		this.route('partners', { 'path': '/partners' });
-	});
-
-	this.route('organization-manager-sub-organization-partner', { 'path': '/organization/partner/:organization-manager-organization-partner_id' });
-
+	this.route('organization-manager-organization-structure', { 'path': '/organization/structure' });
 	this.route('organization-manager-group-management', { 'path': '/organization/groups' });
 });
 
@@ -18,156 +9,13 @@ define(
 	["exports"],
 	function(exports) {
 		if(window.developmentMode) console.log('DEFINE: twyrPortal/routes/organization-manager-organization-structure');
-		var OrganizationManagerOrganizationStructureRoute = window.Ember.Route.extend({
-			'_inited': false,
-
+		var ManageOrganizationManagerOrganizationStructureRoute = window.Ember.Route.extend({
 			'beforeModel': function() {
-				if(!this.get('_inited')) {
-					this.set('_inited', true);
-					return window.Ember.$.getScript('<%= mountPath %>/mvc/organization-manager-organization-structure');
-				}
+				return window.Ember.$.getScript('<%= mountPath %>/mvc/organizationManagerOrganizationStructure');
 			},
 
 			'model': function() {
-				return this.store.find('organization-manager-organization-structure', '<%= tenantId %>');
-			},
-
-			'redirect': function(model) {
-				this.transitionTo('organization-manager-sub-organization-structure', model);
-			}
-		});
-
-		exports['default'] = OrganizationManagerOrganizationStructureRoute;
-	}
-);
-
-define(
-	"twyrPortal/routes/organization-manager-sub-organization-structure",
-	["exports"],
-	function(exports) {
-		if(window.developmentMode) console.log('DEFINE: twyrPortal/routes/organization-manager-sub-organization-structure');
-		var OrganizationManagerSubOrganizationStructureRoute = window.Ember.Route.extend({
-			'_inited': false,
-
-			'beforeModel': function() {
-				if(!this.get('_inited')) {
-					this.set('_inited', true);
-					return window.Ember.$.getScript('<%= mountPath %>/mvc/organization-manager-organization-structure');
-				}
-			},
-
-			'model': function(params) {
-				return this.store.find('organization-manager-organization-structure', params['organization-manager-organization-structure_id']);
-			},
-
-			'setupController': function(controller, model) {
-				this.store.find('organization-manager-organization-structure', model.get('id'))
-				.then(function(subOrgModel) {
-					controller.set('rootOrganizationId', '<%= tenantId %>');
-					controller.set('model', subOrgModel);
-				})
-				.catch(function(reason) {
-					console.error('OrganizationManagerSubOrganizationStructureRoute::setupController::Error: ', reason);
-				});
-			}
-		});
-
-		exports['default'] = OrganizationManagerSubOrganizationStructureRoute;
-	}
-);
-
-define(
-	"twyrPortal/routes/organization-manager-sub-organization-structure/subsidiaries",
-	["exports"],
-	function(exports) {
-		if(window.developmentMode) console.log('DEFINE: twyrPortal/routes/organization-manager-organization-structure/subsidiaries');
-		var OrganizationManagerOrganizationStructureSubsidiariesRoute = window.Ember.Route.extend({
-			'setupController': function(controller, model) {
-				this.store.find('organization-manager-organization-structure', model.get('id'))
-				.then(function(orgModel) {
-					return orgModel.get('suborganizations');
-				})
-				.then(function(subOrgsModel) {
-					var subsidiariesModel = subOrgsModel.filter(function(item) {
-						return (item.get('tenantType') == 'Organization');
-					});
-
-					controller.set('model', subsidiariesModel);
-				})
-				.catch(function(reason) {
-					console.error('OrganizationManagerOrganizationStructureSubsidiariesRoute::setupController::Error: ', reason);
-				});
-			}
-		});
-
-		exports['default'] = OrganizationManagerOrganizationStructureSubsidiariesRoute;
-	}
-);
-
-define(
-	"twyrPortal/routes/organization-manager-sub-organization-structure/departments",
-	["exports"],
-	function(exports) {
-		if(window.developmentMode) console.log('DEFINE: twyrPortal/routes/organization-manager-organization-structure/departments');
-		var OrganizationManagerOrganizationStructureDepartmentsRoute = window.Ember.Route.extend({
-			'setupController': function(controller, model) {
-				this.store.find('organization-manager-organization-structure', model.get('id'))
-				.then(function(orgModel) {
-					return orgModel.get('suborganizations');
-				})
-				.then(function(subOrgsModel) {
-					var departmentsModel = subOrgsModel.filter(function(item) {
-						return (item.get('tenantType') == 'Department');
-					});
-
-					controller.set('model', departmentsModel);
-				})
-				.catch(function(reason) {
-					console.error('OrganizationManagerOrganizationStructureDepartmentsRoute::setupController::Error: ', reason);
-				});
-			}
-		});
-
-		exports['default'] = OrganizationManagerOrganizationStructureDepartmentsRoute;
-	}
-);
-
-define(
-	"twyrPortal/routes/organization-manager-sub-organization-structure/partners",
-	["exports"],
-	function(exports) {
-		if(window.developmentMode) console.log('DEFINE: twyrPortal/routes/organization-manager-organization-structure/partners');
-		var OrganizationManagerOrganizationStructurePartnersRoute = window.Ember.Route.extend({
-			'setupController': function(controller, model) {
-				this.store.find('organization-manager-organization-structure', model.get('id'))
-				.then(function(orgModel) {
-					return orgModel.get('partners');
-				})
-				.then(function(partnersModel) {
-					controller.set('model', partnersModel);
-				})
-				.catch(function(reason) {
-					console.error('OrganizationManagerOrganizationStructurePartnersRoute::setupController::Error: ', reason);
-				});
-			}
-		});
-
-		exports['default'] = OrganizationManagerOrganizationStructurePartnersRoute;
-	}
-);
-
-define(
-	"twyrPortal/routes/organization-manager-group-management",
-	["exports"],
-	function(exports) {
-		if(window.developmentMode) console.log('DEFINE: twyrPortal/routes/organization-manager-group-management');
-		var OrganizationManagerGroupManagementRoute = window.Ember.Route.extend({
-			'beforeModel': function() {
-				return window.Ember.$.getScript('<%= mountPath %>/mvc/organization-manager-group-management');
-			},
-
-			'model': function() {
-				return this.store.find('organization-manager-group-management', '<%= tenantId %>');
+				return this.store.findRecord('organization-manager-organization-structure', '<%= tenantId %>');
 			},
 
 			'setupController': function(controller, model) {
@@ -175,6 +23,6 @@ define(
 			}
 		});
 
-		exports['default'] = OrganizationManagerGroupManagementRoute;
+		exports['default'] = ManageOrganizationManagerOrganizationStructureRoute;
 	}
 );
