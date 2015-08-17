@@ -53,7 +53,7 @@ var menuComponent = prime({
 			}
 
 			// Step 1: Get the data we are supposed to use for constructing menus
-			var currentTenantData = ((request.user && request.user.id) ? userData.currentTenant : userData);
+			var currentTenantData = ((userId == 'public') ? userData : userData.currentTenant);
 
 			// Step 2: If the data has already been processed, render it and be done...
 			if(currentTenantData.sessionData && currentTenantData.sessionData[self.name]) {
@@ -113,7 +113,7 @@ var menuComponent = prime({
 			}
 
 			// Step 1: Get the data we are supposed to use for constructing menus
-			currentTenantData = ((request.user && request.user.id) ? userData.currentTenant : userData);
+			currentTenantData = ((userId == 'public') ? userData : userData.currentTenant);
 
 			// Step 2: If the data has already been processed, render it and be done...
 			if(currentTenantData.sessionData && currentTenantData.sessionData[self.name]) {
@@ -211,7 +211,9 @@ var menuComponent = prime({
 			databaseSrvc = this.$dependencies.databaseService,
 			self = this;
 
-		var currentTenantData = ((userId) ? userData.currentTenant : userData),
+		console.log('_setupMenuCache parameters:\nuserId: ', userId, '\nuserData: ', userData);
+
+		var currentTenantData = ((userId == 'public') ? userData : userData.currentTenant),
 			widgetList = currentTenantData.widgets,
 			menuList = currentTenantData.menus,
 			promiseResolutions = [];

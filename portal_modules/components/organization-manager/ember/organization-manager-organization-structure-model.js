@@ -22,10 +22,10 @@ define(
 			'name': window.DS.attr('string'),
 			'parent': window.DS.belongsTo('organization-manager-organization-structure', { 'async': true, 'inverse': 'suborganizations' }),
 			'tenantType': window.DS.attr('string'), 
-			'createdOn': window.DS.attr('date', { 'defaultValue': (new Date()) }),
 
 			'suborganizations': window.DS.hasMany('organization-manager-organization-structure', { 'async': true, 'inverse': 'parent' }),
-			'partners': window.DS.hasMany('organization-manager-organization-partner', { 'async': true, 'inverse': 'tenant' }),
+			'groups': window.DS.hasMany('organization-manager-organization-group', { 'async': true, 'inverse': 'tenant' }),
+			'users': window.DS.hasMany('organization-manager-organization-user-tenant', { 'async': true, 'inverse': 'tenant' }),
 
 			'isDepartment': window.Ember.computed('tenantType', {
 				'get': function(key) {
@@ -39,6 +39,7 @@ define(
 				}
 			}),
 
+			'createdOn': window.DS.attr('date', { 'defaultValue': (new Date()) }),
 			'formattedCreatedOn': window.Ember.computed('createdOn', {
 				'get': function(key) {
 					return window.moment(this.get('createdOn')).format('Do MMM YYYY');
@@ -50,29 +51,34 @@ define(
 	}
 );
 
+
 define(
-	"twyrPortal/adapters/organization-manager-organization-partner",
+	"twyrPortal/adapters/organization-manager-organization-group",
 	["exports", "twyrPortal/app"],
 	function(exports, app) {
-		if(window.developmentMode) console.log('DEFINE: twyrPortal/adapters/organization-manager-organization-partner');
+		if(window.developmentMode) console.log('DEFINE: twyrPortal/adapters/organization-manager-organization-group');
 
-		var OrganizationManagerOrganizationPartnerAdapter = app.default.ApplicationAdapter.extend({
+		var OrganizationManagerOrganizationGroupAdapter = app.default.ApplicationAdapter.extend({
 			'namespace': 'organization-manager'
 		});
 
-		exports['default'] = OrganizationManagerOrganizationPartnerAdapter;
+		exports['default'] = OrganizationManagerOrganizationGroupAdapter;
 	}
 );
 
 define(
-	"twyrPortal/models/organization-manager-organization-partner",
-	["exports"],
-	function(exports) {
-		if(window.developmentMode) console.log('DEFINE: twyrPortal/models/organization-manager-organization-partner');
+	"twyrPortal/models/organization-manager-organization-group",
+	["exports", "twyrPortal/app"],
+	function(exports, app) {
+		if(window.developmentMode) console.log('DEFINE: twyrPortal/models/organization-manager-organization-group');
 
-		var OrganizationManagerOrganizationPartnerModel = window.DS.Model.extend({
-			'tenant': window.DS.belongsTo('organization-manager-organization-structure', { 'async': true, 'inverse': 'partners' }),
-			'partner': window.DS.belongsTo('organization-manager-organization-structure', { 'async': true, 'inverse': null }),
+		var OrganizationManagerOrganizationGroupModel = window.DS.Model.extend({
+			'displayName': window.DS.attr('string'),
+
+			'tenant': window.DS.belongsTo('organization-manager-organization-structure', { 'async': true, 'inverse': 'groups' }),
+
+			'parent': window.DS.belongsTo('organization-manager-organization-group', { 'async': true, 'inverse': 'subgroups' }),
+			'subgroups': window.DS.hasMany('organization-manager-organization-group', { 'async': true, 'inverse': 'parent' }),
 
 			'createdOn': window.DS.attr('date', { 'defaultValue': (new Date()) }),
 			'formattedCreatedOn': window.Ember.computed('createdOn', {
@@ -82,6 +88,88 @@ define(
 			})
 		});
 
-		exports['default'] = OrganizationManagerOrganizationPartnerModel;
+		exports['default'] = OrganizationManagerOrganizationGroupModel;
+	}
+);
+
+
+define(
+	"twyrPortal/adapters/organization-manager-organization-user-tenant",
+	["exports", "twyrPortal/app"],
+	function(exports, app) {
+		if(window.developmentMode) console.log('DEFINE: twyrPortal/adapters/organization-manager-organization-user-tenant');
+
+		var OrganizationManagerOrganizationUserTenantAdapter = app.default.ApplicationAdapter.extend({
+			'namespace': 'organization-manager'
+		});
+
+		exports['default'] = OrganizationManagerOrganizationUserTenantAdapter;
+	}
+);
+
+define(
+	"twyrPortal/models/organization-manager-organization-user-tenant",
+	["exports", "twyrPortal/app"],
+	function(exports, app) {
+		if(window.developmentMode) console.log('DEFINE: twyrPortal/models/organization-manager-organization-user-tenant');
+
+		var OrganizationManagerOrganizationUserModel = window.DS.Model.extend({
+			'tenant': window.DS.belongsTo('organization-manager-organization-structure', { 'async': true, 'inverse': 'users' }),
+			'user': window.DS.belongsTo('organization-manager-organization-user', { 'async': true, 'inverse': null }),
+
+			'createdOn': window.DS.attr('date', { 'defaultValue': (new Date()) }),
+			'formattedCreatedOn': window.Ember.computed('createdOn', {
+				'get': function(key) {
+					return window.moment(this.get('createdOn')).format('Do MMM YYYY');
+				}
+			})
+		});
+
+		exports['default'] = OrganizationManagerOrganizationUserModel;
+	}
+);
+
+
+define(
+	"twyrPortal/adapters/organization-manager-organization-user",
+	["exports", "twyrPortal/app"],
+	function(exports, app) {
+		if(window.developmentMode) console.log('DEFINE: twyrPortal/models/organization-manager-organization-user');
+
+		var OrganizationManagerOrganizationUserAdapter = app.default.ApplicationAdapter.extend({
+			'namespace': 'organization-manager'
+		});
+
+		exports['default'] = OrganizationManagerOrganizationUserAdapter;
+	}
+);
+
+define(
+	"twyrPortal/models/organization-manager-organization-user",
+	["exports", "twyrPortal/app"],
+	function(exports, app) {
+		if(window.developmentMode) console.log('DEFINE: twyrPortal/adapters/organization-manager-organization-user');
+
+		var OrganizationManagerOrganizationUserModel = window.DS.Model.extend({
+			'firstName': window.DS.attr('string'),
+			'middleNames': window.DS.attr('string'),
+			'lastName': window.DS.attr('string'),
+			'email': window.DS.attr('string'),
+
+			'fullName': window.Ember.computed('firstName', 'lastName', {
+				'get': function(key) {
+					return (this.get('firstName') + ' ' + this.get('lastName'));
+				}
+			}),
+
+			'createdOn': window.DS.attr('date', { 'defaultValue': (new Date()) }),
+			'formattedCreatedOn': window.Ember.computed('createdOn', {
+				'get': function(key) {
+					return window.moment(this.get('createdOn')).format('Do MMM YYYY');
+				}
+			})
+		});
+
+		exports['default'] = OrganizationManagerOrganizationUserModel;
 	}
 );

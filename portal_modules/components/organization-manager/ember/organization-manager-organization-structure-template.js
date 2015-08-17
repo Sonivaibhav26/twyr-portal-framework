@@ -1,3 +1,69 @@
+<script type="text/x-handlebars" data-template-name="components/organization-manager-organization-structure-organization-groups">
+<table class="table table-bordered table-hover table-striped">
+<thead>
+	<tr>
+		<th style="text-align:center; vertical-align:middle;">Name</th>
+		<th style="text-align:center; vertical-align:middle;">Parent</th>
+		<th style="text-align:center; vertical-align:middle;">Created ON</th>
+		<th style="text-align:center; vertical-align:middle;">&nbsp;</th>
+	</tr>
+</thead>
+<tbody>
+	{{#each model.groups key="id" as |group index|}}
+		<tr>
+			<td style="vertical-align:middle;">{{group.displayName}}</td>
+			<td style="vertical-align:middle;">{{group.parent.displayName}}</td>
+			<td style="vertical-align:middle;">{{group.formattedCreatedOn}}</td>
+			<td style="text-align:right; vertical-align:middle;">
+			    <button type="button" class="btn btn-danger btn-sm" {{action "delete" model group}}>
+					<i class="fa fa-remove" style="margin-right:5px;" /><span>Delete</span>
+			    </button>
+			</td>
+		</tr>
+	{{else}}
+	<tr>
+		<td colspan="4" style="text-align:center; vertical-align:middle;">
+			<p>No groups assigned to {{model.name}}</p>
+		</td>
+	</tr>
+	{{/each}}
+</tbody>
+</table>
+</script>
+
+<script type="text/x-handlebars" data-template-name="components/organization-manager-organization-structure-organization-users">
+<table class="table table-bordered table-hover table-striped">
+<thead>
+	<tr>
+		<th style="text-align:center; vertical-align:middle;">Name</th>
+		<th style="text-align:center; vertical-align:middle;">Login</th>
+		<th style="text-align:center; vertical-align:middle;">Since</th>
+		<th style="text-align:center; vertical-align:middle;">&nbsp;</th>
+	</tr>
+</thead>
+<tbody>
+	{{#each model.users key="id" as |userRel index|}}
+		<tr>
+			<td style="vertical-align:middle;">{{userRel.user.fullName}}</td>
+			<td style="vertical-align:middle;">{{userRel.user.email}}</td>
+			<td style="vertical-align:middle;">{{userRel.formattedCreatedOn}}</td>
+			<td style="text-align:right; vertical-align:middle;">
+			    <button type="button" class="btn btn-danger btn-sm" {{action "delete" model userRel}}>
+					<i class="fa fa-remove" style="margin-right:5px;" /><span>Delete</span>
+			    </button>
+			</td>
+		</tr>
+	{{else}}
+		<tr>
+			<td colspan="4" style="text-align:center; vertical-align:middle;">
+				<p>No users assigned to {{model.name}}</p>
+			</td>
+		</tr>
+	{{/each}}
+</tbody>
+</table>
+</script>
+
 <script type="text/x-handlebars" data-template-name="components/organization-manager-organization-structure-organization">
 <div class="box box-default" style="text-align:left; margin-bottom:0px; box-shadow:none;">
 	<div class="box-header with-border">
@@ -36,6 +102,7 @@
 			{{input type="text" value=model.formattedCreatedOn class="form-control" placeholder="Member since" readonly="readonly"}}
 		</div>
 	</div>
+	{{#unless model.isNew}}
 	<div class="box-body row">
 		<div class="col-lg-6 col-lg-offset-6 col-md-6 col-md-offset-6 col-sm-6 col-sm-offset-6 col-xs-12" style="text-align:right;">
 			{{#unless model.isDepartment}}
@@ -46,13 +113,29 @@
 		    <button type="button" class="btn btn-primary btn-sm" {{action "add" "department" bubbles=false}}>
 				<i class="fa fa-plus" style="margin-right:5px;" /><span>Add Department</span>
 		    </button>
-			{{#unless model.tenant}}
-		    <button type="button" class="btn btn-primary btn-sm" {{action "add" "vendor" bubbles=false}}>
-				<i class="fa fa-plus" style="margin-right:5px;" /><span>Add Vendor</span>
-		    </button>
-			{{/unless}}
 		</div>
 	</div>
+	<div class="box-body row">
+		<div class="nav-tabs-custom col-lg-12 col-md-12 col-sm-12 col-xs-12">
+			<ul class="nav nav-tabs">
+				<li class="active">
+					<a href="#organization-manager-organization-structure-organization-groups-tab" data-toggle="tab">Groups</a>
+				</li>
+				<li>
+					<a href="#organization-manager-organization-structure-organization-users-tab" data-toggle="tab">Users</a>
+				</li>
+			</ul>
+			<div class="tab-content">
+				<div class="tab-pane active" id="organization-manager-organization-structure-organization-groups-tab">
+					{{organization-manager-organization-structure-organization-groups model=model controller-action="controller-action"}}
+				</div>
+				<div class="tab-pane" id="organization-manager-organization-structure-organization-users-tab">
+					{{organization-manager-organization-structure-organization-users model=model controller-action="controller-action"}}
+				</div>
+			</div>
+		</div>
+	</div>
+	{{/unless}}
 </div>
 </script>
 
@@ -115,69 +198,6 @@
 			<td style="vertical-align:middle;">&nbsp;</td>
 		</tr>
 		{{/if}}
-	{{/each}}
-	</tbody>
-	</table>
-	</div>
-</div>
-</script>
-
-
-<script type="text/x-handlebars" data-template-name="components/organization-manager-organization-structure-vendors">
-<div class="box box-default" style="text-align:left; margin-bottom:0px; box-shadow:none;">
-	<div class="box-header with-border">
-		<h3 class="box-title">Vendor: {{model.partner.name}}</h3>
-		<div class="pull-right" style="cursor:pointer; margin:0px 5px;" {{action "delete" bubbles=false}}>
-		    <button type="button" class="btn btn-danger btn-sm">
-				<i class="fa fa-remove" style="margin-right:5px;" /><span>Delete</span>
-		    </button>
-		</div>
-	</div>
-	<div class="box-body row">
-		<div class="form-group col-lg-4 col-md-4 col-sm-4 col-xs-4">
-			<label>Vendor Name</label>
-			{{#if model.isNew}}
-				<select id="select-vendor-new-{{model.id}}" class="form-control" />
-			{{else}}
-				{{input type="text" value=model.partner.name class="form-control" placeholder="Organization Name" readonly="readonly"}}
-			{{/if}}
-		</div>
-		<div class="form-group col-lg-4 col-md-4 col-sm-4 col-xs-4">
-			<label>Affiliated To</label>
-			{{input type="text" value=model.tenant.name class="form-control" placeholder="Parent Name" readonly="readonly"}}
-		</div>
-		<div class="form-group col-lg-4 col-md-4 col-sm-4 col-xs-4">
-			<label>Vendor Since</label>
-			{{input type="text" value=model.formattedCreatedOn class="form-control" placeholder="Member since" readonly="readonly"}}
-		</div>
-	</div>
-</div>
-</script>
-
-
-<script type="text/x-handlebars" data-template-name="components/organization-manager-organization-structure-list-vendors">
-<div class="box box-default" style="text-align:left; margin-bottom:0px; box-shadow:none;">
-	<div class="box-header with-border">
-		<h3 class="box-title">{{model.name}} Vendors</h3>
-	</div>
-	<div class="box-body row">
-	<table class="table table-bordered table-striped table-hover">
-	<thead>
-		<tr>
-			<th style="vertical-align:middle;">Name</th>
-			<th style="vertical-align:middle;">Affiliated To</th>
-			<th style="vertical-align:middle;">Vendor Since</th>
-			<th style="vertical-align:middle;">&nbsp;</th>
-		</tr>
-	</thead>
-	<tbody>
-	{{#each model.partners key="id" as |partner index|}}
-		<tr>
-			<td style="vertical-align:middle;">{{partner.partner.name}}</td>
-			<td style="vertical-align:middle;">{{partner.tenant.name}}</td>
-			<td style="vertical-align:middle;">{{partner.formattedCreatedOn}}</td>
-			<td style="vertical-align:middle;">&nbsp;</td>
-		</tr>
 	{{/each}}
 	</tbody>
 	</table>

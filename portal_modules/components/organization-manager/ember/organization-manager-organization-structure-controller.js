@@ -70,11 +70,22 @@ define(
 			},
 
 			'save-org': function(data) {
-				var self = this;
+				var self = this,
+					shouldReload = self.get('currentModel').get('isNew');
 
 				self.get('currentModel').save()
 				.then(function() {
+					if(shouldReload) {
+						return self.get('currentModel').reload();
+					}
+					else {
+						return self.get('currentModel');
+					}
+				})
+				.then(function(reloadedModel) {
+					self.set('currentModel', reloadedModel);
 					self.showStatusMessage('success', 'Organization information has been updated');
+
 					window.Ember.run.later(self, function() {
 						self.resetStatusMessages();
 					}, 5000);
@@ -131,6 +142,31 @@ define(
 				}
 			},
 
+			'delete-user': function(data) {
+				var self = this,
+					parent = data.organization,
+					userRel = data.userRel;
+
+				userRel.destroyRecord()
+				.then(function() {
+					parent.get('users').removeObject(userRel);
+
+					self.showStatusMessage('success', 'User has been deleted from the Organization');
+					window.Ember.run.later(self, function() {
+						self.resetStatusMessages();
+					}, 5000);
+				})
+				.catch(function(reason) {
+					self.showStatusMessage('failure');
+					window.Ember.run.later(self, function() {
+						self.resetStatusMessages();
+
+						userRel.rollbackAttributes();
+						userRel.transitionTo('loaded.saved');
+					}, 5000);
+				});
+			},
+
 			'selected-org-changed': function(data) {
 				var self = this,
 					tmplType = data.type,
@@ -142,14 +178,8 @@ define(
 						tmplType = 'organization';
 						break;
 
-					case 'vendors':
-						tmplType = 'vendors';
-						recordType = 'organization-manager-organization-partner';
-						break;
-
 					case 'list-subsidiaries':
 					case 'list-departments':
-					case 'list-vendors':
 						break;
 
 					default:

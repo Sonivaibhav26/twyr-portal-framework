@@ -97,10 +97,6 @@ define(
 					parentNodeId = parentNodeId + '--departments';
 				}
 
-				if(newEntity.get('tenant')) {
-					parentNodeId = parentNodeId + '--vendors';
-				}
-
 				var parentNode = self.$('div.box-body div').jstree('get_node', (newEntity.get('parent') || newEntity.get('tenant')).get('id'));
 				if(!self.$('div.box-body div').jstree('is_open', parentNode))
 					self.$('div.box-body div').jstree('open_node', parentNode);
@@ -174,6 +170,10 @@ define(
 						'id': this.get('model').get('id'),
 						'type': 'organization'
 					});
+				},
+
+				'controller-action': function(action, data) {
+					this.sendAction('controller-action', action, data);
 				}
 			}
 		});
@@ -182,91 +182,24 @@ define(
 	}
 );
 
+
 define(
-	"twyrPortal/components/organization-manager-organization-structure-vendors",
+	"twyrPortal/components/organization-manager-organization-structure-organization-users",
 	["exports"],
 	function(exports) {
-		if(window.developmentMode) console.log('DEFINE: twyrPortal/components/organization-manager-organization-structure-vendors');
+		if(window.developmentMode) console.log('DEFINE: twyrPortal/components/organization-manager-organization-structure-organization-users');
 
-		var OrganizationManagerOrganizationStructureVendorComponent = window.Ember.Component.extend({
-			'didInsertElement': function() {
-				var self = this;
-				self._super();
-
-				window.Ember.run.scheduleOnce('afterRender', self, function() {
-					self.$('select.form-control').each(function(index, selectElem) {
-						self._initSelect(self.$(selectElem));
-					});
-				});
-			},
-
-			'_initSelect': function(selectElem) {
-				if(!selectElem) return;
-
-				var self = this;
-				selectElem.select2({
-					'ajax': {
-						'delay': 250,
-						'dataType': 'json',
-
-						'url': window.apiServer + 'masterdata/partners',
-
-						'data': function (params) {
-							var queryParameters = {
-								'filter': params.term
-							}
-
-							return queryParameters;
-						},
-
-						'processResults': function (data) {
-							var processedResult =  {
-								'results': window.Ember.$.map(data, function(item) {
-									return {
-										'text': item.name,
-										'slug': item.name,
-										'id': item.id
-									};
-								})
-							};
-
-							return processedResult;
-						},
-
-						'cache': true
-					},
-
-					'minimumInputLength': 2,
-					'minimumResultsForSearch': 10,
-
-					'allowClear': false,
-					'closeOnSelect': true,
-
-					'placeholder': 'Vendor'
-				})
-				.on('change', function() {
-					self.get('model').store.find('organization-manager-organization-structure', selectElem.val())
-					.then(function(vendorOrg) {
-						self.get('model').set('partner', vendorOrg);
-						return self.get('model').save();
-					})
-					.catch(function(err) {
-						console.error('Error retrieving partner organization data: ', err);
-						self.get('model').rollbackAttributes();
-					});
-				});
-			},
-
+		var OrganizationManagerOrganizationStructureOrganizationUsersComponent = window.Ember.Component.extend({
 			'actions': {
-				'delete': function() {
-					this.sendAction('controller-action', 'delete-org', {
-						'id': this.get('model').get('id'),
-						'type': 'vendor'
+				'delete': function(organization, userRel) {
+					this.sendAction('controller-action', 'delete-user', {
+						'organization': organization, 
+						'userRel': userRel
 					});
 				}
 			}
 		});
 
-		exports['default'] = OrganizationManagerOrganizationStructureVendorComponent;
+		exports['default'] = OrganizationManagerOrganizationStructureOrganizationUsersComponent;
 	}
 );
