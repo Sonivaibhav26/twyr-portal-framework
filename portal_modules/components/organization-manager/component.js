@@ -58,9 +58,14 @@ var organizationManagerComponent = prime({
 	'_getClientTemplate': function(request, response, next) {
 		response.type('application/javascript');
 
-		filesystem.readFileAsync(path.join(__dirname, 'ember/organization-manager-organization-structure-template.js'))
+		var promiseResolutions = [];
+
+		promiseResolutions.push(filesystem.readFileAsync(path.join(__dirname, 'ember/organization-manager-organization-structure-template.js')));
+		promiseResolutions.push(filesystem.readFileAsync(path.join(__dirname, 'ember/organization-manager-group-management-template.js')));
+
+		promises.all(promiseResolutions)		
 		.then(function(tmplFile) {
-			response.status(200).send(tmplFile);
+			response.status(200).send(tmplFile.join('\n'));
 		})
 		.catch(function(err) {
 			response.status(err.code || err.number || 500).json(err);
@@ -78,6 +83,24 @@ var organizationManagerComponent = prime({
 			promiseResolutions.push(filesystem.readFileAsync(path.join(__dirname, 'ember/organization-manager-organization-structure-model.js')));
 			promiseResolutions.push(filesystem.readFileAsync(path.join(__dirname, 'ember/organization-manager-organization-structure-view.js')));
 			promiseResolutions.push(filesystem.readFileAsync(path.join(__dirname, 'ember/organization-manager-organization-structure-controller.js')));
+
+			promises.all(promiseResolutions)
+			.then(function(mvcFiles) {
+				response.status(200).send(mvcFiles.join('\n'));
+			})
+			.catch(function(err) {
+				response.status(err.code || err.number || 500).json(err);
+			});
+		});
+
+		this.$router.get('/mvc/organizationManagerGroupManagement', function(request, response, next) {
+			response.type('application/javascript');
+
+			var promiseResolutions = [];
+
+			promiseResolutions.push(filesystem.readFileAsync(path.join(__dirname, 'ember/organization-manager-group-management-model.js')));
+			promiseResolutions.push(filesystem.readFileAsync(path.join(__dirname, 'ember/organization-manager-group-management-view.js')));
+			promiseResolutions.push(filesystem.readFileAsync(path.join(__dirname, 'ember/organization-manager-group-management-controller.js')));
 
 			promises.all(promiseResolutions)
 			.then(function(mvcFiles) {

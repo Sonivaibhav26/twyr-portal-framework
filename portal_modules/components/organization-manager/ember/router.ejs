@@ -26,3 +26,26 @@ define(
 		exports['default'] = ManageOrganizationManagerOrganizationStructureRoute;
 	}
 );
+
+define(
+	"twyrPortal/routes/organization-manager-group-management",
+	["exports"],
+	function(exports) {
+		if(window.developmentMode) console.log('DEFINE: twyrPortal/routes/organization-manager-group-management');
+		var ManageOrganizationManagerGroupManagementRoute = window.Ember.Route.extend({
+			'beforeModel': function() {
+				return window.Ember.$.getScript('<%= mountPath %>/mvc/organizationManagerGroupManagement');
+			},
+
+			'model': function() {
+				return this.store.findRecord('organization-manager-group-management', '<%= tenantId %>');
+			},
+
+			'setupController': function(controller, model) {
+				controller.set('model', model);
+			}
+		});
+
+		exports['default'] = ManageOrganizationManagerGroupManagementRoute;
+	}
+);
