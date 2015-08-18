@@ -80,6 +80,8 @@ define(
 			'parent': window.DS.belongsTo('organization-manager-organization-group', { 'async': true, 'inverse': 'subgroups' }),
 			'subgroups': window.DS.hasMany('organization-manager-organization-group', { 'async': true, 'inverse': 'parent' }),
 
+			'permissions': window.DS.hasMany('organization-manager-organization-group-permission', { 'async': true, 'inverse': 'group' }),
+
 			'createdOn': window.DS.attr('date', { 'defaultValue': (new Date()) }),
 			'formattedCreatedOn': window.Ember.computed('createdOn', {
 				'get': function(key) {
@@ -171,5 +173,73 @@ define(
 		});
 
 		exports['default'] = OrganizationManagerOrganizationUserModel;
+	}
+);
+
+
+define(
+	"twyrPortal/adapters/organization-manager-organization-group-permission",
+	["exports", "twyrPortal/app"],
+	function(exports, app) {
+		if(window.developmentMode) console.log('DEFINE: twyrPortal/models/organization-manager-organization-group-permission');
+
+		var OrganizationManagerOrganizationGroupPermissionAdapter = app.default.ApplicationAdapter.extend({
+			'namespace': 'organization-manager'
+		});
+
+		exports['default'] = OrganizationManagerOrganizationGroupPermissionAdapter;
+	}
+);
+
+define(
+	"twyrPortal/models/organization-manager-organization-group-permission",
+	["exports", "twyrPortal/app"],
+	function(exports, app) {
+		if(window.developmentMode) console.log('DEFINE: twyrPortal/models/organization-manager-organization-group-permission');
+
+		var OrganizationManagerOrganizationGroupPermissionModel = window.DS.Model.extend({
+			'group': window.DS.belongsTo('organization-manager-organization-group', { 'async': true, 'inverse': 'permissions' }),
+			'permission': window.DS.belongsTo('organization-manager-component-permission', { 'async': true, 'inverse': null }),
+
+			'createdOn': window.DS.attr('date', { 'defaultValue': (new Date()) }),
+			'formattedCreatedOn': window.Ember.computed('createdOn', {
+				'get': function(key) {
+					return window.moment(this.get('createdOn')).format('Do MMM YYYY');
+				}
+			})
+		});
+
+		exports['default'] = OrganizationManagerOrganizationGroupPermissionModel;
+	}
+);
+
+
+define(
+	"twyrPortal/adapters/organization-manager-component-permission",
+	["exports", "twyrPortal/app"],
+	function(exports, app) {
+		if(window.developmentMode) console.log('DEFINE: twyrPortal/models/organization-manager-component-permission');
+
+		var OrganizationManagerComponentPermissionAdapter = app.default.ApplicationAdapter.extend({
+			'namespace': 'organization-manager'
+		});
+
+		exports['default'] = OrganizationManagerComponentPermissionAdapter;
+	}
+);
+
+define(
+	"twyrPortal/models/organization-manager-component-permission",
+	["exports", "twyrPortal/app"],
+	function(exports, app) {
+		if(window.developmentMode) console.log('DEFINE: twyrPortal/models/organization-manager-component-permission');
+
+		var OrganizationManagerComponentPermissionModel = window.DS.Model.extend({
+			'componentName': window.DS.attr('string'),
+			'displayName': window.DS.attr('string'),
+			'description':  window.DS.attr('string')
+		});
+
+		exports['default'] = OrganizationManagerComponentPermissionModel;
 	}
 );
