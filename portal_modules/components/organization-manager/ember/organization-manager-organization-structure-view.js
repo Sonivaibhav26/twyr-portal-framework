@@ -191,15 +191,78 @@ define(
 
 		var OrganizationManagerOrganizationStructureOrganizationUsersComponent = window.Ember.Component.extend({
 			'didInsertElement': function() {
-				this._super();
-
 				var self = this;
+				self._super();
+
+				self.set('currentlySelectedUser', null);
 				window.Ember.run.scheduleOnce('afterRender', this, function() {
 					self.$('select').each(function(index, selectElem) {
-						self._initSelect(self.$(selectElem));
+						if(self.$(selectElem).attr('id').indexOf('new-user-group') >= 0)
+							self._initGroupSelect(self.$(selectElem));
+						else
+							self._initSelect(self.$(selectElem));
 					});
+
+					var currentlySelectedUsers = self.get('model').get('users').filter(function(userRel) {
+						if(!userRel.get('user').get('isLoaded'))
+							return false;
+
+						return !!userRel.get('user').get('isCurrentlySelected');
+					});
+
+					if(!currentlySelectedUsers.length) {
+						self.get('model').get('users').get('firstObject').one('didLoad', function() {
+							self.$('tr#organization-manager-organization-structure-organization-users-tr-' + self.get('model').get('users').get('firstObject').get('id')).click();
+						});
+					}
+					else {
+						self.$('tr#organization-manager-organization-structure-organization-users-tr-' + currentlySelectedUsers[0].get('user').get('id')).click();
+					}
 				});
 			},
+
+			'willClearRender': function() {
+				var self = this;
+				self._super();
+
+				self.set('currentlySelectedUser', null);
+				self.get('model').get('users').forEach(function(thisUserRel) {
+					if(!thisUserRel.get('user').get('isLoaded'))
+						return;
+
+					thisUserRel.get('user').set('isCurrentlySelected', false);
+				});
+			},
+
+			'_modelChangeReactor': window.Ember.observer('model', function() {
+				var self = this;
+
+				self.set('currentlySelectedUser', null);
+				window.Ember.run.scheduleOnce('afterRender', this, function() {
+					self.$('select').each(function(index, selectElem) {
+						if(self.$(selectElem).attr('id').indexOf('new-user-group') >= 0)
+							self._initGroupSelect(self.$(selectElem));
+						else
+							self._initSelect(self.$(selectElem));
+					});
+
+					var currentlySelectedUsers = self.get('model').get('users').filter(function(userRel) {
+						if(!userRel.get('user').get('isLoaded'))
+							return false;
+
+						return !!userRel.get('user').get('isCurrentlySelected');
+					});
+
+					if(!currentlySelectedUsers.length) {
+						self.get('model').get('users').get('firstObject').one('didLoad', function() {
+							self.$('tr#organization-manager-organization-structure-organization-users-tr-' + self.get('model').get('users').get('firstObject').get('id')).click();
+						});
+					}
+					else {
+						self.$('tr#organization-manager-organization-structure-organization-users-tr-' + currentlySelectedUsers[0].get('user').get('id')).click();
+					}
+				});
+			}),
 			
 			'_initSelect': function(selectElem) {
 				var self = this;
@@ -253,6 +316,60 @@ define(
 				});
 			},
 
+			'_initGroupSelect': function(selectElem) {
+				var self = this;
+				selectElem.select2({
+					'ajax': {
+						'delay': 250,
+						'dataType': 'json',
+
+						'url': window.apiServer + 'masterdata/userGroups',
+
+						'data': function (params) {
+							var queryParameters = {
+								'tenantId': self.get('model').get('id'),
+								'userId': self.get('currentlySelectedUser').get('id'),
+								'filter': params.term
+							}
+
+							return queryParameters;
+						},
+
+						'processResults': function (data) {
+							var processedResult =  {
+								'results': window.Ember.$.map(data, function(item) {
+									return {
+										'text': item.display_name,
+										'slug': item.display_name,
+										'id': item.id
+									};
+								})
+							};
+
+							return processedResult;
+						},
+
+						'cache': true
+					},
+
+					'minimumInputLength': 0,
+					'minimumResultsForSearch': 10,
+
+					'allowClear': true,
+					'closeOnSelect': true,
+
+					'placeholder': 'Group Name'
+				})
+				.on('change', function() {
+					var groupRelId = selectElem.attr('id').replace('organization-manager-organization-structure-organization-users-select-new-user-group-', '');
+
+					self.sendAction('controller-action', 'save-user-group', {
+						'groupId': selectElem.val(),
+						'groupRelId': groupRelId
+					});
+				});
+			},
+
 			'actions': {
 				'create': function(organization) {
 				},
@@ -272,9 +389,45 @@ define(
 				},
 
 				'delete': function(organization, userRel) {
+					this.set('currentlySelectedUser', null);
 					this.sendAction('controller-action', 'delete-user-rel', {
 						'organization': organization, 
 						'userRel': userRel
+					});
+				},
+
+				'select': function(userRel) {
+					this.get('model').get('users').forEach(function(thisUserRel) {
+						if(!thisUserRel.get('user').get('isLoaded'))
+							return;
+
+						thisUserRel.get('user').set('isCurrentlySelected', false);
+					});
+	
+
+					userRel.get('user').set('isCurrentlySelected', true);
+					this.set('currentlySelectedUser', userRel.get('user'));
+				},
+
+				'add-user-group': function(user) {
+					var self = this,
+						userGroupId = app.default.generateUUID();
+
+					self.sendAction('controller-action', 'add-user-group', {
+						'user': user,
+						'userGroupId': userGroupId
+					});
+
+					window.Ember.run.scheduleOnce('afterRender', self, function() {
+						var selectElem = self.$('select#organization-manager-organization-structure-organization-users-select-new-user-group-' + userGroupId);
+						self._initGroupSelect(self.$(selectElem));
+					});
+				},
+
+				'delete-user-group': function(user, userGroup) {
+					this.sendAction('controller-action', 'delete-user-group', {
+						'user': user,
+						'userGroup': userGroup
 					});
 				}
 			}
@@ -296,6 +449,10 @@ define(
 			'_initialize': function() {
 				this.set('currentModel', this.get('model'));
 			}.on('init'),
+
+			'_modelChangeReactor': window.Ember.observer('model', function() {
+				this.set('currentModel', this.get('model'));
+			}),
 
 			'selected-group-changed': function(data) {
 				this.set('currentModel', data.group);
@@ -325,6 +482,11 @@ define(
 			'didInsertElement': function() {
 				var self = this;
 				self._super();
+				self._initTree();
+			},
+
+			'_initTree': function() {
+				var self = this;
 
 				window.Ember.run.scheduleOnce('afterRender', self, function() {
 					var orgStructureTree = self.$('div.box-body div').jstree({
@@ -336,7 +498,11 @@ define(
 								'url':window.apiServer + 'organization-manager/organizationStructureGroupsTree',
 								'dataType': 'json',
 								'data': function(node) {
-									return { 'id': (node ? node.id : null) };
+									var tenantId = (self.get('model') && self.get('model').get('tenant')) ? self.get('model').get('tenant').get('id') : self.get('model').get('id');
+									return {
+										'tenantId': tenantId,
+										'groupId': (node ? node.id : '#')
+									};
 								}
 							},
 
@@ -350,9 +516,7 @@ define(
 					orgStructureTree.on('activate_node.jstree', function(event, treeNode) {
 						if(!treeNode.node) return;
 
-						var nodeId = treeNode.node.id.substring(0, treeNode.node.id.indexOf('--'));
-
-						self.get('model').store.findRecord('organization-manager-organization-group', nodeId)
+						self.get('model').store.findRecord('organization-manager-organization-group', treeNode.node.id)
 						.then(function(groupData) {
 							self.set('currentModel', groupData);
 
@@ -369,15 +533,28 @@ define(
 						var rootNodeId = self.$('div.box-body div > ul > li:first-child').attr('id');
 						self.$('div.box-body div').jstree('activate_node', rootNodeId, false, false);
 					});
+
+					orgStructureTree.on('refresh.jstree', function() {
+						var rootNodeId = self.$('div.box-body div > ul > li:first-child').attr('id');
+						self.$('div.box-body div').jstree('activate_node', rootNodeId, false, false);
+					});
 				});
 			},
 
-			'_modelNameChangeReactor': window.Ember.observer('currentModel.displayName', function(component, propertyName) {
+			'_modelChangeReactor': window.Ember.observer('model', function() {
+				var self = this;
+
+				window.Ember.run.scheduleOnce('afterRender', self, function() {
+					self.$('div.box-body div').jstree(true).refresh();
+				});
+			}),
+
+			'_modelNameChangeReactor': window.Ember.observer('currentModel.displayName', function() {
 				var selNodes = this.$('div.box-body div').jstree('get_selected', true),
 					selNodeIdx = null;
 
 				for(var idx = 0; idx < selNodes.length; idx++){
-					if((this.get('currentModel').get('id') + '--group') != selNodes[idx].id)
+					if(this.get('currentModel').get('id') != selNodes[idx].id)
 						continue;
 
 					selNodeIdx = idx;
@@ -397,7 +574,7 @@ define(
 				self.get('currentModel').set('contextChange', null);
 				if(!newEntity) return;
 
-				var parentNodeId = newEntity.get('parent').get('id') + '--group',
+				var parentNodeId = newEntity.get('parent').get('id'),
 					parentNode = self.$('div.box-body div').jstree('get_node', parentNodeId);
 
 				if(!self.$('div.box-body div').jstree('is_open', parentNode))
@@ -405,12 +582,12 @@ define(
 
 				parentNode = self.$('div.box-body div').jstree('get_node', parentNodeId);
 				self.$('div.box-body div').jstree('create_node', parentNode, {
-					'id': newEntity.get('id') + '--group',
+					'id': newEntity.get('id'),
 					'text': newEntity.get('displayName'),
 					'parent': parentNodeId,
 					'children': true
 				}, 'last', function() {
-					self.$('div.box-body div').jstree('activate_node', newEntity.get('id') + '--group', false, false);
+					self.$('div.box-body div').jstree('activate_node', newEntity.get('id'), false, false);
 				});
 			}),
 
@@ -421,7 +598,7 @@ define(
 					selNodeIdx = null;
 
 				for(var idx = 0; idx < selNodes.length; idx++){
-					if((this.get('currentModel').get('id') + '--group') != selNodes[idx].id)
+					if(this.get('currentModel').get('id') != selNodes[idx].id)
 						continue;
 
 					selNodeIdx = idx;
@@ -469,6 +646,97 @@ define(
 					this.sendAction('controller-action', 'add-group', {
 						'parent': this.get('model')
 					});
+				}
+			}
+		});
+
+		exports['default'] = OrganizationManagerOrganizationStructureGroupDetailComponent;
+	}
+);
+
+define(
+	"twyrPortal/components/organization-manager-organization-structure-group-permissions",
+	["exports", "twyrPortal/app"],
+	function(exports, app) {
+		if(window.developmentMode) console.log('DEFINE: twyrPortal/components/organization-manager-organization-structure-group-permissions');
+
+		var OrganizationManagerOrganizationStructureGroupPermissionsComponent = window.Ember.Component.extend({
+			'onModelChange': window.Ember.observer('model', function() {
+				var self = this;
+				window.Ember.run.scheduleOnce('afterRender', self, function() {
+					self.$('select').each(function(index, selectElem) {
+						self._initSelect(self.$(selectElem));
+					})
+				});
+			}),
+
+			'_initSelect': function(selectElem) {
+				var self = this;
+				selectElem.select2({
+					'ajax': {
+						'delay': 250,
+						'dataType': 'json',
+
+						'url': window.apiServer + 'masterdata/groupPermissions',
+
+						'data': function (params) {
+							var queryParameters = {
+								'groupId': self.get('model').get('id'),
+								'parentId': self.get('model').get('parent').get('id'),
+								'filter': params.term
+							}
+
+							return queryParameters;
+						},
+
+						'processResults': function (data) {
+							var processedResult =  {
+								'results': window.Ember.$.map(data, function(item) {
+									return {
+										'text': item.name,
+										'slug': item.name,
+										'id': item.id
+									};
+								})
+							};
+
+							return processedResult;
+						},
+
+						'cache': true
+					},
+
+					'minimumInputLength': 0,
+					'minimumResultsForSearch': 10,
+
+					'allowClear': true,
+					'closeOnSelect': true,
+
+					'placeholder': 'Permission Name'
+				})
+				.on('change', function() {
+					var permissionRelId = selectElem.attr('id').replace('organization-manager-organization-structure-group-permissions-select-', '');
+
+					self.sendAction('controller-action', 'save-permission', {
+						'group': self.get('model'),
+						'permissionRelId': permissionRelId,
+						'permissionId': selectElem.val()
+					});
+				});
+			},
+
+			'actions': {
+				'add-permission': function(permissionRel) {
+					var newRelId = app.default.generateUUID();
+					this.sendAction('controller-action', 'add-permission', {
+						'newRelId': newRelId,
+						'group': this.get('model')
+					});
+
+					var self = this;
+					window.Ember.run.scheduleOnce('afterRender', self, function() {
+						self._initSelect(self.$('select#organization-manager-organization-structure-group-permissions-select-' + newRelId));
+					});
 				},
 
 				'delete-permission': function(permissionRel) {
@@ -480,7 +748,6 @@ define(
 			}
 		});
 
-		exports['default'] = OrganizationManagerOrganizationStructureGroupDetailComponent;
+		exports['default'] = OrganizationManagerOrganizationStructureGroupPermissionsComponent;
 	}
 );
-

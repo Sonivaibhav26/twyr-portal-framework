@@ -115,7 +115,7 @@ define(
 	function(exports, app) {
 		if(window.developmentMode) console.log('DEFINE: twyrPortal/models/organization-manager-organization-user-tenant');
 
-		var OrganizationManagerOrganizationUserModel = window.DS.Model.extend({
+		var OrganizationManagerOrganizationUserTenantModel = window.DS.Model.extend({
 			'tenant': window.DS.belongsTo('organization-manager-organization-structure', { 'async': true, 'inverse': 'users' }),
 			'user': window.DS.belongsTo('organization-manager-organization-user', { 'async': true, 'inverse': null }),
 
@@ -127,7 +127,44 @@ define(
 			})
 		});
 
-		exports['default'] = OrganizationManagerOrganizationUserModel;
+		exports['default'] = OrganizationManagerOrganizationUserTenantModel;
+	}
+);
+
+
+define(
+	"twyrPortal/adapters/organization-manager-organization-user-group",
+	["exports", "twyrPortal/app"],
+	function(exports, app) {
+		if(window.developmentMode) console.log('DEFINE: twyrPortal/adapters/organization-manager-organization-user-group');
+
+		var OrganizationManagerOrganizationUserGroupAdapter = app.default.ApplicationAdapter.extend({
+			'namespace': 'organization-manager'
+		});
+
+		exports['default'] = OrganizationManagerOrganizationUserGroupAdapter;
+	}
+);
+
+define(
+	"twyrPortal/models/organization-manager-organization-user-group",
+	["exports", "twyrPortal/app"],
+	function(exports, app) {
+		if(window.developmentMode) console.log('DEFINE: twyrPortal/models/organization-manager-organization-user-group');
+
+		var OrganizationManagerOrganizationUserGroupModel = window.DS.Model.extend({
+			'group': window.DS.belongsTo('organization-manager-organization-group', { 'async': true, 'inverse': null }),
+			'user': window.DS.belongsTo('organization-manager-organization-user', { 'async': true, 'inverse': 'groups' }),
+
+			'createdOn': window.DS.attr('date', { 'defaultValue': (new Date()) }),
+			'formattedCreatedOn': window.Ember.computed('createdOn', {
+				'get': function(key) {
+					return window.moment(this.get('createdOn')).format('Do MMM YYYY');
+				}
+			})
+		});
+
+		exports['default'] = OrganizationManagerOrganizationUserGroupModel;
 	}
 );
 
@@ -157,6 +194,9 @@ define(
 			'middleNames': window.DS.attr('string'),
 			'lastName': window.DS.attr('string'),
 			'email': window.DS.attr('string'),
+			'isCurrentlySelected': window.DS.attr('boolean', { 'defaultValue': false }),
+
+			'groups': window.DS.hasMany('organization-manager-organization-user-group', { 'async': true, 'inverse': 'user' }),
 
 			'fullName': window.Ember.computed('firstName', 'lastName', {
 				'get': function(key) {

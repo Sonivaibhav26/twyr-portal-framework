@@ -5,6 +5,19 @@ define(
 		if(window.developmentMode) console.log('DEFINE: twyrPortal/controllers/organization-manager-organization-structure');
 
 		var OrganizationManagerOrganizationStructureController = window.Ember.Controller.extend({
+			'_removePermissionFromSubGroups': function(group, permissionId) {
+				var self = this;
+
+				group.get('subgroups').forEach(function(subgroup) {
+					var toBeRemoved = subgroup.get('permissions').filter(function(groupPermissionRel) {
+						return (groupPermissionRel.get('permission').get('id') == permissionId);
+					});
+
+					subgroup.get('permissions').removeObject(toBeRemoved);
+					self._removePermissionFromSubGroups(subgroup, permissionId);
+				});
+			},
+
 			'resetStatusMessages': function(timeout) {
 				window.Ember.$('div#div-organization-manager-organization-structure-failure-message').slideUp(timeout || 600);
 
@@ -319,6 +332,48 @@ define(
 				}
 			},
 
+			'add-permission': function(data) {
+				var group = data.group,
+					newRelId = data.newRelId;
+
+				var newGroupPermission = group.store.createRecord('organization-manager-organization-group-permission', {
+					'id': newRelId,
+					'group': group
+				});
+
+				group.get('permissions').addObject(newGroupPermission);
+			},
+
+			'save-permission': function(data) {
+				var group = data.group,
+					permissionRel = group.get('permissions').filterBy('id', data.permissionRelId)[0],
+					permissionId = data.permissionId,
+					self = this;
+
+				group.store.find('organization-manager-component-permission', permissionId)
+				.then(function(permission) {
+					permissionRel.set('group', group);
+					permissionRel.set('permission', permission);
+
+					return permissionRel.save();
+				})
+				.then(function() {
+					self.showStatusMessage('success', 'Added Group Permission successfully');
+					window.Ember.run.later(self, function() {
+						self.resetStatusMessages();
+					}, 5000);
+				})
+				.catch(function(reason) {
+					self.showStatusMessage('failure');
+					window.Ember.run.later(self, function() {
+						self.resetStatusMessages();
+
+						permissionRel.rollbackAttributes();
+						permissionRel.transitionTo('created.uncommitted');
+					}, 5000);
+				});
+			},
+
 			'delete-permission': function(data) {
 				var group = data.group,
 					permissionRel = data.permissionRel,
@@ -330,6 +385,8 @@ define(
 						return group.get('permissions').removeObject(permissionRel);
 					})
 					.then(function() {
+						self._removePermissionFromSubGroups(group, permissionRel.get('permission').get('id'));
+
 						self.showStatusMessage('success', 'Deleted Group Permission successfully');
 						window.Ember.run.later(self, function() {
 							self.resetStatusMessages();
@@ -351,7 +408,95 @@ define(
 				}
 				else {
 					window.Ember.$.confirm({
-						'text': 'Are you sure that you want to delete <strong>"' + permissionRel.get('permission').get('displayName') + '"</strong>?',
+						'text': 'Are you sure that you want to delete <strong>"' + permissionRel.get('permission').get('displayName') + '"</strong> from the ' + group.get('displayName') + ' group?',
+						'title': 'Delete',
+	
+						'confirm': delFn,
+	
+						'cancel': function() {
+							// Do nothing...
+						}
+					});
+				}
+			},
+
+			'add-user-group': function(data) {
+				var user = data.user,
+					userGroupId = data.userGroupId,
+					newUserGroup = this.get('model').store.createRecord('organization-manager-organization-user-group', {
+						'id': userGroupId,
+						'user': user
+					});
+
+				user.get('groups').addObject(newUserGroup);
+			},
+
+			'save-user-group': function(data) {
+				var groupId = data.groupId,
+					groupRelId = data.groupRelId,
+					self = this;
+
+				window.Ember.RSVP.Promise.all([
+					this.get('model').store.find('organization-manager-organization-user-group', groupRelId),
+					this.get('model').store.find('organization-manager-organization-group', groupId)
+				])
+				.then(function(results) {
+					var groupRel = results[0],
+						group = results[1];
+
+					groupRel.set('group', group);
+					return groupRel.save();
+				})
+				.then(function() {
+					self.showStatusMessage('success', 'Saved Group successfully');
+					window.Ember.run.later(self, function() {
+						self.resetStatusMessages();
+					}, 5000);
+				})
+				.catch(function(reason) {
+					self.showStatusMessage('failure');
+					window.Ember.run.later(self, function() {
+						self.resetStatusMessages();
+
+						userGroup.rollbackAttributes();
+						userGroup.transitionTo('loaded.saved');
+					}, 5000);
+				});
+			},
+
+			'delete-user-group': function(data) {
+				var user = data.user,
+					userGroup = data.userGroup,
+					self = this;
+
+				var delFn = function() {
+					userGroup.destroyRecord()
+					.then(function() {
+						return user.get('groups').removeObject(userGroup)
+					})
+					.then(function() {
+						self.showStatusMessage('success', 'Deleted Group successfully');
+						window.Ember.run.later(self, function() {
+							self.resetStatusMessages();
+						}, 5000);
+					})
+					.catch(function(reason) {
+						self.showStatusMessage('failure');
+						window.Ember.run.later(self, function() {
+							self.resetStatusMessages();
+	
+							userGroup.rollbackAttributes();
+							userGroup.transitionTo('loaded.saved');
+						}, 5000);
+					});
+				};
+
+				if(userGroup.get('isNew')) {
+					delFn();
+				}
+				else {
+					window.Ember.$.confirm({
+						'text': 'Are you sure that you want to delete <strong>"' + userGroup.get('group').get('displayName') + '"</strong>?',
 						'title': 'Delete',
 	
 						'confirm': delFn,
