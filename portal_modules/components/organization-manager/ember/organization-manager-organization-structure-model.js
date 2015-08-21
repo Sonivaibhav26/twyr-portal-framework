@@ -153,6 +153,7 @@ define(
 		if(window.developmentMode) console.log('DEFINE: twyrPortal/models/organization-manager-organization-user-group');
 
 		var OrganizationManagerOrganizationUserGroupModel = window.DS.Model.extend({
+			'tenant': window.DS.attr('string'),
 			'group': window.DS.belongsTo('organization-manager-organization-group', { 'async': true, 'inverse': null }),
 			'user': window.DS.belongsTo('organization-manager-organization-user', { 'async': true, 'inverse': 'groups' }),
 

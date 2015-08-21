@@ -123,18 +123,6 @@ var app = prime({
 				.use(logger('combined', {
 					'stream': loggerStream
 				}))
-				.use(function(request, response, next) {
-					var requestDomain = domain.create();
-					requestDomain.add(request);
-					requestDomain.add(response);
-
-					requestDomain.on('error', function(error) {
-						loggerSrvc.error('Error servicing request "' + request.path + '":\nQuery: ', request.query, '\nBody: ', request.body, '\nParams: ', request.params, '\nError: ', error);
-						response.status(500).redirect('/error');
-					});
-
-					next();
-				})
 				.use(debounce())
 				.use(acceptOverride())
 				.use(methodOverride())
@@ -142,6 +130,9 @@ var app = prime({
 				.use(favicon(path.join(__dirname, self.$config.favicon)))
 				.use(poweredBy(self.$config.poweredBy))
 				.use(timeout(self.$config.requestTimeout * 1000))
+				.use(flash())
+				.use(self.$cookieParser)
+				.use(self.$session)
 				.use(bodyParser.json({
 					'limit': self.$config.maxRequestSize
 				}))
@@ -155,11 +146,20 @@ var app = prime({
 					'extended': true,
 					'limit': self.$config.maxRequestSize
 				}))
-				.use(flash())
-				.use(self.$cookieParser)
-				.use(self.$session)
 				.use(self.$services.authService.getInterface().initialize())
-				.use(self.$services.authService.getInterface().session());
+				.use(self.$services.authService.getInterface().session())
+				.use(function(request, response, next) {
+					var requestDomain = domain.create();
+					requestDomain.add(request);
+					requestDomain.add(response);
+
+					requestDomain.on('error', function(error) {
+						loggerSrvc.error('Error servicing request "' + request.path + '":\nQuery: ', request.query, '\nBody: ', request.body, '\nParams: ', request.params, '\nError: ', error);
+						response.status(500).redirect('/error');
+					});
+
+					next();
+				});
 			
 			// Step 3.3: Setup the static server
 			self.$config.publicDir = path.join(__dirname, self.$config.publicDir);

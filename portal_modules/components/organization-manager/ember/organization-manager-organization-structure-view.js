@@ -190,40 +190,13 @@ define(
 		if(window.developmentMode) console.log('DEFINE: twyrPortal/components/organization-manager-organization-structure-organization-users');
 
 		var OrganizationManagerOrganizationStructureOrganizationUsersComponent = window.Ember.Component.extend({
-			'didInsertElement': function() {
-				var self = this;
-				self._super();
-
-				self.set('currentlySelectedUser', null);
-				window.Ember.run.scheduleOnce('afterRender', this, function() {
-					self.$('select').each(function(index, selectElem) {
-						if(self.$(selectElem).attr('id').indexOf('new-user-group') >= 0)
-							self._initGroupSelect(self.$(selectElem));
-						else
-							self._initSelect(self.$(selectElem));
-					});
-
-					var currentlySelectedUsers = self.get('model').get('users').filter(function(userRel) {
-						if(!userRel.get('user').get('isLoaded'))
-							return false;
-
-						return !!userRel.get('user').get('isCurrentlySelected');
-					});
-
-					if(!currentlySelectedUsers.length) {
-						self.get('model').get('users').get('firstObject').one('didLoad', function() {
-							self.$('tr#organization-manager-organization-structure-organization-users-tr-' + self.get('model').get('users').get('firstObject').get('id')).click();
-						});
-					}
-					else {
-						self.$('tr#organization-manager-organization-structure-organization-users-tr-' + currentlySelectedUsers[0].get('user').get('id')).click();
-					}
-				});
-			},
-
 			'willClearRender': function() {
 				var self = this;
 				self._super();
+
+				if(self.get('currentlySelectedUser')) {
+					self.get('currentlySelectedUser').set('isCurrentlySelected', false);
+				}
 
 				self.set('currentlySelectedUser', null);
 				self.get('model').get('users').forEach(function(thisUserRel) {
@@ -236,30 +209,31 @@ define(
 
 			'_modelChangeReactor': window.Ember.observer('model', function() {
 				var self = this;
+				if(self.get('currentlySelectedUser')) {
+					self.get('currentlySelectedUser').set('isCurrentlySelected', false);
+				}
 
 				self.set('currentlySelectedUser', null);
 				window.Ember.run.scheduleOnce('afterRender', this, function() {
 					self.$('select').each(function(index, selectElem) {
 						if(self.$(selectElem).attr('id').indexOf('new-user-group') >= 0)
-							self._initGroupSelect(self.$(selectElem));
-						else
-							self._initSelect(self.$(selectElem));
+							return;
+
+						self._initSelect(self.$(selectElem));
 					});
 
-					var currentlySelectedUsers = self.get('model').get('users').filter(function(userRel) {
-						if(!userRel.get('user').get('isLoaded'))
-							return false;
+					var firstLoadedUser = null;
+					self.get('model').get('users').forEach(function(thisUserRel) {
+						if(!thisUserRel.get('user').get('isLoaded'))
+							return;
 
-						return !!userRel.get('user').get('isCurrentlySelected');
+						thisUserRel.get('user').set('isCurrentlySelected', false);
+						if(!firstLoadedUser) firstLoadedUser = thisUserRel.get('user');
+
 					});
 
-					if(!currentlySelectedUsers.length) {
-						self.get('model').get('users').get('firstObject').one('didLoad', function() {
-							self.$('tr#organization-manager-organization-structure-organization-users-tr-' + self.get('model').get('users').get('firstObject').get('id')).click();
-						});
-					}
-					else {
-						self.$('tr#organization-manager-organization-structure-organization-users-tr-' + currentlySelectedUsers[0].get('user').get('id')).click();
+					if(firstLoadedUser) {
+						self.$('tr#organization-manager-organization-structure-organization-users-tr-' + firstLoadedUser.get('id')).click();
 					}
 				});
 			}),
@@ -307,11 +281,24 @@ define(
 					'placeholder': 'root@twyrportal.com'
 				})
 				.on('change', function() {
-					var userRelId = selectElem.attr('id').replace('organization-manager-organization-structure-organization-users-select-new-', '');
+					var userRelId = selectElem.attr('id').replace('organization-manager-organization-structure-organization-users-select-new-', ''),
+						cachedUser = null;
 
 					self.sendAction('controller-action', 'save-user-rel', {
 						'userId': selectElem.val(),
 						'userRelId': userRelId
+					});
+
+					if(self.get('currentlySelectedUser')) {
+						cachedUser = self.get('currentlySelectedUser');
+						cachedUser.set('isCurrentlySelected', false);
+
+						self.set('currentlySelectedUser', null);
+					}
+
+					window.Ember.run.scheduleOnce('afterRender', self, function() {
+						if(!cachedUser) return;
+						self.$('tr#organization-manager-organization-structure-organization-users-tr-' + cachedUser.get('id')).click();
 					});
 				});
 			},
@@ -397,16 +384,37 @@ define(
 				},
 
 				'select': function(userRel) {
+					if(this.get('currentlySelectedUser')) {
+						this.get('currentlySelectedUser').set('isCurrentlySelected', false);
+					}
+	
+					this.set('currentlySelectedUser', null);
 					this.get('model').get('users').forEach(function(thisUserRel) {
 						if(!thisUserRel.get('user').get('isLoaded'))
 							return;
 
 						thisUserRel.get('user').set('isCurrentlySelected', false);
 					});
-	
 
 					userRel.get('user').set('isCurrentlySelected', true);
 					this.set('currentlySelectedUser', userRel.get('user'));
+
+					var self = this;
+					userRel.get('user').get('groups').forEach(function(userGroup) {
+						if(userGroup.get('tenant') == self.get('model').get('id')) {
+							userGroup.set('belongsToTenant', true);
+						}
+						else {
+							userGroup.set('belongsToTenant', false);
+						}
+					});
+
+					window.Ember.run.scheduleOnce('afterRender', this, function() {
+						self.$('select').each(function(index, selectElem) {
+							if(self.$(selectElem).attr('id').indexOf('new-user-group') >= 0)
+								self._initGroupSelect(self.$(selectElem));
+						});
+					});
 				},
 
 				'add-user-group': function(user) {
@@ -414,6 +422,7 @@ define(
 						userGroupId = app.default.generateUUID();
 
 					self.sendAction('controller-action', 'add-user-group', {
+						'tenant': self.get('model').get('id'),
 						'user': user,
 						'userGroupId': userGroupId
 					});

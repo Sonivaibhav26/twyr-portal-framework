@@ -164,7 +164,7 @@
 		</tr>
 		{{else}}
 			{{#if userRel.user.isCurrentlySelected}}
-			<tr id="organization-manager-organization-structure-organization-users-tr-{{userRel.user.id}}" style="background-color:#428bca; color:white;">
+			<tr id="organization-manager-organization-structure-organization-users-tr-{{userRel.user.id}}" style="background-color:#5bc0de; color:white;">
 				<td style="vertical-align:middle;">{{userRel.user.email}}</td>
 				<td style="vertical-align:middle;">{{userRel.user.fullName}}</td>
 				<td style="vertical-align:middle;">{{userRel.formattedCreatedOn}}</td>
@@ -218,25 +218,45 @@
 		</thead>
 		<tbody>
 		{{#each currentlySelectedUser.groups as |groupRel index|}}
-			<tr>
-			{{#if groupRel.isNew}}
-				<td class="form-group" style="vertical-align:middle;">
-					<select class="form-control" id="organization-manager-organization-structure-organization-users-select-new-user-group-{{groupRel.id}}" style="width:100%;" />
-				</td>
-			{{else}}
-				<td style="vertical-align:middle;">{{groupRel.group.displayName}}</td>
+			{{#if groupRel.belongsToTenant}}
+				{{#if groupRel.isNew}}
+				<tr>
+					<td class="form-group" style="vertical-align:middle;">
+						<select class="form-control" id="organization-manager-organization-structure-organization-users-select-new-user-group-{{groupRel.id}}" style="width:100%;" />
+					</td>
+					<td style="vertical-align:middle;">{{groupRel.formattedCreatedOn}}</td>
+					<td style="text-align:right; vertical-align:middle;">
+					    <button type="button" class="btn btn-danger btn-sm" {{action "delete-user-group" currentlySelectedUser groupRel bubbles=false}}>
+							<i class="fa fa-remove" style="margin-right:5px;" /><span>Delete</span>
+					    </button>
+					</td>
+				</tr>
+				{{else}}
+				<tr>
+					<td style="vertical-align:middle;">{{groupRel.group.displayName}}</td>
+					<td style="vertical-align:middle;">{{groupRel.formattedCreatedOn}}</td>
+					<td style="text-align:right; vertical-align:middle;">
+					    <button type="button" class="btn btn-danger btn-sm" {{action "delete-user-group" currentlySelectedUser groupRel bubbles=false}}>
+							<i class="fa fa-remove" style="margin-right:5px;" /><span>Delete</span>
+					    </button>
+					</td>
+				</tr>
+				{{/if}}
 			{{/if}}
-				<td style="vertical-align:middle;">{{groupRel.formattedCreatedOn}}</td>
-				<td style="text-align:right; vertical-align:middle;">
-				    <button type="button" class="btn btn-danger btn-sm" {{action "delete-user-group" currentlySelectedUser groupRel bubbles=false}}>
-						<i class="fa fa-remove" style="margin-right:5px;" /><span>Delete</span>
-				    </button>
-				</td>
-			</tr>
 		{{/each}}
 		</tbody>
 		</table>
 	</div>
+</div>
+{{else}}
+<div style="display:none;">
+{{#each model.users as |userRel index|}}
+	{{#each userRel.user.groups as |groupRel index|}}
+		{{#unless groupRel.isNew}}
+			<p>{{groupRel.group.displayName}}</p>
+		{{/unless}}
+	{{/each}}
+{{/each}}
 </div>
 {{/if}}
 </script>

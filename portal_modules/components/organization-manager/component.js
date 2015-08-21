@@ -38,7 +38,7 @@ var organizationManagerComponent = prime({
 
 	'_getClientRouter': function(request, response, next) {
 		response.type('application/javascript');
-		if(!this._checkPermission(request, requiredPermission)) {
+		if(!request.user) {
 			response.status(200).send('');
 			return;
 		}

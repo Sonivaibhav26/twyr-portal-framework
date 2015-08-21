@@ -95,9 +95,7 @@ define(
 					self.showStatusMessage('failure');
 					window.Ember.run.later(self, function() {
 						self.resetStatusMessages();
-
 						self.get('currentModel').rollbackAttributes();
-						self.get('currentModel').transitionTo('loaded.saved');
 					}, 5000);
 				});
 			},
@@ -119,9 +117,7 @@ define(
 							self.showStatusMessage('failure');
 							window.Ember.run.later(self, function() {
 								self.resetStatusMessages();
-		
 								self.get('currentModel').rollbackAttributes();
-								self.get('currentModel').transitionTo('loaded.saved');
 							}, 5000);
 						});
 					};
@@ -191,7 +187,7 @@ define(
 
 				window.Ember.RSVP.Promise.all([
 					self.get('model').store.find('organization-manager-organization-user', data.userId),
-					self.get('model').store.find('organization-manager-organization-user-tenant', data.userRelId)
+					self.get('model').store.peekRecord('organization-manager-organization-user-tenant', data.userRelId)
 				])
 				.then(function(results) {
 					user = results[0];
@@ -210,9 +206,7 @@ define(
 					self.showStatusMessage('failure');
 					window.Ember.run.later(self, function() {
 						self.resetStatusMessages();
-
 						userRel.rollbackAttributes();
-						userRel.transitionTo('created.uncommitted');
 					}, 5000);
 				});
 			},
@@ -236,9 +230,7 @@ define(
 						self.showStatusMessage('failure');
 						window.Ember.run.later(self, function() {
 							self.resetStatusMessages();
-	
 							userRel.rollbackAttributes();
-							userRel.transitionTo('loaded.saved');
 						}, 5000);
 					});
 				};
@@ -287,9 +279,7 @@ define(
 					self.showStatusMessage('failure');
 					window.Ember.run.later(self, function() {
 						self.resetStatusMessages();
-
 						data.group.rollbackAttributes();
-						data.group.transitionTo('loaded.saved');
 					}, 5000);
 				});
 			},
@@ -308,9 +298,7 @@ define(
 							self.showStatusMessage('failure');
 							window.Ember.run.later(self, function() {
 								self.resetStatusMessages();
-		
 								data.group.rollbackAttributes();
-								data.group.transitionTo('loaded.saved');
 							}, 5000);
 						});
 					};
@@ -367,9 +355,7 @@ define(
 					self.showStatusMessage('failure');
 					window.Ember.run.later(self, function() {
 						self.resetStatusMessages();
-
 						permissionRel.rollbackAttributes();
-						permissionRel.transitionTo('created.uncommitted');
 					}, 5000);
 				});
 			},
@@ -396,9 +382,7 @@ define(
 						self.showStatusMessage('failure');
 						window.Ember.run.later(self, function() {
 							self.resetStatusMessages();
-	
 							permissionRel.rollbackAttributes();
-							permissionRel.transitionTo('loaded.saved');
 						}, 5000);
 					});
 				};
@@ -422,10 +406,13 @@ define(
 
 			'add-user-group': function(data) {
 				var user = data.user,
+					tenant = data.tenant,
 					userGroupId = data.userGroupId,
 					newUserGroup = this.get('model').store.createRecord('organization-manager-organization-user-group', {
 						'id': userGroupId,
-						'user': user
+						'tenant': tenant,
+						'user': user,
+						'belongsToTenant': true
 					});
 
 				user.get('groups').addObject(newUserGroup);
@@ -436,13 +423,16 @@ define(
 					groupRelId = data.groupRelId,
 					self = this;
 
+				var groupRel = null,
+					group = null;
+
 				window.Ember.RSVP.Promise.all([
-					this.get('model').store.find('organization-manager-organization-user-group', groupRelId),
+					this.get('model').store.peekRecord('organization-manager-organization-user-group', groupRelId),
 					this.get('model').store.find('organization-manager-organization-group', groupId)
 				])
 				.then(function(results) {
-					var groupRel = results[0],
-						group = results[1];
+					groupRel = results[0];
+					group = results[1];
 
 					groupRel.set('group', group);
 					return groupRel.save();
@@ -457,9 +447,7 @@ define(
 					self.showStatusMessage('failure');
 					window.Ember.run.later(self, function() {
 						self.resetStatusMessages();
-
-						userGroup.rollbackAttributes();
-						userGroup.transitionTo('loaded.saved');
+						groupRel.rollbackAttributes();
 					}, 5000);
 				});
 			},
@@ -484,9 +472,7 @@ define(
 						self.showStatusMessage('failure');
 						window.Ember.run.later(self, function() {
 							self.resetStatusMessages();
-	
 							userGroup.rollbackAttributes();
-							userGroup.transitionTo('loaded.saved');
 						}, 5000);
 					});
 				};
