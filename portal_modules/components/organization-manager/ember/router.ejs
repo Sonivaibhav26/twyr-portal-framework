@@ -1,6 +1,7 @@
 var Router = require('twyrPortal/router')['default'];
 Router.map(function() {
 	this.route('organization-manager-organization-structure', { 'path': '/organization/structure' });
+	this.route('organization-manager-tenant-machine-management', { 'path': '/organization/machine' });
 });
 
 define(
@@ -8,9 +9,9 @@ define(
 	["exports"],
 	function(exports) {
 		if(window.developmentMode) console.log('DEFINE: twyrPortal/routes/organization-manager-organization-structure');
-		var ManageOrganizationManagerOrganizationStructureRoute = window.Ember.Route.extend({
+		var OrganizationManagerOrganizationStructureRoute = window.Ember.Route.extend({
 			'beforeModel': function() {
-				return window.Ember.$.getScript('<%= mountPath %>/mvc/organizationManagerOrganizationStructure');
+				return window.Ember.$.getScript('<%= mountPath %>/mvc/OrganizationManagerOrganizationStructure');
 			},
 
 			'model': function() {
@@ -22,6 +23,29 @@ define(
 			}
 		});
 
-		exports['default'] = ManageOrganizationManagerOrganizationStructureRoute;
+		exports['default'] = OrganizationManagerOrganizationStructureRoute;
+	}
+);
+
+define(
+	"twyrPortal/routes/organization-manager-tenant-machine-management",
+	["exports"],
+	function(exports) {
+		if(window.developmentMode) console.log('DEFINE: twyrPortal/routes/organization-manager-tenant-machine-management');
+		var OrganizationManagerTenantMachineManagementRoute = window.Ember.Route.extend({
+			'beforeModel': function() {
+				return window.Ember.$.getScript('<%= mountPath %>/mvc/OrganizationManagerTenantMachineManagement');
+			},
+
+			'model': function() {
+				return this.store.findRecord('organization-manager-organization-structure', '<%= tenantId %>');
+			},
+
+			'setupController': function(controller, model) {
+				controller.set('model', model);
+			}
+		});
+
+		exports['default'] = OrganizationManagerTenantMachineManagementRoute;
 	}
 );

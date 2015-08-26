@@ -225,7 +225,7 @@ var menuComponent = prime({
 			for(var idx in widgetList[widgetPosition]) {
 				var thisWidget = widgetList[widgetPosition][idx];
 
-				promiseResolutions.push(databaseSrvc.knex.raw("SELECT D.ember_component_name AS widget, C.ember_route, A.menu_template FROM system_menus A INNER JOIN system_menu_component_menu_mapping B ON (B.system_menu_id = A.id) INNER JOIN component_menus C ON (C.id = B.component_menu_id) INNER JOIN component_widgets D ON (D.id = A.component_widget_id) WHERE A.component_widget_id = '" + thisWidget.id + "' AND C.parent_id IS NULL ORDER BY B.display_order;"));
+				promiseResolutions.push(databaseSrvc.knex.raw("SELECT D.ember_component_name AS widget, C.display_name, C.ember_route, A.menu_template FROM system_menus A INNER JOIN system_menu_component_menu_mapping B ON (B.system_menu_id = A.id) INNER JOIN component_menus C ON (C.id = B.component_menu_id) INNER JOIN component_widgets D ON (D.id = A.component_widget_id) WHERE A.component_widget_id = '" + thisWidget.id + "' AND C.parent_id IS NULL ORDER BY B.display_order;"));
 			}
 		});
 
@@ -258,9 +258,10 @@ var menuComponent = prime({
 				// pull the complete display data of the menu item from the cache
 				for(var tmIdx in thisMenuItems) {
 					for(var mlIdx in menuList) {
-						if(menuList[mlIdx].ember_route == thisMenuItems[tmIdx].ember_route) {
+						if((menuList[mlIdx].ember_route == thisMenuItems[tmIdx].ember_route) && (menuList[mlIdx].display_name == thisMenuItems[tmIdx].display_name)) {
 							sessionMenus[widget].menuItems.push(menuList[mlIdx]);
 							menuListUsedUp.push(mlIdx);
+							
 						}
 					}
 				}

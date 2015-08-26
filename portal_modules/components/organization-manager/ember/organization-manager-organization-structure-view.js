@@ -359,6 +359,22 @@ define(
 
 			'actions': {
 				'create': function(organization) {
+					var email = self.$('input#organization-manager-organization-structure-organization-users-input-email').val(),
+						firstName = self.$('input#organization-manager-organization-structure-organization-users-input-first-name').val(),
+						lastName  = self.$('input#organization-manager-organization-structure-organization-users-input-last-name').val();
+
+					this.sendAction('controller-action', 'create-user-rel', {
+						'organization': organization,
+						'email': email,
+						'firstName': firstName,
+						'lastName': lastName
+					});
+
+					window.Ember.run.scheduleOnce('afterRender', this, function() {
+						self.$('input#organization-manager-organization-structure-organization-users-input-email').val('');
+						self.$('input#organization-manager-organization-structure-organization-users-input-first-name').val('');
+						self.$('input#organization-manager-organization-structure-organization-users-input-last-name').val('');
+					});
 				},
 
 				'add': function(organization) {

@@ -237,6 +237,9 @@
 <% } %>
 <script type="application/javascript" src="/bower_components/ember/ember-template-compiler.js"></script>
 
+<!-- Primus - realtime websocket connection stuff -->
+<script type="application/javascript" src="<%= apiServer.protocol %>://<%= apiServer.host %>:<%= apiServer.port %>/websockets/primus.js"></script>
+
 <!-- Setup ALL Ajax Requests to send credential information -->
 <script type="application/javascript">
 $.ajaxSetup({

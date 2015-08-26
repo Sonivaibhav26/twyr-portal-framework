@@ -169,6 +169,61 @@ define(
 				});
 			},
 
+			'create-user-rel': function(data) {
+				var self = this,
+					newUserId = app.default.generateUUID(),
+					newUserRelId = app.default.generateUUID(),
+					tenant = data.organization;
+
+				var newUserRel = null,
+					newUser = self.get('model').store.createRecord('organization-manager-organization-user', {
+					'id': newUserId,
+					'firstName': data.firstName,
+					'lastName': data.lastName,
+					'email': data.email
+				});
+
+				self.showStatusMessage('progress', 'Adding ' + data.firstName + ' ' + data.lastName + ' to ' + tenant.get('name'));
+				newUser.save()
+				.catch(function(err) {
+					newUser.rollbackAttributes();
+					throw err;
+				})
+				.then(function() {
+					newUserRel = self.get('model').store.createRecord('organization-manager-organization-user-tenant', {
+						'id': newUserRelId,
+						'tenant': tenant,
+						'user': newUser
+					});
+
+					return newUserRel.save();
+				})
+				.then(function() {
+					return tenant.get('users').addObject(newUserRel);
+				})
+				.then(function() {
+					self.resetStatusMessages();
+					self.showStatusMessage('success', 'User has been added to the Organization');
+
+					window.Ember.run.later(self, function() {
+						self.resetStatusMessages();
+					}, 5000);
+				})
+				.catch(function(err) {
+					self.resetStatusMessages();
+					self.showStatusMessage('failure');
+
+					if(newUserRel) {
+						tenant.get('users').removeObject(newUserRel);
+						newUserRel.rollbackAttributes();
+					}
+
+					window.Ember.run.later(self, function() {
+						self.resetStatusMessages();
+					}, 5000);
+				});
+			},
+
 			'add-user-rel': function(data) {
 				var parent = data.organization,
 					newUserRelId = data.newUserRelId,
@@ -242,9 +297,9 @@ define(
 					window.Ember.$.confirm({
 						'text': 'Are you sure that you want to delete <strong>"' + userRel.get('user').get('fullName') + '"</strong>?',
 						'title': 'Delete',
-	
+
 						'confirm': delFn,
-	
+
 						'cancel': function() {
 							// Do nothing...
 						}

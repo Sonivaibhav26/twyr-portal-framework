@@ -88,6 +88,8 @@ var profileComponent = prime({
 		promiseResolutions.push(filesystem.readFileAsync(controllerFile));
 		if(modelFile) promiseResolutions.push(filesystem.readFileAsync(modelFile));
 
+		response.type('application/javascript');
+
 		promises.all(promiseResolutions)
 		.then(function(files) {
 			self.$dependencies.logger.silly('Servicing request "' + request.path + '":\nQuery: ', request.query, '\nBody: ', request.body, '\nParams: ', request.params, '\nResponse: ', files.join('\n'));
@@ -95,8 +97,6 @@ var profileComponent = prime({
 		})
 		.catch(function(err) {
 			self.$dependencies.logger.error('Error servicing request "' + request.path + '":\nQuery: ', request.query, '\nBody: ', request.body, '\nParams: ', request.params, '\nError: ', err);
-
-			response.type('application/javascript');
 			response.status(500).json(err);
 		});
 	},

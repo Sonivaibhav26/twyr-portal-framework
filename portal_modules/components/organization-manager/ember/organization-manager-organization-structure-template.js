@@ -57,7 +57,7 @@
 </script>
 
 <script type="text/x-handlebars" data-template-name="components/organization-manager-organization-structure-group-detail">
-<div class="box box-default" style="text-align:left; box-shadow:none; border-top:0px;">
+<div class="box box-default" style="text-align:left; box-shadow:none; border-radius:0px;">
 	<div class="box-header with-border">
 		<h3 class="box-title">{{model.displayName}} Group</h3>
 		{{#if model.parent}}
@@ -107,7 +107,7 @@
 </script>
 
 <script type="text/x-handlebars" data-template-name="components/organization-manager-organization-structure-groups-tree">
-<div class="box box-default" style="text-align:left; box-shadow:none; border-top:0px;">
+<div class="box box-default" style="text-align:left; box-shadow:none; border-radius:0px;">
 	<div class="box-header with-border" style="min-height:50px;">
 		<h3 class="box-title">{{model.tenant.name}} Groups</h3>
 	</div>
@@ -119,10 +119,10 @@
 
 <script type="text/x-handlebars" data-template-name="components/organization-manager-organization-structure-organization-groups">
 <div class="row" style="margin:0px;">
-	<div class="col-lg-3 col-md-3 col-sm-3 col-xs-3" style="max-height:320px; overflow:auto; padding-left:0px;">
+	<div class="col-lg-3 col-md-3 col-sm-3 col-xs-3" style="max-height:320px; overflow:auto; padding:0px;">
 		{{organization-manager-organization-structure-groups-tree model=model controller-action="controller-action"}}
 	</div>
-	<div class="col-lg-9 col-md-9 col-sm-9 col-xs-9" style=" padding-right:0px;">
+	<div class="col-lg-9 col-md-9 col-sm-9 col-xs-9" style=" padding:0px;">
 		{{organization-manager-organization-structure-group-detail model=currentModel controller-action="controller-action"}}
 	</div>
 </div>
@@ -134,68 +134,102 @@
 </script>
 
 <script type="text/x-handlebars" data-template-name="components/organization-manager-organization-structure-organization-users">
-<table class="table table-bordered table-hover table-striped">
-<thead>
-	<tr>
-		<th style="text-align:center; vertical-align:middle;">Login</th>
-		<th style="text-align:center; vertical-align:middle;">Name</th>
-		<th style="text-align:center; vertical-align:middle;">Since</th>
-		<th style="text-align:right; vertical-align:middle;">
-		    <button type="button" class="btn btn-primary btn-sm" {{action "add" model}}>
-				<i class="fa fa-plus" style="margin-right:5px;" /><span>Add User</span>
+<div class="box box-default" style="text-align:left;">
+	<div class="box-header with-border">
+		<h3 class="box-title">Create New User</h3>
+	</div>
+	<div class="box-body">
+	<div class="row">
+		<div class="form-group col-lg-4 col-md-4 col-sm-4 col-xs-4">
+			<label>Email<sup>*</sup></label>
+			{{input id="organization-manager-organization-structure-organization-users-input-email" type="text" class="form-control" placeholder="root@twyrportal.com"}}
+		</div>
+		<div class="form-group col-lg-3 col-md-3 col-sm-3 col-xs-3">
+			<label>First Name<sup>*</sup></label>
+			{{input id="organization-manager-organization-structure-organization-users-input-first-name" type="text" class="form-control" placeholder="First/Given Name"}}
+		</div>
+		<div class="form-group col-lg-3 col-md-3 col-sm-3 col-xs-3">
+			<label>Last Name<sup>*</sup></label>
+			{{input id="organization-manager-organization-structure-organization-users-input-last-name" type="text" class="form-control" placeholder="Family Name / Surname"}}
+		</div>
+		<div class="form-group col-lg-2 col-md-2 col-sm-2 col-xs-2" style="padding-top:25px; text-align:right;">
+		    <button type="button" class="btn btn-success btn-sm" {{action "create" model}}>
+				<i class="fa fa-plus" style="margin-right:5px;" /><span>Create New User</span>
 		    </button>
-		</th>
-	</tr>
-</thead>
-<tbody>
-	{{#each model.users key="id" as |userRel index|}}
-		{{#if userRel.isNew}}
-		<tr>
-			<td class="form-group" style="vertical-align:middle;">
-				<select class="form-control" id="organization-manager-organization-structure-organization-users-select-new-{{userRel.id}}" style="width:100%;" />
-			</td>
-			<td style="vertical-align:middle;">{{userRel.user.fullName}}</td>
-			<td style="vertical-align:middle;">{{userRel.formattedCreatedOn}}</td>
-			<td style="text-align:right; vertical-align:middle;">
-			    <button type="button" class="btn btn-warning btn-sm" {{action "delete" model userRel bubbles=false}}>
-					<i class="fa fa-undo" style="margin-right:5px;" /><span>Cancel</span>
-			    </button>
-			</td>
-		</tr>
-		{{else}}
-			{{#if userRel.user.isCurrentlySelected}}
-			<tr id="organization-manager-organization-structure-organization-users-tr-{{userRel.user.id}}" style="background-color:#5bc0de; color:white;">
-				<td style="vertical-align:middle;">{{userRel.user.email}}</td>
-				<td style="vertical-align:middle;">{{userRel.user.fullName}}</td>
-				<td style="vertical-align:middle;">{{userRel.formattedCreatedOn}}</td>
-				<td style="text-align:right; vertical-align:middle;">
-				    <button type="button" class="btn btn-danger btn-sm" {{action "delete" model userRel bubbles=false}}>
-						<i class="fa fa-remove" style="margin-right:5px;" /><span>Delete</span>
+		</div>
+	</div>
+	</div>
+</div>
+
+<div class="box box-default" style="text-align:left;">
+	<div class="box-header with-border">
+		<h3 class="box-title">Current Users</h3>
+	</div>
+	<div class="box-body no-padding">
+		<table class="table table-bordered table-hover table-striped">
+		<thead>
+			<tr>
+				<th style="text-align:center; vertical-align:middle;">Login</th>
+				<th style="text-align:center; vertical-align:middle;">Name</th>
+				<th style="text-align:center; vertical-align:middle;">Since</th>
+				<th style="text-align:right; vertical-align:middle;">
+				    <button type="button" class="btn btn-primary btn-sm" {{action "add" model}}>
+						<i class="fa fa-plus" style="margin-right:5px;" /><span>Add Registered User</span>
 				    </button>
-				</td>
+				</th>
 			</tr>
+		</thead>
+		<tbody>
+			{{#each model.users key="id" as |userRel index|}}
+				{{#if userRel.isNew}}
+				<tr>
+					<td class="form-group" style="vertical-align:middle;">
+						<select class="form-control" id="organization-manager-organization-structure-organization-users-select-new-{{userRel.id}}" style="width:100%;" />
+					</td>
+					<td style="vertical-align:middle;">{{userRel.user.fullName}}</td>
+					<td style="vertical-align:middle;">{{userRel.formattedCreatedOn}}</td>
+					<td style="text-align:right; vertical-align:middle;">
+					    <button type="button" class="btn btn-warning btn-sm" {{action "delete" model userRel bubbles=false}}>
+							<i class="fa fa-undo" style="margin-right:5px;" /><span>Cancel</span>
+					    </button>
+					</td>
+				</tr>
+				{{else}}
+					{{#if userRel.user.isCurrentlySelected}}
+					<tr id="organization-manager-organization-structure-organization-users-tr-{{userRel.user.id}}" style="background-color:#5bc0de; color:white;">
+						<td style="vertical-align:middle;">{{userRel.user.email}}</td>
+						<td style="vertical-align:middle;">{{userRel.user.fullName}}</td>
+						<td style="vertical-align:middle;">{{userRel.formattedCreatedOn}}</td>
+						<td style="text-align:right; vertical-align:middle;">
+						    <button type="button" class="btn btn-danger btn-sm" {{action "delete" model userRel bubbles=false}}>
+								<i class="fa fa-remove" style="margin-right:5px;" /><span>Delete</span>
+						    </button>
+						</td>
+					</tr>
+					{{else}}
+					<tr id="organization-manager-organization-structure-organization-users-tr-{{userRel.user.id}}" {{action "select" userRel bubbles=false}}>
+						<td style="vertical-align:middle;">{{userRel.user.email}}</td>
+						<td style="vertical-align:middle;">{{userRel.user.fullName}}</td>
+						<td style="vertical-align:middle;">{{userRel.formattedCreatedOn}}</td>
+						<td style="text-align:right; vertical-align:middle;">
+						    <button type="button" class="btn btn-danger btn-sm" {{action "delete" model userRel bubbles=false}}>
+								<i class="fa fa-remove" style="margin-right:5px;" /><span>Delete</span>
+						    </button>
+						</td>
+					</tr>
+					{{/if}}
+				{{/if}}
 			{{else}}
-			<tr id="organization-manager-organization-structure-organization-users-tr-{{userRel.user.id}}" {{action "select" userRel bubbles=false}}>
-				<td style="vertical-align:middle;">{{userRel.user.email}}</td>
-				<td style="vertical-align:middle;">{{userRel.user.fullName}}</td>
-				<td style="vertical-align:middle;">{{userRel.formattedCreatedOn}}</td>
-				<td style="text-align:right; vertical-align:middle;">
-				    <button type="button" class="btn btn-danger btn-sm" {{action "delete" model userRel bubbles=false}}>
-						<i class="fa fa-remove" style="margin-right:5px;" /><span>Delete</span>
-				    </button>
-				</td>
-			</tr>
-			{{/if}}
-		{{/if}}
-	{{else}}
-		<tr>
-			<td colspan="4" style="text-align:center; vertical-align:middle;">
-				<p>No users assigned to {{model.name}}</p>
-			</td>
-		</tr>
-	{{/each}}
-</tbody>
-</table>
+				<tr>
+					<td colspan="4" style="text-align:center; vertical-align:middle;">
+						<p>No users assigned to {{model.name}}</p>
+					</td>
+				</tr>
+			{{/each}}
+		</tbody>
+		</table>
+	</div>
+</div>
 
 {{#if currentlySelectedUser}}
 <div class="box box-default" style="text-align:left; box-shadow:none;">

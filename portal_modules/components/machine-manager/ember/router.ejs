@@ -1,0 +1,27 @@
+var Router = require('twyrPortal/router')['default'];
+Router.map(function() {
+	this.route('machine-manager-realtime-data', { 'path': '/machine/realtime' });
+});
+
+define(
+	"twyrPortal/routes/machine-manager-realtime-data",
+	["exports"],
+	function(exports) {
+		if(window.developmentMode) console.log('DEFINE: twyrPortal/routes/machine-manager-realtime-data');
+		var MachineManagerRealtimeDataRoute = window.Ember.Route.extend({
+			'beforeModel': function() {
+				return window.Ember.$.getScript('<%= mountPath %>/mvc');
+			},
+
+			'model': function() {
+				return this.store.findAll('machine-manager-user-tenant-machine');
+			},
+
+			'setupController': function(controller, model) {
+				controller.set('model', model);
+			}
+		});
+
+		exports['default'] = MachineManagerRealtimeDataRoute;
+	}
+);

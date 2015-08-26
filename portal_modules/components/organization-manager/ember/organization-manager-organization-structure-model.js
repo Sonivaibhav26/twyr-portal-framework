@@ -27,6 +27,8 @@ define(
 			'groups': window.DS.hasMany('organization-manager-organization-group', { 'async': true, 'inverse': 'tenant' }),
 			'users': window.DS.hasMany('organization-manager-organization-user-tenant', { 'async': true, 'inverse': 'tenant' }),
 
+			'machines': window.DS.hasMany('organization-manager-tenant-machine', { 'async': true, 'inverse': 'tenant' }),
+
 			'isDepartment': window.Ember.computed('tenantType', {
 				'get': function(key) {
 					return (this.get('tenantType') == 'Department');

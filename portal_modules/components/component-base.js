@@ -20,7 +20,8 @@ var prime = require('prime'),
 /**
  * Module dependencies, required for this module
  */
-var path = require('path');
+var inflection = require('inflection'),
+	path = require('path');
 
 var simpleComponent = prime({
 	'constructor': function() {
@@ -187,6 +188,8 @@ var simpleComponent = prime({
 	},
 
 	'_checkPermission': function(request, permission, tenantId, callback) {
+		this.$dependencies.logger.silly('_checkPermission:\nUser: ', request.user.id, '\nPermission: ', permission, '\nTenant: ', tenantId, '\nCallback: ', !!callback);
+
 		if(tenantId && !callback) {
 			callback = tenantId;
 			tenantId = null;
@@ -206,34 +209,78 @@ var simpleComponent = prime({
 				allowed = allowed || (request.user.tenants[thisTenantId].permissions.indexOf(permission) >= 0);
 			});
 
-			self.$dependencies.logger.info('_checkPermission:\nUser: ', request.user.id, '\nPermission: ', permission, '\nTenant: ', tenantId, '\nAllowed: ', allowed);
+			self.$dependencies.logger.silly('_checkPermission:\nUser: ', request.user.id, '\nPermission: ', permission, '\nTenant: ', tenantId, '\nAllowed: ', allowed);
 			callback(null, allowed);
+
 			return;
 		}
 
 		if(Object.keys(request.user.tenants).indexOf(tenantId) >= 0) {
 			var allowed = (request.user.tenants[tenantId].permissions.indexOf(permission) >= 0);
+
+			self.$dependencies.logger.silly('_checkPermission:\nUser: ', request.user.id, '\nPermission: ', permission, '\nTenant: ', tenantId, '\nAllowed: ', allowed);
 			callback(null, allowed);
+
 			return;
 		}
 
 		var database = this.$dependencies.databaseService;
-		database.knex.raw('SELECT id FROM fn_get_tenant_parents(\'' + tenantId + '\');')
+		database.knex.raw('SELECT id FROM fn_get_tenant_parents(\'' + tenantId + '\') ORDER BY level ASC;')
 		.then(function(tenantParents) {
 			var allowed = false;
 
-			tenantParents.rows
-			.forEach(function(thisTenantParent) {
-				allowed = allowed || (request.user.tenants[thisTenantParent.id] && (request.user.tenants[thisTenantParent.id].permissions.indexOf(permission) >= 0));
-			});
+			for(var idx in tenantParents.rows) {
+				var thisTenantParentId = tenantParents.rows[idx].id;
+				if(!request.user.tenants[thisTenantParentId])
+					continue;
 
-			self.$dependencies.logger.info('_checkPermission:\nUser: ', request.user.id, '\nPermission: ', permission, '\nTenant: ', tenantId, '\nAllowed: ', allowed);
+				allowed = (request.user.tenants[thisTenantParentId].permissions.indexOf(permission) >= 0);
+				break;
+			}
+
+			self.$dependencies.logger.silly('_checkPermission:\nUser: ', request.user.id, '\nPermission: ', permission, '\nTenant: ', tenantId, '\nAllowed: ', allowed);
 			callback(null, allowed);
 		})
 		.catch(function(err) {
 			self.$dependencies.logger.error('_checkPermission Error: ', err);
 			callback(err);
 		});
+	},
+
+	'_camelize': function(inputObject) {
+		var camelizedObject = {},
+			self = this;
+
+		if(!inputObject) return inputObject;
+		
+		Object.keys(inputObject)
+		.forEach(function(key) {
+			if(!inputObject[key]) {
+				camelizedObject[inflection.camelize(key, true)] = inputObject[key];
+				return;
+			}
+
+			if(typeof inputObject[key] == 'object') {
+				if(!Object.keys(inputObject[key]).length) {
+					camelizedObject[inflection.camelize(key, true)] = inputObject[key];
+					return;
+				}
+
+				var subObject = self._camelize(inputObject[key]);
+				if(!Object.keys(subObject).length) {
+					camelizedObject[inflection.camelize(key, true)] = inputObject[key];
+				}
+				else {
+					camelizedObject[inflection.camelize(key, true)] = subObject;
+				}
+
+				return;
+			}
+
+			camelizedObject[inflection.camelize(key, true)] = inputObject[key];
+		});
+
+		return camelizedObject;
 	},
 
 	'name': 'simpleComponent',
