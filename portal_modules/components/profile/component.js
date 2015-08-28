@@ -32,16 +32,14 @@ var profileComponent = prime({
 		this._loadConfig(path.join(__dirname, 'config.js'));
 
 		this['publicRouter'] = path.join(__dirname, 'ember/router-public.ejs');
-		this['registeredRouter'] = path.join(__dirname, 'ember/router-registered.ejs');
-
 		this['publicTmpl'] = path.join(__dirname, 'ember/template-public.ejs');
-		this['registeredTmpl'] = path.join(__dirname, 'ember/template-registered.ejs');
-
-		this['registeredModel'] = path.join(__dirname, 'ember/model-registered.js');
-
 		this['publicCtrl'] = path.join(__dirname, 'ember/controller-public.js');
+
+		this['registeredTmpl'] = path.join(__dirname, 'ember/template-registered.ejs');
+		this['registeredRouter'] = path.join(__dirname, 'ember/router-registered.ejs');
+		this['registeredModel'] = path.join(__dirname, 'ember/model-registered.js');
+		this['registeredView'] = path.join(__dirname, 'ember/view-registered.js');
 		this['registeredCtrl'] = path.join(__dirname, 'ember/controller-registered.js');
-		this['profileCtrl'] = path.join(__dirname, 'ember/controller-manage-profile.js');
 
 		if(this.$config.profileImagePath[0] != '/') {
 			this.$config.profileImagePath = path.join(__dirname, this.$config.profileImagePath);
@@ -74,6 +72,7 @@ var profileComponent = prime({
 
 		var controllerFile = '',
 			modelFile = null,
+			viewFile = '',
 			self = this;
 
 		if(!request.user) {
@@ -81,12 +80,14 @@ var profileComponent = prime({
 		}
 		else {
 			modelFile =  this['registeredModel'];
+			viewFile = this['registeredView'];
 			controllerFile = this['registeredCtrl'];
 		}
 
 		var promiseResolutions = [];
 		promiseResolutions.push(filesystem.readFileAsync(controllerFile));
 		if(modelFile) promiseResolutions.push(filesystem.readFileAsync(modelFile));
+		if(viewFile) promiseResolutions.push(filesystem.readFileAsync(viewFile));
 
 		response.type('application/javascript');
 
@@ -122,22 +123,6 @@ var profileComponent = prime({
 	'_addRoutes': function() {
 		var self = this,
 			anonImg = path.join(self.$config.profileImagePath, 'anonymous.png');
-
-		this.$router.get('/mvc/manageProfile', function(request, response, next) {
-			self.$dependencies.logger.silly('Servicing request "' + request.path + '":\nQuery: ', request.query, '\nBody: ', request.body, '\nParams: ', request.params);
-	
-			filesystem.readFileAsync(self['profileCtrl'])
-			.then(function(controller) {
-				self.$dependencies.logger.silly('Request response"' + request.path + '":\nQuery: ', request.query, '\nBody: ', request.body, '\nParams: ', request.params, '\nResponse: ', controller);
-				response.status(200).send(controller);
-			})
-			.catch(function(err) {
-				self.$dependencies.logger.error('Error servicing request "' + request.path + '":\nQuery: ', request.query, '\nBody: ', request.body, '\nParams: ', request.params, '\nError: ', err);
-
-				response.type('application/javascript');
-				response.status(500).json(err);
-			});
-		});
 
 		this.$router.get('/profileImage', function(request, response, next) {
 			self.$dependencies.logger.silly('Servicing request "' + request.path + '":\nQuery: ', request.query, '\nBody: ', request.body, '\nParams: ', request.params);

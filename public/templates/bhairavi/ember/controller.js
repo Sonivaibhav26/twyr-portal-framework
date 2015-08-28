@@ -15,7 +15,45 @@ define(
 
 					return currPath;
 				}
-			}).readOnly()
+			}),
+
+			'resetStatusMessages': function(timeout) {
+				window.Ember.$('div#bhairavi-status-message').slideUp(timeout || 600);
+				window.Ember.$('div#bhairavi-status-message span').text('');
+
+				window.Ember.$('div#bhairavi-error-message').slideUp(timeout || 600);
+				this.set('errorModel', null);
+			},
+
+			'display-status-message': function(data) {
+				this.resetStatusMessages(2);
+
+				if(data.type != 'error') {
+					window.Ember.$('div#bhairavi-status-message').addClass('callout-' + data.type);
+					window.Ember.$('div#bhairavi-status-message span').html(data.message);
+
+					window.Ember.$('div#bhairavi-status-message').slideDown(600);
+				}
+				else {
+					this.set('errorModel', data.errorModel);
+					window.Ember.$('div#bhairavi-error-message').slideDown(600);
+				}
+
+				var self = this;
+				window.Ember.run.later(self, function() {
+					window.Ember.$('div#bhairavi-status-message').removeClass('callout-' + data.type);
+					self.resetStatusMessages();
+				}, 10000);
+			},
+
+			'actions': {
+				'portal-action': function(action, data) {
+					if(this[action])
+						this[action](data);
+					else
+						console.log('TODO: Handle ' + action + ' action with data: ', data);
+				}
+			}
 		});
 
 		exports['default'] = ApplicationController;

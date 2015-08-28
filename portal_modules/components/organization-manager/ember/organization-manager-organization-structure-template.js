@@ -4,7 +4,7 @@
 	<div class="box-header with-border">
 		<h3 class="box-title">{{model.displayName}} Permissions</h3>
 		{{#if model.parent}}
-		<div class="pull-right" style="cursor:pointer; margin:0px 5px;" {{action "add-permission" bubbles=false}}>
+		<div class="pull-right" style="cursor:pointer; margin:0px 5px;" {{action "controller-action" "add-permission" bubbles=false}}>
 		    <button type="button" class="btn btn-primary btn-sm">
 				<i class="fa fa-plus" style="margin-right:5px;" /><span>Add Permission</span>
 		    </button>
@@ -31,7 +31,7 @@
 						<select id="organization-manager-organization-structure-group-permissions-select-{{permissionRel.id}}" class="form-control" style="width:100%;" />
 					</td>
 					<td style="text-align:right; vertical-align:middle;">
-					    <button type="button" class="btn btn-danger btn-sm" {{action "delete-permission" permissionRel}}>
+					    <button type="button" class="btn btn-danger btn-sm" {{action "controller-action" "delete-permission" permissionRel}}>
 							<i class="fa fa-remove" style="margin-right:5px;" /><span>Delete</span>
 					    </button>
 					</td>
@@ -41,7 +41,7 @@
 					<td style="vertical-align:middle;">{{permissionRel.permission.description}}</td>
 					{{#if model.parent}}
 					<td style="text-align:right; vertical-align:middle;">
-					    <button type="button" class="btn btn-danger btn-sm" {{action "delete-permission" permissionRel}}>
+					    <button type="button" class="btn btn-danger btn-sm" {{action "controller-action" "delete-permission" permissionRel}}>
 							<i class="fa fa-remove" style="margin-right:5px;" /><span>Delete</span>
 					    </button>
 					</td>
@@ -61,14 +61,14 @@
 	<div class="box-header with-border">
 		<h3 class="box-title">{{model.displayName}} Group</h3>
 		{{#if model.parent}}
-		<div class="pull-right" style="cursor:pointer; margin:0px 5px;" {{action "delete" bubbles=false}}>
+		<div class="pull-right" style="cursor:pointer; margin:0px 5px;" {{action "controller-action" "delete" bubbles=false}}>
 		    <button type="button" class="btn btn-danger btn-sm">
 				<i class="fa fa-remove" style="margin-right:5px;" /><span>Delete</span>
 		    </button>
 		</div>
 		{{/if}}
 		{{#unless model.isNew}}
-		<div class="pull-right" style="cursor:pointer; margin:0px 5px;" {{action "add-subgroup" bubbles=false}}>
+		<div class="pull-right" style="cursor:pointer; margin:0px 5px;" {{action "controller-action" "add-subgroup" bubbles=false}}>
 		    <button type="button" class="btn btn-primary btn-sm">
 				<i class="fa fa-plus" style="margin-right:5px;" /><span>Add Subgroup</span>
 		    </button>
@@ -76,13 +76,13 @@
 		{{/unless}}
 		{{#if model.hasDirtyAttributes}}
 		{{#unless model.isNew}}
-		<div class="pull-right" style="cursor:pointer; margin:0px 5px;" {{action "cancel" bubbles=false}}>
+		<div class="pull-right" style="cursor:pointer; margin:0px 5px;" {{action "controller-action" "cancel" bubbles=false}}>
 		    <button type="button" class="btn btn-warning btn-sm">
 				<i class="fa fa-undo" style="margin-right:5px;" /><span>Cancel</span>
 		    </button>
 		</div>
 		{{/unless}}
-		<div class="pull-right" style="cursor:pointer; margin:0px 5px;" {{action "save" bubbles=false}}>
+		<div class="pull-right" style="cursor:pointer; margin:0px 5px;" {{action "controller-action" "save" bubbles=false}}>
 		    <button type="submit" class="btn btn-primary btn-sm">
 				<i class="fa fa-save" style="margin-right:5px;" /><span>Save</span>	
 		    </button>
@@ -153,7 +153,7 @@
 			{{input id="organization-manager-organization-structure-organization-users-input-last-name" type="text" class="form-control" placeholder="Family Name / Surname"}}
 		</div>
 		<div class="form-group col-lg-2 col-md-2 col-sm-2 col-xs-2" style="padding-top:25px; text-align:right;">
-		    <button type="button" class="btn btn-success btn-sm" {{action "create" model}}>
+		    <button type="button" class="btn btn-success btn-sm" {{action "controller-action" "create" model}}>
 				<i class="fa fa-plus" style="margin-right:5px;" /><span>Create New User</span>
 		    </button>
 		</div>
@@ -173,7 +173,7 @@
 				<th style="text-align:center; vertical-align:middle;">Name</th>
 				<th style="text-align:center; vertical-align:middle;">Since</th>
 				<th style="text-align:right; vertical-align:middle;">
-				    <button type="button" class="btn btn-primary btn-sm" {{action "add" model}}>
+				    <button type="button" class="btn btn-primary btn-sm" {{action "controller-action" "add"}}>
 						<i class="fa fa-plus" style="margin-right:5px;" /><span>Add Registered User</span>
 				    </button>
 				</th>
@@ -189,7 +189,7 @@
 					<td style="vertical-align:middle;">{{userRel.user.fullName}}</td>
 					<td style="vertical-align:middle;">{{userRel.formattedCreatedOn}}</td>
 					<td style="text-align:right; vertical-align:middle;">
-					    <button type="button" class="btn btn-warning btn-sm" {{action "delete" model userRel bubbles=false}}>
+					    <button type="button" class="btn btn-warning btn-sm" {{action "controller-action" "delete" userRel bubbles=false}}>
 							<i class="fa fa-undo" style="margin-right:5px;" /><span>Cancel</span>
 					    </button>
 					</td>
@@ -201,18 +201,18 @@
 						<td style="vertical-align:middle;">{{userRel.user.fullName}}</td>
 						<td style="vertical-align:middle;">{{userRel.formattedCreatedOn}}</td>
 						<td style="text-align:right; vertical-align:middle;">
-						    <button type="button" class="btn btn-danger btn-sm" {{action "delete" model userRel bubbles=false}}>
+						    <button type="button" class="btn btn-danger btn-sm" {{action "controller-action" "delete" userRel bubbles=false}}>
 								<i class="fa fa-remove" style="margin-right:5px;" /><span>Delete</span>
 						    </button>
 						</td>
 					</tr>
 					{{else}}
-					<tr id="organization-manager-organization-structure-organization-users-tr-{{userRel.user.id}}" {{action "select" userRel bubbles=false}}>
+					<tr id="organization-manager-organization-structure-organization-users-tr-{{userRel.user.id}}" {{action "controller-action" "select" userRel bubbles=false}}>
 						<td style="vertical-align:middle;">{{userRel.user.email}}</td>
 						<td style="vertical-align:middle;">{{userRel.user.fullName}}</td>
 						<td style="vertical-align:middle;">{{userRel.formattedCreatedOn}}</td>
 						<td style="text-align:right; vertical-align:middle;">
-						    <button type="button" class="btn btn-danger btn-sm" {{action "delete" model userRel bubbles=false}}>
+						    <button type="button" class="btn btn-danger btn-sm" {{action "controller-action" "delete" userRel bubbles=false}}>
 								<i class="fa fa-remove" style="margin-right:5px;" /><span>Delete</span>
 						    </button>
 						</td>
@@ -235,7 +235,7 @@
 <div class="box box-default" style="text-align:left; box-shadow:none;">
 	<div class="box-header with-border">
 		<h3 class="box-title">{{currentlySelectedUser.fullName}} Groups</h3>
-		<div class="pull-right" style="cursor:pointer; margin:0px 5px;" {{action "add-user-group" currentlySelectedUser bubbles=false}}>
+		<div class="pull-right" style="cursor:pointer; margin:0px 5px;" {{action "controller-action" "add-user-group" currentlySelectedUser bubbles=false}}>
 		    <button type="button" class="btn btn-primary btn-sm">
 				<i class="fa fa-plus" style="margin-right:5px;" /><span>Add Group</span>
 		    </button>
@@ -260,7 +260,7 @@
 					</td>
 					<td style="vertical-align:middle;">{{groupRel.formattedCreatedOn}}</td>
 					<td style="text-align:right; vertical-align:middle;">
-					    <button type="button" class="btn btn-danger btn-sm" {{action "delete-user-group" currentlySelectedUser groupRel bubbles=false}}>
+					    <button type="button" class="btn btn-danger btn-sm" {{action "controller-action" "delete-user-group" groupRel bubbles=false}}>
 							<i class="fa fa-remove" style="margin-right:5px;" /><span>Delete</span>
 					    </button>
 					</td>
@@ -270,7 +270,7 @@
 					<td style="vertical-align:middle;">{{groupRel.group.displayName}}</td>
 					<td style="vertical-align:middle;">{{groupRel.formattedCreatedOn}}</td>
 					<td style="text-align:right; vertical-align:middle;">
-					    <button type="button" class="btn btn-danger btn-sm" {{action "delete-user-group" currentlySelectedUser groupRel bubbles=false}}>
+					    <button type="button" class="btn btn-danger btn-sm" {{action "controller-action" "delete-user-group" groupRel bubbles=false}}>
 							<i class="fa fa-remove" style="margin-right:5px;" /><span>Delete</span>
 					    </button>
 					</td>
@@ -299,20 +299,20 @@
 <div class="box box-default" style="text-align:left; margin-bottom:0px; box-shadow:none;">
 	<div class="box-header with-border">
 		<h3 class="box-title">{{model.name}} Organization</h3>
-		<div class="pull-right" style="cursor:pointer; margin:0px 5px;" {{action "delete" bubbles=false}}>
+		<div class="pull-right" style="cursor:pointer; margin:0px 5px;" {{action "controller-action" "delete" bubbles=false}}>
 		    <button type="button" class="btn btn-danger btn-sm">
 				<i class="fa fa-remove" style="margin-right:5px;" /><span>Delete</span>
 		    </button>
 		</div>
 		{{#if model.hasDirtyAttributes}}
 		{{#unless model.isNew}}
-		<div class="pull-right" style="cursor:pointer; margin:0px 5px;" {{action "cancel" bubbles=false}}>
+		<div class="pull-right" style="cursor:pointer; margin:0px 5px;" {{action "controller-action" "cancel" bubbles=false}}>
 		    <button type="button" class="btn btn-warning btn-sm">
 				<i class="fa fa-undo" style="margin-right:5px;" /><span>Cancel</span>
 		    </button>
 		</div>
 		{{/unless}}
-		<div class="pull-right" style="cursor:pointer; margin:0px 5px;" {{action "save" bubbles=false}}>
+		<div class="pull-right" style="cursor:pointer; margin:0px 5px;" {{action "controller-action" "save" bubbles=false}}>
 		    <button type="submit" class="btn btn-primary btn-sm">
 				<i class="fa fa-save" style="margin-right:5px;" /><span>Save</span>	
 		    </button>
@@ -337,11 +337,11 @@
 	<div class="box-body row">
 		<div class="col-lg-6 col-lg-offset-6 col-md-6 col-md-offset-6 col-sm-6 col-sm-offset-6 col-xs-12" style="text-align:right;">
 			{{#unless model.isDepartment}}
-		    <button type="button" class="btn btn-primary btn-sm" {{action "add" "subsidiary" bubbles=false}}>
+		    <button type="button" class="btn btn-primary btn-sm" {{action "controller-action" "add" "subsidiary" bubbles=false}}>
 				<i class="fa fa-plus" style="margin-right:5px;" /><span>Add Subsidiary</span>
 		    </button>
 			{{/unless}}
-		    <button type="button" class="btn btn-primary btn-sm" {{action "add" "department" bubbles=false}}>
+		    <button type="button" class="btn btn-primary btn-sm" {{action "controller-action" "add" "department" bubbles=false}}>
 				<i class="fa fa-plus" style="margin-right:5px;" /><span>Add Department</span>
 		    </button>
 		</div>
@@ -453,22 +453,6 @@
 <div class="box box-default" style="text-align:left; margin-bottom:0px; box-shadow:none;">
 	<div class="box-header with-border">
 		<h3 class="box-title">Organization Structure</h3>
-	</div>
-	<div id="div-organization-manager-organization-structure-failure-message" class="box-body callout callout-danger" style="display:none; border-radius:0px;">
-		{{#each model.errors.id as |error|}}
-			<span id="organization-manager-organization-structure-failed-message">{{error.message}}</span>
-		{{/each}}
-	</div>
-	<div id="div-organization-manager-organization-structure-alert-message" class="box-body callout callout-danger" style="display:none; border-radius:0px;">
-		<i class="fa fa-ban"></i>
-		<span id="organization-manager-organization-structure-alert-message">Alert!</span>
-	</div>
-	<div id="div-organization-manager-organization-structure-progress-message" class="box-body callout callout-info" style="display:none; border-radius:0px;">
-		<i class="fa fa-spinner fa-spin"></i>
-		<span id="organization-manager-organization-structure-progress-message">Progress...</span>
-	</div>
-	<div id="div-organization-manager-organization-structure-success-message" class="box-body callout callout-success" style="display:none; border-radius:0px;">
-		<span id="organization-manager-organization-structure-success-message">Success!</span>
 	</div>
 	<div class="box-body">
 		<div class="col-lg-2 col-md-2 col-sm-2 col-xs-2" style="max-height:640px; overflow:auto;">

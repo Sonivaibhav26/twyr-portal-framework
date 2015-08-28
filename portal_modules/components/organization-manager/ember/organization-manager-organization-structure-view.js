@@ -132,7 +132,16 @@ define(
 				var parentNode = this.$('div.box-body div').jstree('get_node', selNodes[selNodeIdx].parents[1]);
 				this.$('div.box-body div').jstree('delete_node', selNodes[selNodeIdx]);
 				this.$('div.box-body div').jstree('activate_node', parentNode, false, false);
-			})
+			}),
+
+			'actions': {
+				'controller-action': function(action, data) {
+					if(this[action])
+						this[action](data);
+					else
+						this.sendAction('controller-action', action, data);
+				}
+			}
 		});
 
 		exports['default'] = OrganizationManagerOrganizationStructureTreeComponent;
@@ -146,34 +155,37 @@ define(
 		if(window.developmentMode) console.log('DEFINE: twyrPortal/components/organization-manager-organization-structure-organization');
 
 		var OrganizationManagerOrganizationStructureOrganizationComponent = window.Ember.Component.extend({
+			'add': function(entityType) {
+				this.sendAction('controller-action', 'add-entity', {
+					'id': this.get('model').get('id'),
+					'type': entityType
+				});
+			},
+
+			'save': function() {
+				this.sendAction('controller-action', 'save-org', {
+					'id': this.get('model').get('id'),
+					'type': 'organization'
+				});
+			},
+
+			'cancel': function() {
+				this.get('model').rollbackAttributes();
+			},
+
+			'delete': function() {
+				this.sendAction('controller-action', 'delete-org', {
+					'id': this.get('model').get('id'),
+					'type': 'organization'
+				});
+			},
+
 			'actions': {
-				'add': function(entityType) {
-					this.sendAction('controller-action', 'add-entity', {
-						'id': this.get('model').get('id'),
-						'type': entityType
-					});
-				},
-
-				'save': function() {
-					this.sendAction('controller-action', 'save-org', {
-						'id': this.get('model').get('id'),
-						'type': 'organization'
-					});
-				},
-
-				'cancel': function() {
-					this.get('model').rollbackAttributes();
-				},
-
-				'delete': function() {
-					this.sendAction('controller-action', 'delete-org', {
-						'id': this.get('model').get('id'),
-						'type': 'organization'
-					});
-				},
-
 				'controller-action': function(action, data) {
-					this.sendAction('controller-action', action, data);
+					if(this[action])
+						this[action](data);
+					else
+						this.sendAction('controller-action', action, data);
 				}
 			}
 		});
@@ -357,103 +369,110 @@ define(
 				});
 			},
 
-			'actions': {
-				'create': function(organization) {
-					var email = self.$('input#organization-manager-organization-structure-organization-users-input-email').val(),
-						firstName = self.$('input#organization-manager-organization-structure-organization-users-input-first-name').val(),
-						lastName  = self.$('input#organization-manager-organization-structure-organization-users-input-last-name').val();
+			'create': function(organization) {
+				var email = self.$('input#organization-manager-organization-structure-organization-users-input-email').val(),
+					firstName = self.$('input#organization-manager-organization-structure-organization-users-input-first-name').val(),
+					lastName  = self.$('input#organization-manager-organization-structure-organization-users-input-last-name').val();
 
-					this.sendAction('controller-action', 'create-user-rel', {
-						'organization': organization,
-						'email': email,
-						'firstName': firstName,
-						'lastName': lastName
-					});
+				this.sendAction('controller-action', 'create-user-rel', {
+					'organization': organization,
+					'email': email,
+					'firstName': firstName,
+					'lastName': lastName
+				});
 
-					window.Ember.run.scheduleOnce('afterRender', this, function() {
-						self.$('input#organization-manager-organization-structure-organization-users-input-email').val('');
-						self.$('input#organization-manager-organization-structure-organization-users-input-first-name').val('');
-						self.$('input#organization-manager-organization-structure-organization-users-input-last-name').val('');
-					});
-				},
+				window.Ember.run.scheduleOnce('afterRender', this, function() {
+					self.$('input#organization-manager-organization-structure-organization-users-input-email').val('');
+					self.$('input#organization-manager-organization-structure-organization-users-input-first-name').val('');
+					self.$('input#organization-manager-organization-structure-organization-users-input-last-name').val('');
+				});
+			},
 
-				'add': function(organization) {
-					var self = this,
-						newUserRelId = app.default.generateUUID();
+			'add': function() {
+				var self = this,
+					newUserRelId = app.default.generateUUID();
 
-					this.sendAction('controller-action', 'add-user-rel', {
-						'organization': organization,
-						'newUserRelId': newUserRelId
-					});
+				this.sendAction('controller-action', 'add-user-rel', {
+					'organization': this.get('model'),
+					'newUserRelId': newUserRelId
+				});
 
-					window.Ember.run.scheduleOnce('afterRender', this, function() {
-						self._initSelect(self.$('select#organization-manager-organization-structure-organization-users-select-new-' + newUserRelId));
-					});
-				},
+				window.Ember.run.scheduleOnce('afterRender', this, function() {
+					self._initSelect(self.$('select#organization-manager-organization-structure-organization-users-select-new-' + newUserRelId));
+				});
+			},
 
-				'delete': function(organization, userRel) {
-					this.set('currentlySelectedUser', null);
-					this.sendAction('controller-action', 'delete-user-rel', {
-						'organization': organization, 
-						'userRel': userRel
-					});
-				},
+			'delete': function(userRel) {
+				this.set('currentlySelectedUser', null);
+				this.sendAction('controller-action', 'delete-user-rel', {
+					'organization': this.get('model'), 
+					'userRel': userRel
+				});
+			},
 
-				'select': function(userRel) {
-					if(this.get('currentlySelectedUser')) {
-						this.get('currentlySelectedUser').set('isCurrentlySelected', false);
+			'select': function(userRel) {
+				if(this.get('currentlySelectedUser')) {
+					this.get('currentlySelectedUser').set('isCurrentlySelected', false);
+				}
+
+				this.set('currentlySelectedUser', null);
+				this.get('model').get('users').forEach(function(thisUserRel) {
+					if(!thisUserRel.get('user').get('isLoaded'))
+						return;
+
+					thisUserRel.get('user').set('isCurrentlySelected', false);
+				});
+
+				userRel.get('user').set('isCurrentlySelected', true);
+				this.set('currentlySelectedUser', userRel.get('user'));
+
+				var self = this;
+				userRel.get('user').get('groups').forEach(function(userGroup) {
+					if(userGroup.get('tenant') == self.get('model').get('id')) {
+						userGroup.set('belongsToTenant', true);
 					}
-	
-					this.set('currentlySelectedUser', null);
-					this.get('model').get('users').forEach(function(thisUserRel) {
-						if(!thisUserRel.get('user').get('isLoaded'))
-							return;
+					else {
+						userGroup.set('belongsToTenant', false);
+					}
+				});
 
-						thisUserRel.get('user').set('isCurrentlySelected', false);
+				window.Ember.run.scheduleOnce('afterRender', this, function() {
+					self.$('select').each(function(index, selectElem) {
+						if(self.$(selectElem).attr('id').indexOf('new-user-group') >= 0)
+							self._initGroupSelect(self.$(selectElem));
 					});
+				});
+			},
 
-					userRel.get('user').set('isCurrentlySelected', true);
-					this.set('currentlySelectedUser', userRel.get('user'));
+			'add-user-group': function(user) {
+				var self = this,
+					userGroupId = app.default.generateUUID();
 
-					var self = this;
-					userRel.get('user').get('groups').forEach(function(userGroup) {
-						if(userGroup.get('tenant') == self.get('model').get('id')) {
-							userGroup.set('belongsToTenant', true);
-						}
-						else {
-							userGroup.set('belongsToTenant', false);
-						}
-					});
+				self.sendAction('controller-action', 'add-user-group', {
+					'tenant': self.get('model').get('id'),
+					'user': user,
+					'userGroupId': userGroupId
+				});
 
-					window.Ember.run.scheduleOnce('afterRender', this, function() {
-						self.$('select').each(function(index, selectElem) {
-							if(self.$(selectElem).attr('id').indexOf('new-user-group') >= 0)
-								self._initGroupSelect(self.$(selectElem));
-						});
-					});
-				},
+				window.Ember.run.scheduleOnce('afterRender', self, function() {
+					var selectElem = self.$('select#organization-manager-organization-structure-organization-users-select-new-user-group-' + userGroupId);
+					self._initGroupSelect(self.$(selectElem));
+				});
+			},
 
-				'add-user-group': function(user) {
-					var self = this,
-						userGroupId = app.default.generateUUID();
+			'delete-user-group': function(userGroup) {
+				this.sendAction('controller-action', 'delete-user-group', {
+					'user': this.get('currentlySelectedUser'),
+					'userGroup': userGroup
+				});
+			},
 
-					self.sendAction('controller-action', 'add-user-group', {
-						'tenant': self.get('model').get('id'),
-						'user': user,
-						'userGroupId': userGroupId
-					});
-
-					window.Ember.run.scheduleOnce('afterRender', self, function() {
-						var selectElem = self.$('select#organization-manager-organization-structure-organization-users-select-new-user-group-' + userGroupId);
-						self._initGroupSelect(self.$(selectElem));
-					});
-				},
-
-				'delete-user-group': function(user, userGroup) {
-					this.sendAction('controller-action', 'delete-user-group', {
-						'user': user,
-						'userGroup': userGroup
-					});
+			'actions': {
+				'controller-action': function(action, data) {
+					if(this[action])
+						this[action](data);
+					else
+						this.sendAction('controller-action', action, data);
 				}
 			}
 		});
@@ -636,7 +655,16 @@ define(
 				var parentNode = this.$('div.box-body div').jstree('get_node', selNodes[selNodeIdx].parents[0]);
 				this.$('div.box-body div').jstree('delete_node', selNodes[selNodeIdx]);
 				this.$('div.box-body div').jstree('activate_node', parentNode, false, false);
-			})
+			}),
+
+			'actions': {
+				'controller-action': function(action, data) {
+					if(this[action])
+						this[action](data);
+					else
+						this.sendAction('controller-action', action, data);
+				}
+			}
 		});
 
 		exports['default'] = OrganizationManagerOrganizationStructureGroupsTreeComponent;
@@ -650,27 +678,34 @@ define(
 		if(window.developmentMode) console.log('DEFINE: twyrPortal/components/organization-manager-organization-structure-group-detail');
 
 		var OrganizationManagerOrganizationStructureGroupDetailComponent = window.Ember.Component.extend({
+			'save': function() {
+				this.sendAction('controller-action', 'save-group', {
+					'group': this.get('model')
+				});
+			},
+
+			'cancel': function() {
+				this.get('model').rollbackAttributes();
+			},
+
+			'delete': function() {
+				this.sendAction('controller-action', 'delete-group', {
+					'group': this.get('model')
+				});
+			},
+
+			'add-subgroup': function() {
+				this.sendAction('controller-action', 'add-group', {
+					'parent': this.get('model')
+				});
+			},
+
 			'actions': {
-				'save': function() {
-					this.sendAction('controller-action', 'save-group', {
-						'group': this.get('model')
-					});
-				},
-
-				'cancel': function() {
-					this.get('model').rollbackAttributes();
-				},
-
-				'delete': function() {
-					this.sendAction('controller-action', 'delete-group', {
-						'group': this.get('model')
-					});
-				},
-
-				'add-subgroup': function() {
-					this.sendAction('controller-action', 'add-group', {
-						'parent': this.get('model')
-					});
+				'controller-action': function(action, data) {
+					if(this[action])
+						this[action](data);
+					else
+						this.sendAction('controller-action', action, data);
 				}
 			}
 		});
@@ -750,25 +785,32 @@ define(
 				});
 			},
 
+			'add-permission': function(permissionRel) {
+				var newRelId = app.default.generateUUID();
+				this.sendAction('controller-action', 'add-permission', {
+					'newRelId': newRelId,
+					'group': this.get('model')
+				});
+
+				var self = this;
+				window.Ember.run.scheduleOnce('afterRender', self, function() {
+					self._initSelect(self.$('select#organization-manager-organization-structure-group-permissions-select-' + newRelId));
+				});
+			},
+
+			'delete-permission': function(permissionRel) {
+				this.sendAction('controller-action', 'delete-permission', {
+					'group': this.get('model'),
+					'permissionRel': permissionRel
+				});
+			},
+
 			'actions': {
-				'add-permission': function(permissionRel) {
-					var newRelId = app.default.generateUUID();
-					this.sendAction('controller-action', 'add-permission', {
-						'newRelId': newRelId,
-						'group': this.get('model')
-					});
-
-					var self = this;
-					window.Ember.run.scheduleOnce('afterRender', self, function() {
-						self._initSelect(self.$('select#organization-manager-organization-structure-group-permissions-select-' + newRelId));
-					});
-				},
-
-				'delete-permission': function(permissionRel) {
-					this.sendAction('controller-action', 'delete-permission', {
-						'group': this.get('model'),
-						'permissionRel': permissionRel
-					});
+				'controller-action': function(action, data) {
+					if(this[action])
+						this[action](data);
+					else
+						this.sendAction('controller-action', action, data);
 				}
 			}
 		});

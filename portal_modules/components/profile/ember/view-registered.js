@@ -1,4 +1,46 @@
 define(
+	"twyrPortal/components/logout-form",
+	["exports"],
+	function(exports) {
+		if(window.developmentMode) console.log('DEFINE: twyrPortal/components/logout-form');
+
+		var LogoutFormComponent = window.Ember.Component.extend({
+			'doLogout': function() {
+				window.Ember.$.ajax({
+					'type': 'GET',
+					'url': window.apiServer + 'profiles/doLogout',
+					'dataType': 'json',
+
+					'success': function(data) {
+						if(!data.status) {
+							alert(data);
+						}
+
+						window.location.href = '/';
+					},
+
+					'error': function(err) {
+						alert(err.responseJSON ? err.responseJSON.responseText : (err.responseText || 'Unknown error' ));
+						window.location.href = '/';
+					}
+				});
+			},
+
+			'actions': {
+				'controller-action': function(action, data) {
+					if(this[action])
+						this[action](data);
+					else
+						this.sendAction('controller-action', action, data);
+				}
+			}
+		});
+
+		exports['default'] = LogoutFormComponent;
+	}
+);
+
+define(
 	"twyrPortal/components/change-password",
 	["exports"],
 	function(exports) {
@@ -40,65 +82,45 @@ define(
 				window.Ember.$('button#component-change-password-button-submit').attr('disabled', 'disabled');
 			},
 
-			'resetStatusMessages': function(timeout) {
-				window.Ember.$('div#div-profile-component-alert-message').slideUp(timeout || 600);
-				window.Ember.$('span#profile-component-alert-message').text('');
+			'changePassword': function() {
+				var self = this;
 
-				window.Ember.$('div#div-profile-component-progress-message').slideUp(timeout || 600);
-				window.Ember.$('span#profile-component-progress-message').text('');
+				self.lockChangePasswordForm();
+				self.sendAction('controller-action', 'display-status-message', { 'type': 'info', 'message': 'Changing your password...' });
 
-				window.Ember.$('div#div-profile-component-success-message').slideUp(timeout || 600);
-				window.Ember.$('span#profile-component-success-message').text('');
-			},
+				window.Ember.$.ajax({
+					'type': 'POST',
+					'url': window.apiServer + 'profiles/changePassword',
 
-			'showStatusMessage': function(statusMessageType, messageText) {
-				this.resetStatusMessages(2);
+					'dataType': 'json',
+					'data': {
+						'currentPassword': self.currentPassword,
+						'newPassword1': self.newPassword1,
+						'newPassword2': self.newPassword2
+					},
 
-				window.Ember.$('span#profile-component-' + statusMessageType + '-message').html(messageText);
-				window.Ember.$('div#div-profile-component-' + statusMessageType + '-message').slideDown(600);
+					'success': function(data) {
+						if(data.status) {
+							self.sendAction('controller-action', 'display-status-message', { 'type': 'success', 'message': data.responseText });
+						}
+						else {
+							self.sendAction('controller-action', 'display-status-message', { 'type': 'danger', 'message': data.responseText });
+						}
+					},
+
+					'error': function(err) {
+						self.resetChangePasswordForm();
+						self.sendAction('controller-action', 'display-status-message', { 'type': 'danger', 'message': (err.responseJSON ? err.responseJSON.responseText : (err.responseText || 'Unknown error' )) });
+					}
+				});
 			},
 
 			'actions': {
-				'changePassword': function() {
-					var self = this;
-
-					self.lockChangePasswordForm();
-					self.showStatusMessage('progress', 'Changing your password...');
-
-					window.Ember.$.ajax({
-						'type': 'POST',
-						'url': window.apiServer + 'profiles/changePassword',
-
-						'dataType': 'json',
-						'data': {
-							'currentPassword': self.currentPassword,
-							'newPassword1': self.newPassword1,
-							'newPassword2': self.newPassword2
-						},
-
-						'success': function(data) {
-							if(data.status) {
-								self.showStatusMessage('success', data.responseText);
-							}
-							else {
-								self.showStatusMessage('alert', data.responseText);
-							}
-
-							window.Ember.run.later(self, function() {
-								self.resetChangePasswordForm();
-								self.resetStatusMessages();
-							}, 5000);
-						},
-
-						'error': function(err) {
-							self.resetChangePasswordForm();
-							self.showStatusMessage('alert', (err.responseJSON ? err.responseJSON.responseText : (err.responseText || 'Unknown error' )));
-
-							window.Ember.run.later(self, function() {
-								self.resetStatusMessages();
-							}, 5000);
-						}
-					});
+				'controller-action': function(action, data) {
+					if(this[action])
+						this[action](data);
+					else
+						this.sendAction('controller-action', action, data);
 				}
 			}
 		});
@@ -240,28 +262,6 @@ define(
 				window.Ember.$('button#component-manage-personal-details-button-submit').attr('disabled', 'disabled');
 			},
 
-			'resetStatusMessages': function(timeout) {
-				window.Ember.$('div#div-profile-component-failure-message').slideUp(timeout || 600);
-
-				window.Ember.$('div#div-profile-component-alert-message').slideUp(timeout || 600);
-				window.Ember.$('span#profile-component-alert-message').text('');
-
-				window.Ember.$('div#div-profile-component-progress-message').slideUp(timeout || 600);
-				window.Ember.$('span#profile-component-progress-message').text('');
-
-				window.Ember.$('div#div-profile-component-success-message').slideUp(timeout || 600);
-				window.Ember.$('span#profile-component-success-message').text('');
-			},
-
-			'showStatusMessage': function(statusMessageType, messageText) {
-				this.resetStatusMessages(2);
-
-				window.Ember.$('div#div-profile-component-' + statusMessageType + '-message').slideDown(600);
-				if(statusMessageType != 'failure') {
-					window.Ember.$('span#profile-component-' + statusMessageType + '-message').html(messageText);
-				}
-			},
-
 			'storeImage': function() {
 				var self = this;
 				if(!self.get('profileImage'))
@@ -276,84 +276,77 @@ define(
 		
 					'success': function(data) {
 						if(data.status) {
-							self.showStatusMessage('success', data.responseText);
+							self.sendAction('controller-action', 'display-status-message', { 'type': 'success', 'message': data.responseText });
 						}
 						else {
-							self.showStatusMessage('alert', data.responseText);
+							self.sendAction('controller-action', 'display-status-message', { 'type': 'danger', 'message': data.responseText });
 						}
 
 						window.Ember.$('img#component-manage-personal-details-img-profile-image').attr('src', 'profile/profileImage');
-						window.Ember.run.later(self, function() {
-							self.resetStatusMessages();
-						}, 5000);
 					},
 		
 					'error': function(err) {
-						self.showStatusMessage('alert', (err.responseJSON ? err.responseJSON.responseText : (err.responseText || 'Unknown error' )));
+						self.sendAction('controller-action', 'display-status-message', { 'type': 'danger', 'message': (err.responseJSON ? err.responseJSON.responseText : (err.responseText || 'Unknown error' )) });
+					}
+				});
+			},
 
-						window.Ember.$('img#component-manage-personal-details-img-profile-image').attr('src', 'profile/profileImage');
-						window.Ember.run.later(self, function() {
-							self.resetStatusMessages();
-						}, 5000);
+			'cancelPersonalDetails': function() {
+				this.resetManagePersonalDetailsForm();
+			},
+
+			'savePersonalDetails': function() {
+				var self = this;
+				self.sendAction('controller-action', 'display-status-message', { 'type': 'info', 'message': 'Saving personal information...' });
+				self.lockManagePersonalDetailsForm();
+
+				self.get('model')
+				.save()
+				.then(function() {
+					self.sendAction('controller-action', 'display-status-message', { 'type': 'success', 'message': 'Your personal information has been updated' });
+				})
+				.catch(function(reason) {
+					self.sendAction('controller-action', 'display-status-message', { 'type': 'error', 'errorModel': self.get('model') });
+					self.get('model').rollbackAttributes();
+				});
+			},
+
+			'deleteAccount': function() {
+				var self = this;
+
+				window.Ember.$.confirm({
+					'text': 'Are you sure that you want to delete your account?',
+					'title': 'Delete Account',
+
+					'confirm': function() {
+						self.get('model')
+						.destroyRecord()
+						.then(function() {
+							self.sendAction('controller-action', 'display-status-message', { 'type': 'success', 'message': 'Your personal information has been deleted' });
+							window.Ember.run.later(self, function() {
+								window.location.href = '/';
+							}, 2500);
+						})
+						.catch(function(reason) {
+							self.sendAction('controller-action', 'display-status-message', { 'type': 'error', 'errorModel': self.get('model') });
+							self.get('model').rollbackAttributes();
+						});
+					},
+
+					'cancel': function() {
+						// Nothing to do...
 					}
 				});
 			},
 
 			'actions': {
-				'cancelPersonalDetails': function() {
-					this.resetManagePersonalDetailsForm();
-				},
-
-				'savePersonalDetails': function() {
-					var self = this;
-	
-					self.lockManagePersonalDetailsForm();
-					self.showStatusMessage('progress', 'Saving personal information...');
-	
-					self.get('model')
-					.save()
-					.then(function() {
-						self.showStatusMessage('success', 'Your personal information has been updated');
-						window.Ember.run.later(self, function() {
-							self.resetStatusMessages();
-						}, 5000);
-					})
-					.catch(function(reason) {
-						self.showStatusMessage('failure');
-						window.Ember.run.later(self, function() {
-							self.resetStatusMessages();
-
-							self.get('model').rollbackAttributes();
-							self.get('model').transitionTo('loaded.saved');
-						}, 5000);
-					});
-				},
-
-				'deleteAccount': function() {
-					var self = this;
-
-					window.Ember.$.confirm({
-						'text': 'Are you sure that you want to delete your account?',
-						'title': 'Delete Account',
-
-						'confirm': function() {
-							self.get('model')
-							.destroyRecord()
-							.then(function() {
-								self.showStatusMessage('success', 'Your personal information has been deleted');
-								window.Ember.run.later(self, function() {
-									window.location.href = '/';
-								}, 2500);
-							})
-							.catch(function(reason) {
-								self.showStatusMessage('failure');
-							});
-						},
-
-						'cancel': function() {
-							// Nothing to do...
-						}
-					});
+				'controller-action': function(action, data) {
+					if(this[action]) {
+						this[action](data);
+					}
+					else {
+						this.sendAction('controller-action', action, data);
+					}
 				}
 			}
 		});

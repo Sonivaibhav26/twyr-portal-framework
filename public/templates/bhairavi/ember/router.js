@@ -12,6 +12,12 @@ define(
 		var ApplicationRoute = window.Ember.Route.extend({
 			'beforeModel': function() {
 				return window.Ember.$.getScript('/mvc');
+			},
+
+			'actions': {
+				'portal-action': function(action, data) {
+					this.get('controller').send('portal-action', action, data);
+				}
 			}
 		});
 

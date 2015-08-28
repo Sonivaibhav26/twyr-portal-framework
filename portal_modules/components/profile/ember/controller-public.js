@@ -120,174 +120,181 @@ define(
 				window.Ember.$('div#div-login-component-' + statusMessageType + '-message').slideDown(600);
 			},
 
-			'actions': {
-				'showLoginForm': function() {
-					window.Ember.$('div#div-box-body-register-account').slideUp(600);
-					window.Ember.$('div#div-box-body-reset-password').slideUp(600);
+			'showLoginForm': function() {
+				window.Ember.$('div#div-box-body-register-account').slideUp(600);
+				window.Ember.$('div#div-box-body-reset-password').slideUp(600);
 
-					this.resetLoginForm();
-					window.Ember.$('div#div-box-body-login').slideDown(600);
-				},
+				this.resetLoginForm();
+				window.Ember.$('div#div-box-body-login').slideDown(600);
+			},
 
-				'showResetPasswordForm': function() {
-					window.Ember.$('div#div-box-body-login').slideUp(600);
-					window.Ember.$('div#div-box-body-register-account').slideUp(600);
+			'showResetPasswordForm': function() {
+				window.Ember.$('div#div-box-body-login').slideUp(600);
+				window.Ember.$('div#div-box-body-register-account').slideUp(600);
 
-					this.resetForgotPasswordForm();
-					window.Ember.$('div#div-box-body-reset-password').slideDown(600);
-				},
+				this.resetForgotPasswordForm();
+				window.Ember.$('div#div-box-body-reset-password').slideDown(600);
+			},
 
-				'showNewAccountForm': function() {
-					window.Ember.$('div#div-box-body-login').slideUp(600);
-					window.Ember.$('div#div-box-body-reset-password').slideUp(600);
+			'showNewAccountForm': function() {
+				window.Ember.$('div#div-box-body-login').slideUp(600);
+				window.Ember.$('div#div-box-body-reset-password').slideUp(600);
 
-					this.resetRegisterAccountForm();
-					window.Ember.$('div#div-box-body-register-account').slideDown(600);
-				},
+				this.resetRegisterAccountForm();
+				window.Ember.$('div#div-box-body-register-account').slideDown(600);
+			},
 
-				'doLogin': function() {
-					var self = this;
+			'doLogin': function() {
+				var self = this;
 
-					self.lockLoginForm();
-					self.showStatusMessage('progress', 'Logging you in...');
+				self.lockLoginForm();
+				self.showStatusMessage('progress', 'Logging you in...');
 
-					window.Ember.$.ajax({
-						'type': 'POST',
-						'url': window.apiServer + 'profiles/doLogin',
-				
-						'dataType': 'json',
-						'data': {
-							'username': this.get('username'),
-							'password': this.get('password')
-						},
-				
-						'success': function(data) {
-							if(data.status) {
-								self.showStatusMessage('success', data.responseText);
+				window.Ember.$.ajax({
+					'type': 'POST',
+					'url': window.apiServer + 'profiles/doLogin',
+			
+					'dataType': 'json',
+					'data': {
+						'username': this.get('username'),
+						'password': this.get('password')
+					},
+			
+					'success': function(data) {
+						if(data.status) {
+							self.showStatusMessage('success', data.responseText);
 
-								window.Ember.run.later(self, function() {
-									self.resetLoginForm();
-									window.location.href = '/';
-								}, 1000);
-							}
-							else {
+							window.Ember.run.later(self, function() {
 								self.resetLoginForm();
-								self.showStatusMessage('alert', data.responseText);
-
-								window.Ember.run.later(self, function() {
-									self.resetStatusMessages();
-								}, 5000);
-							}
-						},
-				
-						'error': function(err) {
+								window.location.href = '/';
+							}, 1000);
+						}
+						else {
 							self.resetLoginForm();
-							self.showStatusMessage('alert', (err.responseJSON ? err.responseJSON.responseText : (err.responseText || 'Unknown error' )));
+							self.showStatusMessage('alert', data.responseText);
 
 							window.Ember.run.later(self, function() {
 								self.resetStatusMessages();
 							}, 5000);
 						}
-					});
-				},
-
-				'doSocialLogin': function(socialNetwork) {
-					var currentLocation = window.location.href;
-					window.location.href = window.apiServer + 'profiles/' + socialNetwork + '?currentLocation=' + currentLocation;
-				},
-
-				'resetPassword': function() {
-					var self = this;
-
-					self.lockForgotPasswordForm();
-					self.showStatusMessage('progress', 'Resetting your password...');
-
-					window.Ember.$.ajax({
-						'type': 'POST',
-						'url': window.apiServer + 'profiles/resetPassword',
+					},
 			
-						'dataType': 'json',
-						'data': {
-							'username': this.get('resetUsername')
-						},
-		
-						'success': function(data) {
-							if(data.status) {
-								self.showStatusMessage('success', data.responseText);
+					'error': function(err) {
+						self.resetLoginForm();
+						self.showStatusMessage('alert', (err.responseJSON ? err.responseJSON.responseText : (err.responseText || 'Unknown error' )));
 
-								window.Ember.run.later(self, function() {
-									self.resetForgotPasswordForm();
-									self.resetStatusMessages();
-								}, 5000);
-							}
-							else {
+						window.Ember.run.later(self, function() {
+							self.resetStatusMessages();
+						}, 5000);
+					}
+				});
+			},
+
+			'doSocialLogin': function(socialNetwork) {
+				var currentLocation = window.location.href;
+				window.location.href = window.apiServer + 'profiles/' + socialNetwork + '?currentLocation=' + currentLocation;
+			},
+
+			'resetPassword': function() {
+				var self = this;
+
+				self.lockForgotPasswordForm();
+				self.showStatusMessage('progress', 'Resetting your password...');
+
+				window.Ember.$.ajax({
+					'type': 'POST',
+					'url': window.apiServer + 'profiles/resetPassword',
+		
+					'dataType': 'json',
+					'data': {
+						'username': this.get('resetUsername')
+					},
+	
+					'success': function(data) {
+						if(data.status) {
+							self.showStatusMessage('success', data.responseText);
+
+							window.Ember.run.later(self, function() {
 								self.resetForgotPasswordForm();
-								self.showStatusMessage('alert', data.responseText);
-
-								window.Ember.run.later(self, function() {
-									self.resetStatusMessages();
-								}, 5000);
-							}
-						},
-				
-						'error': function(err) {
-							console.error(err);
-
+								self.resetStatusMessages();
+							}, 5000);
+						}
+						else {
 							self.resetForgotPasswordForm();
-							self.showStatusMessage('alert', (err.responseJSON ? err.responseJSON.responseText : (err.responseText || 'Unknown error' )));
+							self.showStatusMessage('alert', data.responseText);
 
 							window.Ember.run.later(self, function() {
 								self.resetStatusMessages();
 							}, 5000);
 						}
-					});
-				},
-
-				'registerAccount': function() {
-					var self = this;
-
-					self.lockRegisterAccountForm();
-					self.showStatusMessage('progress', 'Creating your account...');
-
-					window.Ember.$.ajax({
-						'type': 'POST',
-						'url': window.apiServer + 'profiles/registerAccount',
+					},
 			
-						'dataType': 'json',
-						'data': {
-							'username': self.get('registerUsername'),
-							'firstname': self.get('registerFirstname'),
-							'lastname': self.get('registerLastname')
-						},
+					'error': function(err) {
+						console.error(err);
+
+						self.resetForgotPasswordForm();
+						self.showStatusMessage('alert', (err.responseJSON ? err.responseJSON.responseText : (err.responseText || 'Unknown error' )));
+
+						window.Ember.run.later(self, function() {
+							self.resetStatusMessages();
+						}, 5000);
+					}
+				});
+			},
+
+			'registerAccount': function() {
+				var self = this;
+
+				self.lockRegisterAccountForm();
+				self.showStatusMessage('progress', 'Creating your account...');
+
+				window.Ember.$.ajax({
+					'type': 'POST',
+					'url': window.apiServer + 'profiles/registerAccount',
 		
-						'success': function(data) {
-							if(data.status) {
-								self.showStatusMessage('success', data.responseText);
+					'dataType': 'json',
+					'data': {
+						'username': self.get('registerUsername'),
+						'firstname': self.get('registerFirstname'),
+						'lastname': self.get('registerLastname')
+					},
+	
+					'success': function(data) {
+						if(data.status) {
+							self.showStatusMessage('success', data.responseText);
 
-								window.Ember.run.later(self, function() {
-									self.resetRegisterAccountForm();
-									self.resetStatusMessages();
-								}, 5000);
-							}
-							else {
+							window.Ember.run.later(self, function() {
 								self.resetRegisterAccountForm();
-								self.showStatusMessage('alert', data.responseText);
-
-								window.Ember.run.later(self, function() {
-									self.resetStatusMessages();
-								}, 5000);
-							}
-						},
-				
-						'error': function(err) {
+								self.resetStatusMessages();
+							}, 5000);
+						}
+						else {
 							self.resetRegisterAccountForm();
-							self.showStatusMessage('alert', (err.responseJSON ? err.responseJSON.responseText : (err.responseText || 'Unknown error' )));
+							self.showStatusMessage('alert', data.responseText);
 
 							window.Ember.run.later(self, function() {
 								self.resetStatusMessages();
 							}, 5000);
 						}
-					});
+					},
+			
+					'error': function(err) {
+						self.resetRegisterAccountForm();
+						self.showStatusMessage('alert', (err.responseJSON ? err.responseJSON.responseText : (err.responseText || 'Unknown error' )));
+
+						window.Ember.run.later(self, function() {
+							self.resetStatusMessages();
+						}, 5000);
+					}
+				});
+			},
+
+			'actions': {
+				'controller-action': function(action, data) {
+					if(this[action])
+						this[action](data);
+					else
+						this.send('controller-action', action, data);
 				}
 			}
 		});

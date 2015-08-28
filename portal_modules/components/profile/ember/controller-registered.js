@@ -1,34 +1,20 @@
 define(
-	"twyrPortal/components/logout-form",
+	"twyrPortal/controllers/profile",
 	["exports"],
 	function(exports) {
-		if(window.developmentMode) console.log('DEFINE: twyrPortal/components/logout-form');
+		if(window.developmentMode) console.log('DEFINE: twyrPortal/controllers/profile');
 
-		var LogoutFormComponent = window.Ember.Component.extend({
+		var ProfileController = window.Ember.Controller.extend({
 			'actions': {
-				'doLogout': function() {
-					window.Ember.$.ajax({
-						'type': 'GET',
-						'url': window.apiServer + 'profiles/doLogout',
-						'dataType': 'json',
-
-						'success': function(data) {
-							if(!data.status) {
-								alert(data);
-							}
-
-							window.location.href = '/';
-						},
-
-						'error': function(err) {
-							alert(err.responseJSON ? err.responseJSON.responseText : (err.responseText || 'Unknown error' ));
-							window.location.href = '/';
-						}
-					});
+				'controller-action': function(action, data) {
+					if(this[action])
+						this[action](data);
+					else
+						this.send('portal-action', action, data);
 				}
 			}
 		});
 
-		exports['default'] = LogoutFormComponent;
+		exports['default'] = ProfileController;
 	}
 );

@@ -57,22 +57,6 @@
 	<div class="box-header with-border">
 		<h3 class="box-title">Machine Data</h3>
 	</div>
-	<div id="div-machine-manager-realtime-data-failure-message" class="box-body callout callout-danger" style="display:none; border-radius:0px;">
-		{{#each model.errors.id as |error|}}
-			<span id="machine-manager-realtime-data-failed-message">{{error.message}}</span>
-		{{/each}}
-	</div>
-	<div id="div-machine-manager-realtime-data-alert-message" class="box-body callout callout-danger" style="display:none; border-radius:0px;">
-		<i class="fa fa-ban"></i>
-		<span id="machine-manager-realtime-data-alert-message">Alert!</span>
-	</div>
-	<div id="div-machine-manager-realtime-data-progress-message" class="box-body callout callout-info" style="display:none; border-radius:0px;">
-		<i class="fa fa-spinner fa-spin"></i>
-		<span id="machine-manager-realtime-data-progress-message">Progress...</span>
-	</div>
-	<div id="div-machine-manager-realtime-data-success-message" class="box-body callout callout-success" style="display:none; border-radius:0px;">
-		<span id="machine-manager-realtime-data-success-message">Success!</span>
-	</div>
 	<div class="box-body">
 		{{machine-manager-realtime-data-machine-list model=model controller-action="controller-action"}}
 	</div>

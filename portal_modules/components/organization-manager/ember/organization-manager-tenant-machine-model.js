@@ -191,7 +191,6 @@ define(
 		var OrganizationManagerTenantMachineTagModel = window.DS.Model.extend({
 			'name': window.DS.attr('string'),
 			'displayName': window.DS.attr('string'),
-			'register': window.DS.attr('string'),
 
 			'lowLowValue': window.DS.attr('string'),
 			'lowValue': window.DS.attr('string'),
@@ -199,6 +198,7 @@ define(
 			'highHighValue': window.DS.attr('string'),
 
 			'persist': window.DS.attr('boolean'),
+			'persistFrequency': window.DS.attr('string'),
 			'persistPeriod': window.DS.attr('number'),
 
 			'machine': window.DS.belongsTo('organization-manager-tenant-machine', { 'async': true, 'inverse': 'tags' })
@@ -240,6 +240,7 @@ define(
 			'highHighValue': window.DS.attr('string'),
 
 			'persist': window.DS.attr('boolean'),
+			'persistFrequency': window.DS.attr('string'),
 			'persistPeriod': window.DS.attr('number'),
 
 			'machine': window.DS.belongsTo('organization-manager-tenant-machine', { 'async': true, 'inverse': 'computed' })

@@ -132,7 +132,16 @@ define(
 				var parentNode = this.$('div.box-body div').jstree('get_node', selNodes[selNodeIdx].parents[1]);
 				this.$('div.box-body div').jstree('delete_node', selNodes[selNodeIdx]);
 				this.$('div.box-body div').jstree('activate_node', parentNode, false, false);
-			})
+			}),
+
+			'actions': {
+				'controller-action': function(action, data) {
+					if(this[action])
+						this[action](data);
+					else
+						this.sendAction('controller-action', action, data);
+				}
+			}
 		});
 
 		exports['default'] = OrganizationManagerTenantMachineManagementTreeComponent;
@@ -146,15 +155,52 @@ define(
 		if(window.developmentMode) console.log('DEFINE: twyrPortal/components/organization-manager-tenant-machine-management-machine-tags');
 
 		var OrganizationManagerTenantMachineManagementMachineTagsComponent = window.Ember.Component.extend({
+			'edit-tag': function(tag) {
+				this.set('currentlyEditingTag', tag);
+			},
+
+			'delete-tag': function(tag) {
+				tag.deleteRecord();
+				this.get('model').get('tags').removeObject(tag);
+
+				var jsonTags = [];
+				this.get('model').get('tags').forEach(function(thisTag) {
+					var jsonTag = thisTag.toJSON();
+					delete jsonTag.machine;
+
+					jsonTags.push(jsonTag);
+				});
+
+				this.sendAction('controller-action', 'update-machine-tag-list', {
+					'machine': this.get('model'),
+					'tags': jsonTags
+				});
+			},
+
+			'delete-computed-tag': function(tag) {
+				tag.deleteRecord();
+				this.get('model').get('computed').removeObject(tag);
+
+				var jsonTags = [];
+				this.get('model').get('computed').forEach(function(thisTag) {
+					var jsonTag = thisTag.toJSON();
+					delete jsonTag.machine;
+
+					jsonTags.push(jsonTag);
+				});
+
+				this.sendAction('controller-action', 'update-machine-computed-tag-list', {
+					'machine': this.get('model'),
+					'tags': jsonTags
+				});
+			},
+
 			'actions': {
-				'delete-tag': function(machine, tag) {
-					tag.deleteRecord();
-					machine.get('tags').removeObject(tag);
-				},
-	
-				'delete-computed-tag': function(machine, tag) {
-					tag.deleteRecord();
-					machine.get('computed').removeObject(tag);
+				'controller-action': function(action, data) {
+					if(this[action])
+						this[action](data);
+					else
+						this.sendAction('controller-action', action, data);
 				}
 			}
 		});
@@ -234,7 +280,7 @@ define(
 					'placeholder': 'root@twyrportal.com'
 				})
 				.on('change', function() {
-					var userRelId = selectElem.attr('id').replace('select#organization-manager-tenant-machine-management-machine-users-select-', '');
+					var userRelId = selectElem.attr('id').replace('organization-manager-tenant-machine-management-machine-users-select-', '');
 
 					self.sendAction('controller-action', 'save-tenant-machine-user', {
 						'userId': selectElem.val(),
@@ -243,30 +289,71 @@ define(
 				});
 			},
 
+			'delete-tenant-machine-user': function(user) {
+				this.sendAction('controller-action', 'delete-tenant-machine-user', {
+					'tenantMachine': this.get('model'),
+					'user': user
+				});
+			},
+
+			'add-machine-user': function() {
+				var newUserId = app.default.generateUUID();
+				this.sendAction('controller-action', 'add-tenant-machine-user', {
+					'userId': newUserId,
+					'tenantMachine': this.get('model')
+				});
+
+				var self = this;
+				window.Ember.run.scheduleOnce('afterRender', this, function() {
+					self._initSelect(self.$('select#organization-manager-tenant-machine-management-machine-users-select-' + newUserId));
+				});
+			},
+
 			'actions': {
-				'delete-tenant-machine-user': function(machine, user) {
-					this.sendAction('controller-action', 'delete-tenant-machine-user', {
-						'tenantMachine': machine,
-						'user': user
-					});
-				},
-
-				'add-machine-user': function(machine) {
-					var newUserId = app.default.generateUUID();
-					this.sendAction('controller-action', 'add-tenant-machine-user', {
-						'userId': newUserId,
-						'tenantMachine': machine
-					});
-
-					var self = this;
-					window.Ember.run.scheduleOnce('afterRender', this, function() {
-						self._initSelect(self.$('select#organization-manager-tenant-machine-management-machine-users-select-' + newUserId));
-					});
+				'controller-action': function(action, data) {
+					if(this[action])
+						this[action](data);
+					else
+						this.sendAction('controller-action', action, data);
 				}
 			}
 		});
 
 		exports['default'] = OrganizationManagerTenantMachineManagementMachineTagsComponent;
+	}
+);
+
+
+define(
+	"twyrPortal/components/organization-manager-tenant-machine-management-machine-details",
+	["exports"],
+	function(exports) {
+		if(window.developmentMode) console.log('DEFINE: twyrPortal/components/organization-manager-tenant-machine-management-machine-details');
+
+		var OrganizationManagerTenantMachineManagementMachineDetailsComponent = window.Ember.Component.extend({
+			'save': function() {
+				this.sendAction('controller-action', 'save', this.get('model'));
+			},
+
+			'cancel': function() {
+				this.get('model').rollbackAttributes();
+			},
+
+			'delete': function() {
+				this.sendAction('controller-action', 'delete', this.get('model'));
+			},
+
+			'actions': {
+				'controller-action': function(action, data) {
+					if(this[action])
+						this[action](data);
+					else
+						this.sendAction('controller-action', action, data);
+				}
+			}
+		});
+
+		exports['default'] = OrganizationManagerTenantMachineManagementMachineDetailsComponent;
 	}
 );
 
@@ -286,26 +373,35 @@ define(
 				return true;
 			},
 
+			'save': function(machine) {
+				this.sendAction('controller-action', 'save-machine', {
+					'machine': machine
+				});
+			},
+
+			'delete': function(machine) {
+				machine.set('isSelected', false);
+				this.set('currentlySelectedMachine', null);
+
+				this.sendAction('controller-action', 'delete-machine', {
+					'organization': this.get('model'),
+					'machine': machine
+				});
+			},
+
+			'select-machine': function(machine) {
+				this.get('model').get('machines').forEach(function(tenantMachine) {
+					tenantMachine.set('isSelected', false);
+				});
+
+				var self = this;
+				window.Ember.run.scheduleOnce('afterRender', self, function() {
+					machine.set('isSelected', true);
+					self.set('currentlySelectedMachine', machine);
+				});
+			},
+
 			'actions': {
-				'delete': function(organization, machine) {
-					this.sendAction('controller-action', 'delete-machine', {
-						'organization': organization,
-						'machine': machine
-					});
-				},
-
-				'select-machine': function(organization, machine) {
-					organization.get('machines').forEach(function(tenantMachine) {
-						tenantMachine.set('isSelected', false);
-					});
-
-					var self = this;
-					window.Ember.run.scheduleOnce('afterRender', self, function() {
-						machine.set('isSelected', true);
-						self.set('currentlySelectedMachine', machine);
-					});
-				},
-
 				'controller-action': function(action, data) {
 					if(this[action])
 						this[action](data);

@@ -18,28 +18,6 @@ define(
 				});
 			},
 
-			'resetStatusMessages': function(timeout) {
-				window.Ember.$('div#div-organization-manager-organization-structure-failure-message').slideUp(timeout || 600);
-
-				window.Ember.$('div#div-organization-manager-organization-structure-alert-message').slideUp(timeout || 600);
-				window.Ember.$('span#organization-manager-organization-structure-alert-message').text('');
-
-				window.Ember.$('div#div-organization-manager-organization-structure-progress-message').slideUp(timeout || 600);
-				window.Ember.$('span#organization-manager-organization-structure-progress-message').text('');
-
-				window.Ember.$('div#div-organization-manager-organization-structure-success-message').slideUp(timeout || 600);
-				window.Ember.$('span#organization-manager-organization-structure-success-message').text('');
-			},
-
-			'showStatusMessage': function(statusMessageType, messageText) {
-				this.resetStatusMessages(2);
-
-				window.Ember.$('div#div-organization-manager-organization-structure-' + statusMessageType + '-message').slideDown(600);
-				if(statusMessageType != 'failure') {
-					window.Ember.$('span#organization-manager-organization-structure-' + statusMessageType + '-message').html(messageText);
-				}
-			},
-
 			'add-entity': function(data) {
 				var recordData = null,
 					self = this;
@@ -85,18 +63,10 @@ define(
 				})
 				.then(function(reloadedModel) {
 					self.set('currentModel', reloadedModel);
-					self.showStatusMessage('success', 'Organization information has been updated');
-
-					window.Ember.run.later(self, function() {
-						self.resetStatusMessages();
-					}, 5000);
+					self.send('portal-action', 'display-status-message', { 'type': 'success', 'message': self.get('currentModel').get('name') + ' information has been updated' });
 				})
 				.catch(function(reason) {
-					self.showStatusMessage('failure');
-					window.Ember.run.later(self, function() {
-						self.resetStatusMessages();
-						self.get('currentModel').rollbackAttributes();
-					}, 5000);
+					self.send('portal-action', 'display-status-message', { 'type': 'error', 'errorModel': self.get('currentModel') });
 				});
 			},
 
@@ -108,17 +78,11 @@ define(
 					delFn = function() {
 						self.get('currentModel').destroyRecord()
 						.then(function() {
-							self.showStatusMessage('success', 'Organization information has been deleted');
-							window.Ember.run.later(self, function() {
-								self.resetStatusMessages();
-							}, 5000);
+							self.send('portal-action', 'display-status-message', { 'type': 'success', 'message': self.get('currentModel').get('name') + ' information has been deleted' });
 						})
 						.catch(function(reason) {
-							self.showStatusMessage('failure');
-							window.Ember.run.later(self, function() {
-								self.resetStatusMessages();
-								self.get('currentModel').rollbackAttributes();
-							}, 5000);
+							self.send('portal-action', 'display-status-message', { 'type': 'error', 'errorModel': self.get('currentModel') });
+							self.get('currentModel').rollbackAttributes();
 						});
 					};
 
@@ -183,10 +147,9 @@ define(
 					'email': data.email
 				});
 
-				self.showStatusMessage('progress', 'Adding ' + data.firstName + ' ' + data.lastName + ' to ' + tenant.get('name'));
+					self.send('portal-action', 'display-status-message', { 'type': 'info', 'message': 'Adding ' + data.firstName + ' ' + data.lastName + ' to ' + tenant.get('name') });
 				newUser.save()
 				.catch(function(err) {
-					newUser.rollbackAttributes();
 					throw err;
 				})
 				.then(function() {
@@ -202,25 +165,16 @@ define(
 					return tenant.get('users').addObject(newUserRel);
 				})
 				.then(function() {
-					self.resetStatusMessages();
-					self.showStatusMessage('success', 'User has been added to the Organization');
-
-					window.Ember.run.later(self, function() {
-						self.resetStatusMessages();
-					}, 5000);
+					self.send('portal-action', 'display-status-message', { 'type': 'success', 'message': newUser.get('fullName') + ' has been added to the ' + tenant.get('name') + ' Organization' });
 				})
 				.catch(function(err) {
-					self.resetStatusMessages();
-					self.showStatusMessage('failure');
+					self.send('portal-action', 'display-status-message', { 'type': 'error', 'errorModel': (newUserRel ? newUserRel : newUser) });
+					newUser.rollbackAttributes();
 
 					if(newUserRel) {
 						tenant.get('users').removeObject(newUserRel);
 						newUserRel.rollbackAttributes();
 					}
-
-					window.Ember.run.later(self, function() {
-						self.resetStatusMessages();
-					}, 5000);
 				});
 			},
 
@@ -252,41 +206,29 @@ define(
 					return userRel.save();
 				})
 				.then(function() {
-					self.showStatusMessage('success', 'User has been added to the Organization');
-					window.Ember.run.later(self, function() {
-						self.resetStatusMessages();
-					}, 5000);
+					self.send('portal-action', 'display-status-message', { 'type': 'success', 'message': user.get('fullName') + ' has been added to the ' + self.get('currentModel').get('name') + ' Organization' });
 				})
 				.catch(function(err) {
-					self.showStatusMessage('failure');
-					window.Ember.run.later(self, function() {
-						self.resetStatusMessages();
-						userRel.rollbackAttributes();
-					}, 5000);
+					self.send('portal-action', 'display-status-message', { 'type': 'error', 'errorModel': userRel });
+					userRel.rollbackAttributes();
 				});
 			},
 
 			'delete-user-rel': function(data) {
 				var self = this,
 					parent = data.organization,
-					userRel = data.userRel;
+					userRel = data.userRel,
+					userName = (userRel.get('user') ? userRel.get('user').get('fullName') : 'New User Record ');
 
 				var delFn = function() {
 					userRel.destroyRecord()
 					.then(function() {
 						parent.get('users').removeObject(userRel);
-	
-						self.showStatusMessage('success', 'User has been deleted from the Organization');
-						window.Ember.run.later(self, function() {
-							self.resetStatusMessages();
-						}, 5000);
+						self.send('portal-action', 'display-status-message', { 'type': 'success', 'message': userName + ' has been deleted from the ' + parent.get('name') + ' Organization' });
 					})
 					.catch(function(reason) {
-						self.showStatusMessage('failure');
-						window.Ember.run.later(self, function() {
-							self.resetStatusMessages();
-							userRel.rollbackAttributes();
-						}, 5000);
+						self.send('portal-action', 'display-status-message', { 'type': 'error', 'errorModel': userRel });
+						userRel.rollbackAttributes();
 					});
 				};
 
@@ -325,17 +267,11 @@ define(
 
 				data.group.save()
 				.then(function() {
-					self.showStatusMessage('success', 'Saved Group successfully');
-					window.Ember.run.later(self, function() {
-						self.resetStatusMessages();
-					}, 5000);
+					self.send('portal-action', 'display-status-message', { 'type': 'success', 'message': 'Saved ' + data.group.get('displayName') + ' Group successfully' });
 				})
 				.catch(function(reason) {
-					self.showStatusMessage('failure');
-					window.Ember.run.later(self, function() {
-						self.resetStatusMessages();
-						data.group.rollbackAttributes();
-					}, 5000);
+					self.send('portal-action', 'display-status-message', { 'type': 'error', 'errorModel': data.group });
+					data.group.rollbackAttributes();
 				});
 			},
 
@@ -344,17 +280,11 @@ define(
 					delFn = function() {
 						data.group.destroyRecord()
 						.then(function() {
-							self.showStatusMessage('success', 'Deleted Group successfully');
-							window.Ember.run.later(self, function() {
-								self.resetStatusMessages();
-							}, 5000);
+							self.send('portal-action', 'display-status-message', { 'type': 'success', 'message': 'Deleted ' + data.group.get('displayName') + ' Group successfully' });
 						})
 						.catch(function(reason) {
-							self.showStatusMessage('failure');
-							window.Ember.run.later(self, function() {
-								self.resetStatusMessages();
-								data.group.rollbackAttributes();
-							}, 5000);
+							self.send('portal-action', 'display-status-message', { 'type': 'error', 'errorModel': data.group });
+							data.group.rollbackAttributes();
 						});
 					};
 
@@ -401,17 +331,11 @@ define(
 					return permissionRel.save();
 				})
 				.then(function() {
-					self.showStatusMessage('success', 'Added Group Permission successfully');
-					window.Ember.run.later(self, function() {
-						self.resetStatusMessages();
-					}, 5000);
+					self.send('portal-action', 'display-status-message', { 'type': 'success', 'message': 'Added ' + permission.get('displayName') + ' Permission to the ' + group.get('displayName') + ' group' });
 				})
 				.catch(function(reason) {
-					self.showStatusMessage('failure');
-					window.Ember.run.later(self, function() {
-						self.resetStatusMessages();
-						permissionRel.rollbackAttributes();
-					}, 5000);
+					self.send('portal-action', 'display-status-message', { 'type': 'error', 'errorModel': permissionRel });
+					permissionRel.rollbackAttributes();
 				});
 			},
 
@@ -427,18 +351,11 @@ define(
 					})
 					.then(function() {
 						self._removePermissionFromSubGroups(group, permissionRel.get('permission').get('id'));
-
-						self.showStatusMessage('success', 'Deleted Group Permission successfully');
-						window.Ember.run.later(self, function() {
-							self.resetStatusMessages();
-						}, 5000);
+						self.send('portal-action', 'display-status-message', { 'type': 'success', 'message': 'Deleted Group Permission successfully' });
 					})
 					.catch(function(reason) {
-						self.showStatusMessage('failure');
-						window.Ember.run.later(self, function() {
-							self.resetStatusMessages();
-							permissionRel.rollbackAttributes();
-						}, 5000);
+						self.send('portal-action', 'display-status-message', { 'type': 'error', 'errorModel': permissionRel });
+						permissionRel.rollbackAttributes();
 					});
 				};
 
@@ -493,17 +410,11 @@ define(
 					return groupRel.save();
 				})
 				.then(function() {
-					self.showStatusMessage('success', 'Saved Group successfully');
-					window.Ember.run.later(self, function() {
-						self.resetStatusMessages();
-					}, 5000);
+					self.send('portal-action', 'display-status-message', { 'type': 'success', 'message': 'Saved ' + group.get('displayName') + ' Group successfully' });
 				})
 				.catch(function(reason) {
-					self.showStatusMessage('failure');
-					window.Ember.run.later(self, function() {
-						self.resetStatusMessages();
-						groupRel.rollbackAttributes();
-					}, 5000);
+					self.send('portal-action', 'display-status-message', { 'type': 'error', 'errorModel': groupRel });
+					groupRel.rollbackAttributes();
 				});
 			},
 
@@ -518,17 +429,11 @@ define(
 						return user.get('groups').removeObject(userGroup)
 					})
 					.then(function() {
-						self.showStatusMessage('success', 'Deleted Group successfully');
-						window.Ember.run.later(self, function() {
-							self.resetStatusMessages();
-						}, 5000);
+						self.send('portal-action', 'display-status-message', { 'type': 'success', 'message': 'Deleted ' + user.get('fullName') + ' from the Group' });
 					})
 					.catch(function(reason) {
-						self.showStatusMessage('failure');
-						window.Ember.run.later(self, function() {
-							self.resetStatusMessages();
-							userGroup.rollbackAttributes();
-						}, 5000);
+						self.send('portal-action', 'display-status-message', { 'type': 'error', 'errorModel': userGroup });
+						userGroup.rollbackAttributes();
 					});
 				};
 
@@ -554,7 +459,7 @@ define(
 					if(this[action])
 						this[action](data);
 					else
-						console.log('TODO: Handle ' + action + ' action with data: ', data);
+						this.send('portal-action', action, data);
 				}
 			}
 		});

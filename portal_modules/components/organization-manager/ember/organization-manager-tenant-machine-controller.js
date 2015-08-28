@@ -5,28 +5,6 @@ define(
 		if(window.developmentMode) console.log('DEFINE: twyrPortal/controllers/organization-manager-tenant-machine-management');
 
 		var OrganizationManagerTenantMachineManagementController = window.Ember.Controller.extend({
-			'resetStatusMessages': function(timeout) {
-				window.Ember.$('div#div-organization-manager-tenant-machine-management-failure-message').slideUp(timeout || 600);
-
-				window.Ember.$('div#div-organization-manager-tenant-machine-management-alert-message').slideUp(timeout || 600);
-				window.Ember.$('span#organization-manager-tenant-machine-management-alert-message').text('');
-
-				window.Ember.$('div#div-organization-manager-tenant-machine-management-progress-message').slideUp(timeout || 600);
-				window.Ember.$('span#organization-manager-tenant-machine-management-progress-message').text('');
-
-				window.Ember.$('div#div-organization-manager-tenant-machine-management-success-message').slideUp(timeout || 600);
-				window.Ember.$('span#organization-manager-tenant-machine-management-success-message').text('');
-			},
-
-			'showStatusMessage': function(statusMessageType, messageText) {
-				this.resetStatusMessages(2);
-
-				window.Ember.$('div#div-organization-manager-tenant-machine-management-' + statusMessageType + '-message').slideDown(600);
-				if(statusMessageType != 'failure') {
-					window.Ember.$('span#organization-manager-tenant-machine-management-' + statusMessageType + '-message').html(messageText);
-				}
-			},
-
 			'selected-org-changed': function(data) {
 				var self = this,
 					tmplType = data.type,
@@ -57,6 +35,19 @@ define(
 				});
 			},
 
+			'save-machine': function(data) {
+				var self = this;
+
+				data.machine.save()
+				.then(function() {
+					self.send('portal-action', 'display-status-message', { 'type': 'success', 'message': data.machine.get('name') + ' Machine has been updated' });
+				})
+				.catch(function(reason) {
+					self.send('portal-action', 'display-status-message', { 'type': 'error', 'errorModel': data.machine });
+					data.machine.rollbackAttributes();
+				});
+			},
+
 			'delete-machine': function(data) {
 				var organization = data.organization,
 					machine = data.machine,
@@ -68,22 +59,11 @@ define(
 						return organization.get('machines').removeObject(machine);
 					})
 					.then(function() {
-						self.resetStatusMessages();
-						self.showStatusMessage('success', 'Machine has been removed from the Organization');
-	
-						window.Ember.run.later(self, function() {
-							self.resetStatusMessages();
-						}, 5000);
+						self.send('portal-action', 'display-status-message', { 'type': 'success', 'message': machine.get('name') + ' Machine has been removed from the ' + organization.get('name') + ' Organization' });
 					})
 					.catch(function(reason) {
-						self.resetStatusMessages();
-						self.showStatusMessage('failure');
-	
+						self.send('portal-action', 'display-status-message', { 'type': 'error', 'errorModel': machine });
 						machine.rollbackAttributes();
-	
-						window.Ember.run.later(self, function() {
-							self.resetStatusMessages();
-						}, 5000);
 					});
 				};
 
@@ -115,13 +95,14 @@ define(
 
 			'save-tenant-machine-user': function(data) {
 				var userId = data.userId,
-					userTenantMachineId = data.userTenantMachineId;
+					userTenantMachineId = data.userTenantMachineId,
+					self = this;
 
 				var tenantMachineUser = null,
 					organizationUser = null;
 
 				var promiseResolutions = [];
-				promiseResolutions.push(this.store.findRecord('organization-manager-tenant-machine-user', userTenantMachineId));
+				promiseResolutions.push(this.store.peekRecord('organization-manager-tenant-machine-user', userTenantMachineId));
 				promiseResolutions.push(this.store.findRecord('organization-manager-organization-user', userId));
 
 				window.Ember.RSVP.Promise.all(promiseResolutions)
@@ -129,33 +110,24 @@ define(
 					tenantMachineUser = results[0];
 					organizationUser = results[1];
 
-					return tenantMachineUser.get('users').addObject(organizationUser);
+					return tenantMachineUser.set('user', organizationUser);
 				})
 				.then(function() {
 					return tenantMachineUser.save();
 				})
 				.then(function() {
-					self.resetStatusMessages();
-					self.showStatusMessage('success', 'User has been added to the machine\'s watcher list');
-
-					window.Ember.run.later(self, function() {
-						self.resetStatusMessages();
-					}, 5000);
+					self.send('portal-action', 'display-status-message', { 'type': 'success', 'message': organizationUser.get('fullName') +  ' has been added to the ' + tenantMachineUser.get('tenantMachine').get('name') + ' machine\'s access list' });
 				})
 				.catch(function(err) {
-					self.resetStatusMessages();
-					self.showStatusMessage('failure');
-
+					console.error(err);
+					self.send('portal-action', 'display-status-message', { 'type': 'error', 'errorModel': tenantMachineUser });
 					tenantMachineUser.rollbackAttributes();
-
-					window.Ember.run.later(self, function() {
-						self.resetStatusMessages();
-					}, 5000);
 				});
 			},
 
 			'delete-tenant-machine-user': function(data) {
 				var user = data.user,
+					userName = (user.get('user') ? user.get('user').get('fullName') : 'New User'),
 					machine = data.tenantMachine,
 					self = this;
 
@@ -165,22 +137,11 @@ define(
 						return machine.get('users').removeObject(user);
 					})
 					.then(function() {
-						self.resetStatusMessages();
-						self.showStatusMessage('success', 'User has been removed from the machine\'s watcher list');
-	
-						window.Ember.run.later(self, function() {
-							self.resetStatusMessages();
-						}, 5000);
+						self.send('portal-action', 'display-status-message', { 'type': 'success', 'message': userName + ' has been removed from the ' + machine.get('name') + ' machine\'s access list' });
 					})
 					.catch(function(reason) {
-						self.resetStatusMessages();
-						self.showStatusMessage('failure');
-	
+						self.send('portal-action', 'display-status-message', { 'type': 'error', 'errorModel': machine });
 						machine.rollbackAttributes();
-	
-						window.Ember.run.later(self, function() {
-							self.resetStatusMessages();
-						}, 5000);
 					});
 				};
 
@@ -201,12 +162,74 @@ define(
 				}
 			},
 
+			'update-machine-tag-list': function(data) {
+				var machine = data.machine,
+					tagJSON = data.tags,
+					self = this;
+
+				window.Ember.$.ajax({
+					'type': 'PUT',
+					'url': window.apiServer + 'organization-manager/organizationManagerTenantMachineTags',
+
+					'dataType': 'json',
+					'data': {
+						'machine': machine.get('id'),
+						'tenant': machine.get('tenant').get('id'),
+						'tags': tagJSON
+					},
+
+					'success': function(data) {
+						if(data.status) {
+							self.send('portal-action', 'display-status-message', { 'type': 'success', 'message': data.responseText });
+						}
+						else {
+							self.send('portal-action', 'display-status-message', { 'type': 'danger', 'message': data.responseText });
+						}
+					},
+
+					'error': function(err) {
+						self.send('portal-action', 'display-status-message', { 'type': 'danger', 'message': (err.responseJSON ? err.responseJSON.responseText : (err.responseText || 'Unknown error' )) });
+					}
+				});
+			},
+
+			'update-machine-computed-tag-list': function(data) {
+				var machine = data.machine,
+					tagJSON = data.tags,
+					self = this;
+
+				window.Ember.$.ajax({
+					'type': 'PUT',
+					'url': window.apiServer + 'organization-manager/organizationManagerTenantMachineTagComputeds',
+
+					'dataType': 'json',
+					'data': {
+						'machine': machine.get('id'),
+						'tenant': machine.get('tenant').get('id'),
+						'tags': tagJSON
+					},
+
+					'success': function(data) {
+						if(data.status) {
+							self.send('portal-action', 'display-status-message', { 'type': 'success', 'message': data.responseText });
+						}
+						else {
+							self.send('portal-action', 'display-status-message', { 'type': 'danger', 'message': data.responseText });
+						}
+					},
+
+					'error': function(err) {
+						self.send('portal-action', 'display-status-message', { 'type': 'danger', 'message': (err.responseJSON ? err.responseJSON.responseText : (err.responseText || 'Unknown error' )) });
+					}
+				});
+			},
+
 			'actions': {
 				'controller-action': function(action, data) {
 					if(this[action])
 						this[action](data);
 					else
-						console.log('TODO: Handle ' + action + ' action with data: ', data);
+						this.send('portal-action', action, data);
 				}
 			}
 		});

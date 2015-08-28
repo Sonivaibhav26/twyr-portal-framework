@@ -11,10 +11,6 @@ define(
 	function(exports) {
 		if(window.developmentMode) console.log('DEFINE: twyrPortal/routes/profile');
 		var ManageProfileRoute = window.Ember.Route.extend({
-			'beforeModel': function() {
-				return window.Ember.$.getScript('<%= mountPath %>/mvc/manageProfile');
-			},
-
 			'model': function() {
 				return this.store.find('profile', '<%= userId %>');
 			},
