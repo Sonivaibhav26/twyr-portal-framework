@@ -178,10 +178,213 @@
 </script>
 
 
+<script type="text/x-handlebars" data-template-name="components/organization-manager-tenant-machine-management-machine-computed-tag-edit">
+<div class="box box-default" style="text-align:left; margin-bottom:0px;">
+	<div class="box-header with-border" style="min-height:50px;">
+		<h3 class="box-title">{{model.displayName}}</h3>
+		<div class="pull-right" style="cursor:pointer; margin:0px 5px;" {{action "controller-action" "cancel" bubbles=false}}>
+		    <button type="button" class="btn btn-warning btn-sm">
+				<i class="fa fa-undo" style="margin-right:5px;" /><span>Cancel</span>
+		    </button>
+		</div>
+		{{#if model.hasDirtyAttributes}}
+		<div class="pull-right" style="cursor:pointer; margin:0px 5px;" {{action "controller-action" "save" bubbles=false}}>
+		    <button type="submit" class="btn btn-primary btn-sm">
+				<i class="fa fa-save" style="margin-right:5px;" /><span>Save</span>	
+		    </button>
+		</div>
+		{{/if}}
+	</div>
+	<div class="box-body">
+		<div class="row" style="margin:0px;">
+			<div class="col-lg-4 col-md-4 col-sm-4 col-xs-4">
+				<div class="box box-primary" style="text-align:left;">
+					<div class="box-header with-border" style="min-height:50px;">
+						<h3 class="box-title">Basics</h3>
+					</div>
+					<div class="box-body">
+						<div class="form-group">
+							<label>Tag Name</label>
+							{{input type="text" class="form-control" value=model.displayName}}
+						</div>
+						<div class="form-group">
+							<label>Formula</label>
+							{{input type="text" class="form-control" value=model.expression}}
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="col-lg-4 col-md-4 col-sm-4 col-xs-4">
+				<div class="box box-primary" style="text-align:left; margin-bottom:0px;">
+					<div class="box-header with-border" style="min-height:50px;">
+						<h3 class="box-title">Alert Values</h3>
+					</div>
+					<div class="box-body">
+					<div class="row">
+						<div class="form-group col-lg-6 col-md-6 col-sm-6 col-xs-6">
+							<label>Low-low</label>
+							{{input type="number" class="form-control" value=model.lowLowValue placeholder="Not set"}}
+						</div>
+						<div class="form-group col-lg-6 col-md-6 col-sm-6 col-xs-6">
+							<label>Low</label>
+							{{input type="number" class="form-control" value=model.lowValue placeholder="Not set"}}
+						</div>
+					</div>
+					<div class="row">
+						<div class="form-group col-lg-6 col-md-6 col-sm-6 col-xs-6">
+							<label>High</label>
+							{{input type="number" class="form-control" value=model.highValue placeholder="Not set"}}
+						</div>
+						<div class="form-group col-lg-6 col-md-6 col-sm-6 col-xs-6">
+							<label>High-high</label>
+							{{input type="number" class="form-control" value=model.highHighValue placeholder="Not set"}}
+						</div>
+					</div>
+					</div>
+				</div>
+			</div>
+			<div class="col-lg-4 col-md-4 col-sm-4 col-xs-4">
+				<div class="box box-primary" style="text-align:left;">
+					<div class="box-header with-border" style="min-height:50px;">
+						<h3 class="box-title">Persistence</h3>
+						<div class="pull-right">
+							Enabled {{input type="checkbox" checked=model.persist}}
+						</div>
+					</div>
+					<div class="box-body">
+						<div class="form-group">
+							<label>Persist (days)</label>
+							{{input type="number" class="form-control" value=model.persistPeriod disabled=model.disablePersistence}}
+						</div>
+						<div class="form-group">
+							<label>Frequency</label>
+							<select class="form-control" disabled={{model.disablePersistence}}>
+								<option value="none">Not set</option>
+								<option value="minute">Every Minute</option>
+								<option value="hour">Hourly</option>
+								<option value="day">Daily</option>
+								<option value="month">Monthly</option>
+							</select>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+</script>
+
+
+<script type="text/x-handlebars" data-template-name="components/organization-manager-tenant-machine-management-machine-tag-edit">
+<div class="box box-default" style="text-align:left; margin-bottom:0px;">
+	<div class="box-header with-border" style="min-height:50px;">
+		<h3 class="box-title">{{model.displayName}}</h3>
+		<div class="pull-right" style="cursor:pointer; margin:0px 5px;" {{action "controller-action" "cancel" bubbles=false}}>
+		    <button type="button" class="btn btn-warning btn-sm">
+				<i class="fa fa-undo" style="margin-right:5px;" /><span>Cancel</span>
+		    </button>
+		</div>
+		{{#if model.hasDirtyAttributes}}
+		<div class="pull-right" style="cursor:pointer; margin:0px 5px;" {{action "controller-action" "save" bubbles=false}}>
+		    <button type="submit" class="btn btn-primary btn-sm">
+				<i class="fa fa-save" style="margin-right:5px;" /><span>Save</span>	
+		    </button>
+		</div>
+		{{/if}}
+	</div>
+	<div class="box-body">
+		<div class="row" style="margin:0px;">
+			<div class="col-lg-4 col-md-4 col-sm-4 col-xs-4">
+				<div class="box box-primary" style="text-align:left;">
+					<div class="box-header with-border" style="min-height:50px;">
+						<h3 class="box-title">Basics</h3>
+					</div>
+					<div class="box-body">
+						<div class="form-group">
+							<label>Register</label>
+							{{input type="text" class="form-control" value=model.name}}
+						</div>
+						<div class="form-group">
+							<label>Tag Name</label>
+							{{input type="text" class="form-control" value=model.displayName}}
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="col-lg-4 col-md-4 col-sm-4 col-xs-4">
+				<div class="box box-primary" style="text-align:left; margin-bottom:0px;">
+					<div class="box-header with-border" style="min-height:50px;">
+						<h3 class="box-title">Alert Values</h3>
+					</div>
+					<div class="box-body">
+					<div class="row">
+						<div class="form-group col-lg-6 col-md-6 col-sm-6 col-xs-6">
+							<label>Low-low</label>
+							{{input type="number" class="form-control" value=model.lowLowValue placeholder="Not set"}}
+						</div>
+						<div class="form-group col-lg-6 col-md-6 col-sm-6 col-xs-6">
+							<label>Low</label>
+							{{input type="number" class="form-control" value=model.lowValue placeholder="Not set"}}
+						</div>
+					</div>
+					<div class="row">
+						<div class="form-group col-lg-6 col-md-6 col-sm-6 col-xs-6">
+							<label>High</label>
+							{{input type="number" class="form-control" value=model.highValue placeholder="Not set"}}
+						</div>
+						<div class="form-group col-lg-6 col-md-6 col-sm-6 col-xs-6">
+							<label>High-high</label>
+							{{input type="number" class="form-control" value=model.highHighValue placeholder="Not set"}}
+						</div>
+					</div>
+					</div>
+				</div>
+			</div>
+			<div class="col-lg-4 col-md-4 col-sm-4 col-xs-4">
+				<div class="box box-primary" style="text-align:left;">
+					<div class="box-header with-border" style="min-height:50px;">
+						<h3 class="box-title">Persistence</h3>
+						<div class="pull-right">
+							Enabled {{input type="checkbox" checked=model.persist}}
+						</div>
+					</div>
+					<div class="box-body">
+						<div class="form-group">
+							<label>Persist (days)</label>
+							{{input type="number" class="form-control" value=model.persistPeriod disabled=model.disablePersistence}}
+						</div>
+						<div class="form-group">
+							<label>Frequency</label>
+							<select class="form-control" disabled={{model.disablePersistence}}>
+								<option value="none">Not set</option>
+								<option value="minute">Every Minute</option>
+								<option value="hour">Hourly</option>
+								<option value="day">Daily</option>
+								<option value="month">Monthly</option>
+							</select>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+</script>
+
 <script type="text/x-handlebars" data-template-name="components/organization-manager-tenant-machine-management-machine-tags">
 <div class="box box-default" style="text-align:left; margin-bottom:0px;">
 	<div class="box-header with-border" style="min-height:50px;">
 		<h3 class="box-title">{{model.name}} Tags</h3>
+		<div class="pull-right" style="cursor:pointer; margin:0px 5px;" {{action "controller-action" "add-computed-tag" bubbles=false}}>
+		    <button type="button" class="btn btn-primary btn-sm">
+				<i class="fa fa-plus" style="margin-right:5px;" /><span>Add Computed Tag</span>
+		    </button>
+		</div>
+		<div class="pull-right" style="cursor:pointer; margin:0px 5px;" {{action "controller-action" "add-tag" bubbles=false}}>
+		    <button type="button" class="btn btn-primary btn-sm">
+				<i class="fa fa-plus" style="margin-right:5px;" /><span>Add Physical Tag</span>
+		    </button>
+		</div>
 	</div>
 	<div class="box-body no-padding">
 	<table class="table table-bordered table-striped table-hover">
@@ -196,6 +399,13 @@
 	</thead>
 	<tbody>
 	{{#each model.tags key="id" as |tag index|}}
+	{{#if tag.isEditing}}
+	<tr>
+		<td colspan="5">
+		{{organization-manager-tenant-machine-management-machine-tag-edit model=tag controller-action="controller-action"}}
+		</td>
+	</tr>
+	{{else}}
 	<tr>
 		<td style="vertical-align:middle;">{{tag.displayName}}</td>
 		<td style="vertical-align:middle;">{{tag.name}}</td>
@@ -216,8 +426,16 @@
 			</button>
 		</td>
 	</tr>
+	{{/if}}
 	{{/each}}
 	{{#each model.computed key="id" as |tag index|}}
+	{{#if tag.isEditing}}
+	<tr>
+		<td colspan="5">
+		{{organization-manager-tenant-machine-management-machine-computed-tag-edit model=tag controller-action="controller-action"}}
+		</td>
+	</tr>
+	{{else}}
 	<tr>
 		<td style="vertical-align:middle;">{{tag.displayName}}</td>
 		<td style="vertical-align:middle;">{{tag.name}}</td>
@@ -230,11 +448,15 @@
 		{{/if}}
 		</td>
 		<td style="text-align:right; vertical-align:middle;">
+			<button type="button" class="btn btn-primary btn-sm" {{action "controller-action" "edit-tag" tag bubbles=false}}>
+				<i class="fa fa-edit" style="margin-right:5px;"></i><span>Edit</span>
+			</button>
 			<button type="button" class="btn btn-danger btn-sm" {{action "controller-action" "delete-computed-tag" tag bubbles=false}}>
 				<i class="fa fa-remove" style="margin-right:5px;"></i><span>Delete</span>
 			</button>
 		</td>
 	</tr>
+	{{/if}}
 	{{/each}}
 	</tbody>
 	</table>
@@ -301,6 +523,11 @@
 <div class="box box-default" style="text-align:left; margin-bottom:0px; box-shadow:none;">
 	<div class="box-header with-border" style="min-height:50px;">
 		<h3 class="box-title">{{model.name}} Machine List</h3>
+		<div class="pull-right" style="cursor:pointer; margin:0px 5px;" {{action "controller-action" "add-machine" bubbles=false}}>
+		    <button type="button" class="btn btn-primary btn-sm">
+				<i class="fa fa-plus" style="margin-right:5px;" /><span>Add Machine</span>
+		    </button>
+		</div>
 	</div>
 	<div class="box-body no-padding">
 	<table class="table table-bordered table-striped table-hover">

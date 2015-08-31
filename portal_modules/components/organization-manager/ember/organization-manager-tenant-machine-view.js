@@ -148,6 +148,111 @@ define(
 	}
 );
 
+
+define(
+	"twyrPortal/components/organization-manager-tenant-machine-management-machine-tag-edit",
+	["exports"],
+	function(exports) {
+		if(window.developmentMode) console.log('DEFINE: twyrPortal/components/organization-manager-tenant-machine-management-machine-tag-edit');
+
+		var OrganizationManagerTenantMachineManagementMachineTagEditComponent = window.Ember.Component.extend({
+			'_onPersistFreqChange': function() {
+				this.get('model').set('persistFrequency', this.$('select').val());
+			},
+
+			'didInsertElement': function() {
+				this.set('_onPersistFreqChangeBound', this._onPersistFreqChange.bind(this));
+				this.$('select').on('change', this._onPersistFreqChangeBound);
+
+				var self = this;
+				window.Ember.run.scheduleOnce('afterRender', this, function() {
+					self.$('select').val(self.get('model').get('persistFrequency'));
+				})
+
+				return true;
+			},
+
+			'willClearRender': function() {
+				this.$('select').off('change', this._onPersistFreqChangeBound);
+				return true;
+			},
+
+			'cancel': function() {
+				this.get('model').rollbackAttributes();
+				this.sendAction('controller-action', 'cancel-edit-tag', this.get('model'));
+			},
+
+			'save': function() {
+				this.sendAction('controller-action', 'save-tag', this.get('model'));
+			},
+
+			'actions': {
+				'controller-action': function(action, data) {
+					if(this[action])
+						this[action](data);
+					else
+						this.sendAction('controller-action', action, data);
+				}
+			}
+		});
+
+		exports['default'] = OrganizationManagerTenantMachineManagementMachineTagEditComponent;
+	}
+);
+
+
+define(
+	"twyrPortal/components/organization-manager-tenant-machine-management-machine-computed-tag-edit",
+	["exports"],
+	function(exports) {
+		if(window.developmentMode) console.log('DEFINE: twyrPortal/components/organization-manager-tenant-machine-management-machine-computed-tag-edit');
+
+		var OrganizationManagerTenantMachineManagementMachineComputedTagEditComponent = window.Ember.Component.extend({
+			'_onPersistFreqChange': function() {
+				this.get('model').set('persistFrequency', this.$('select').val());
+			},
+
+			'didInsertElement': function() {
+				this.set('_onPersistFreqChangeBound', this._onPersistFreqChange.bind(this));
+				this.$('select').on('change', this._onPersistFreqChangeBound);
+
+				var self = this;
+				window.Ember.run.scheduleOnce('afterRender', this, function() {
+					self.$('select').val(self.get('model').get('persistFrequency'));
+				})
+
+				return true;
+			},
+
+			'willClearRender': function() {
+				this.$('select').off('change', this._onPersistFreqChangeBound);
+				return true;
+			},
+
+			'cancel': function() {
+				this.get('model').rollbackAttributes();
+				this.sendAction('controller-action', 'cancel-edit-tag', this.get('model'));
+			},
+
+			'save': function() {
+				this.sendAction('controller-action', 'save-computed-tag', this.get('model'));
+			},
+
+			'actions': {
+				'controller-action': function(action, data) {
+					if(this[action])
+						this[action](data);
+					else
+						this.sendAction('controller-action', action, data);
+				}
+			}
+		});
+
+		exports['default'] = OrganizationManagerTenantMachineManagementMachineComputedTagEditComponent;
+	}
+);
+
+
 define(
 	"twyrPortal/components/organization-manager-tenant-machine-management-machine-tags",
 	["exports"],
@@ -155,14 +260,21 @@ define(
 		if(window.developmentMode) console.log('DEFINE: twyrPortal/components/organization-manager-tenant-machine-management-machine-tags');
 
 		var OrganizationManagerTenantMachineManagementMachineTagsComponent = window.Ember.Component.extend({
-			'edit-tag': function(tag) {
-				this.set('currentlyEditingTag', tag);
+			'add-tag': function() {
+				this.sendAction('controller-action', 'add-machine-tag-list', {
+					'machine': this.get('model')
+				});
 			},
 
-			'delete-tag': function(tag) {
-				tag.deleteRecord();
-				this.get('model').get('tags').removeObject(tag);
+			'edit-tag': function(tag) {
+				tag.set('isEditing', true);
+			},
 
+			'cancel-edit-tag': function(tag) {
+				tag.set('isEditing', false);
+			},
+
+			'save-tag': function(tag) {
 				var jsonTags = [];
 				this.get('model').get('tags').forEach(function(thisTag) {
 					var jsonTag = thisTag.toJSON();
@@ -175,6 +287,56 @@ define(
 					'machine': this.get('model'),
 					'tags': jsonTags
 				});
+
+				window.Ember.run.scheduleOnce('afterRender', this, function() {
+					tag.set('isEditing', false);
+				});
+			},
+
+			'delete-tag': function(tag) {
+				tag.deleteRecord();
+				this.get('model').get('tags').removeObject(tag);
+
+				var jsonTags = [];
+				this.get('model').get('tags').forEach(function(thisTag) {
+					var jsonTag = thisTag.toJSON();
+					delete jsonTag['machine'];
+
+					jsonTags.push(jsonTag);
+				});
+
+				this.sendAction('controller-action', 'update-machine-tag-list', {
+					'machine': this.get('model'),
+					'tags': jsonTags
+				});
+			},
+
+			'add-computed-tag': function() {
+				this.sendAction('controller-action', 'add-machine-computed-tag-list', {
+					'machine': this.get('model')
+				});
+			},
+
+			'save-computed-tag': function(tag) {
+				var jsonTags = [];
+				this.get('model').get('computed').forEach(function(thisTag) {
+					var jsonTag = thisTag.toJSON();
+					delete jsonTag['machine'];
+
+					jsonTag['name'] = jsonTag['displayName'].replace(/\s/g, '');
+					jsonTags.push(jsonTag);
+
+					thisTag.set('name', jsonTag['name']);
+				});
+
+				this.sendAction('controller-action', 'update-machine-computed-tag-list', {
+					'machine': this.get('model'),
+					'tags': jsonTags
+				});
+
+				window.Ember.run.scheduleOnce('afterRender', this, function() {
+					tag.set('isEditing', false);
+				});
 			},
 
 			'delete-computed-tag': function(tag) {
@@ -184,9 +346,12 @@ define(
 				var jsonTags = [];
 				this.get('model').get('computed').forEach(function(thisTag) {
 					var jsonTag = thisTag.toJSON();
-					delete jsonTag.machine;
+					delete jsonTag['machine'];
 
+					jsonTag['name'] = jsonTag['displayName'].replace(/\s/g, '');
 					jsonTags.push(jsonTag);
+
+					thisTag.set('name', jsonTag['name']);
 				});
 
 				this.sendAction('controller-action', 'update-machine-computed-tag-list', {
@@ -414,4 +579,3 @@ define(
 		exports['default'] = OrganizationManagerTenantMachineManagementMachineComponent;
 	}
 );
-

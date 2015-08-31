@@ -46,6 +46,7 @@
     "bootstrap-jstree-theme": "*",
     "jquery": "*",
     "jquery-confirm": "*",
+	"mathjs": "*",
     "moment": "*",
     "normalize-css": "*",
     "select2": "*",

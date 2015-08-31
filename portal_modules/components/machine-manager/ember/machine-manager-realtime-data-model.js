@@ -80,7 +80,7 @@ define(
 		var MachineManagerMachineTagModel = window.DS.Model.extend({
 			'name': window.DS.attr('string'),
 			'displayName': window.DS.attr('string'),
-			'value': window.DS.attr('string'),
+			'value': window.DS.attr('number'),
 			'alert': window.DS.attr('boolean'),
 
 			'machine': window.DS.belongsTo('machine-manager-user-tenant-machine', { 'async': true, 'inverse': 'tags' })
@@ -114,7 +114,8 @@ define(
 		var MachineManagerMachineTagComputedModel = window.DS.Model.extend({
 			'name': window.DS.attr('string'),
 			'displayName': window.DS.attr('string'),
-			'value': window.DS.attr('string'),
+			'expression':  window.DS.attr('string'),
+			'value': window.DS.attr('number'),
 			'alert': window.DS.attr('boolean'),
 
 			'machine': window.DS.belongsTo('machine-manager-user-tenant-machine', { 'async': true, 'inverse': 'computed' })

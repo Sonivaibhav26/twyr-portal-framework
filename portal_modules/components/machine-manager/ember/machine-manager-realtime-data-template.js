@@ -17,7 +17,7 @@
 		{{#if machine.isWatched}}
 			<div class="tab-pane" id="machine-manager-realtime-data-tab-{{machine.id}}" style="padding:0px;">
 				{{log 'Component' machine.emberComponent 'Layout' machine.emberTemplate}}
-				{{component machine.emberComponent model=machine streamer=streamer layoutName=machine.emberTemplate controller-action="controller-action"}}
+				{{component machine.emberComponent model=machine streamer=streamer controller-action="controller-action"}}
 			</div>
 		{{/if}}
 	{{/each}}

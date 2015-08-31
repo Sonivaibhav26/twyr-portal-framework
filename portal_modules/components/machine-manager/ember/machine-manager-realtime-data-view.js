@@ -154,13 +154,14 @@ define(
 	}
 );
 
+
 define(
 	"twyrPortal/components/machine-manager-realtime-data-default-display",
 	["exports"],
 	function(exports) {
 		if(window.developmentMode) console.log('DEFINE: twyrPortal/components/machine-manager-realtime-data-default-display');
 
-		var MachineManagerRealtimeDataDisplayComponent = window.Ember.Component.extend({
+		var MachineManagerRealtimeDataDefaultDisplayComponent = window.Ember.Component.extend({
 			'_initialize': function() {
 				var self = this;
 				if(!self.get('model'))
@@ -172,7 +173,15 @@ define(
 
 				var computedPropertyMethods = window.Ember.ArrayProxy.create({ 'content': window.Ember.A([]) });
 				self.get('model').get('computed').forEach(function(thisComputed) {
-					var functionBody = 'var computedValue = ' + thisComputed.get('value') + ';\ncompProp.set(\'value\', computedValue);';
+					var parsedExpression = window.math.parse(thisComputed.get('expression'));
+					parsedExpression.transform(function(node, path, parent) {
+						if(node.type == 'SymbolNode')
+							node.name = ('this.get(\'' + node.name + '\').get(\'value\')');
+
+						return node;
+					});
+
+					var functionBody = 'var computedValue = ' + parsedExpression.toString() + ';\ncompProp.set(\'value\', computedValue);';
 					var methodDefn = (new Function('compProp', functionBody));
 
 					thisComputed.set('value', '0');
@@ -209,6 +218,20 @@ define(
 			})
 		});
 
-		exports['default'] = MachineManagerRealtimeDataDisplayComponent;
+		exports['default'] = MachineManagerRealtimeDataDefaultDisplayComponent;
 	}
 );
+
+
+define(
+	"twyrPortal/components/machine-manager-realtime-data-non-default-display",
+	["exports", "twyrPortal/components/machine-manager-realtime-data-default-display"],
+	function(exports, baseComponent) {
+		if(window.developmentMode) console.log('DEFINE: twyrPortal/components/machine-manager-realtime-data-non-default-display');
+
+		var MachineManagerRealtimeDataNonDefaultDisplayComponent = baseComponent.default.extend({});
+
+		exports['default'] = MachineManagerRealtimeDataNonDefaultDisplayComponent;
+	}
+);
+

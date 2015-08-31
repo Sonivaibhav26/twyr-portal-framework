@@ -162,6 +162,17 @@ define(
 				}
 			},
 
+			'add-machine-tag-list': function(data) {
+				var machine = data.machine,
+					newTag = machine.store.createRecord('organization-manager-tenant-machine-tag', {
+						'id': app.default.generateUUID(),
+						'machine': machine.get('id'),
+						'isEditing': true
+					});
+
+				machine.get('tags').addObject(newTag);
+			},
+
 			'update-machine-tag-list': function(data) {
 				var machine = data.machine,
 					tagJSON = data.tags,
@@ -191,6 +202,17 @@ define(
 						self.send('portal-action', 'display-status-message', { 'type': 'danger', 'message': (err.responseJSON ? err.responseJSON.responseText : (err.responseText || 'Unknown error' )) });
 					}
 				});
+			},
+
+			'add-machine-computed-tag-list': function(data) {
+				var machine = data.machine,
+					newTag = machine.store.createRecord('organization-manager-tenant-machine-tag-computed', {
+						'id': app.default.generateUUID(),
+						'machine': machine.get('id'),
+						'isEditing': true
+					});
+
+				machine.get('computed').addObject(newTag);
 			},
 
 			'update-machine-computed-tag-list': function(data) {

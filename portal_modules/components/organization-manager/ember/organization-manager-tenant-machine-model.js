@@ -198,8 +198,14 @@ define(
 			'highHighValue': window.DS.attr('string'),
 
 			'persist': window.DS.attr('boolean'),
-			'persistFrequency': window.DS.attr('string'),
-			'persistPeriod': window.DS.attr('number'),
+			'persistFrequency': window.DS.attr('string', { 'defaultValue': 'none' }),
+			'persistPeriod': window.DS.attr('number', { 'defaultValue': 0 }),
+
+			'disablePersistence': window.Ember.computed('persist', {
+				'get': function() {
+					return !this.get('persist');
+				}
+			}),
 
 			'machine': window.DS.belongsTo('organization-manager-tenant-machine', { 'async': true, 'inverse': 'tags' })
 		});
@@ -240,8 +246,14 @@ define(
 			'highHighValue': window.DS.attr('string'),
 
 			'persist': window.DS.attr('boolean'),
-			'persistFrequency': window.DS.attr('string'),
-			'persistPeriod': window.DS.attr('number'),
+			'persistFrequency': window.DS.attr('string', { 'defaultValue': 'none' }),
+			'persistPeriod': window.DS.attr('number', { 'defaultValue': 0 }),
+
+			'disablePersistence': window.Ember.computed('persist', {
+				'get': function() {
+					return !this.get('persist');
+				}
+			}),
 
 			'machine': window.DS.belongsTo('organization-manager-tenant-machine', { 'async': true, 'inverse': 'computed' })
 		});
