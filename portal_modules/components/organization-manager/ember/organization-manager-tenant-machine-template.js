@@ -87,6 +87,99 @@
 		</div>
 		{{/if}}
 	</div>
+	{{#if model.isNew}}
+	<div class="box-body">
+		<div class="box box-primary">
+			<div class="box-header with-border">
+				<h3 class="box-title">Instance Details</h3>
+			</div>
+			<div class="box-body">
+				<div class="form-group col-lg-6 col-md-6 col-sm-6 col-xs-6">
+					<div class="form-group">
+						<label>Instance Name</label>
+						{{input type="text" class="form-control" value=model.name}}
+					</div>
+				</div>
+				<div class="form-group col-lg-6 col-md-6 col-sm-6 col-xs-6">
+					<div class="form-group">
+						<label>Created On</label>
+						{{input type="text" class="form-control" value=model.formattedCreatedOn readonly="readonly"}}
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<div class="box-body">
+		<div class="col-lg-4 col-md-4 col-sm-4 col-xs-4">
+		<div class="box box-primary">
+			<div class="box-header with-border">
+				<h3 class="box-title">Machine Details</h3>
+			</div>
+			<div class="box-body">
+				<div class="form-group">
+					<label>Name</label>
+					{{input type="text" class="form-control" value=model.machine.name}}
+				</div>
+				<div class="form-group">
+					<label>Manufacturer</label>
+					{{input type="text" class="form-control" value=model.machine.manufacturer}}
+				</div>
+				<div class="form-group">
+					<label>Category</label>
+					{{input type="text" class="form-control" value=model.machine.category}}
+				</div>
+				<div class="form-group">
+					<label>Model</label>
+					{{input type="text" class="form-control" value=model.machine.model}}
+				</div>
+			</div>
+		</div>
+		</div>
+		<div class="col-lg-4 col-md-4 col-sm-4 col-xs-4">
+		<div class="box box-primary">
+			<div class="box-header with-border">
+				<h3 class="box-title">PLC Details</h3>
+			</div>
+			<div class="box-body">
+				<div class="form-group">
+					<label>Name</label>
+					{{input type="text" class="form-control" value=model.plc.name}}
+				</div>
+				<div class="form-group">
+					<label>Manufacturer</label>
+					{{input type="text" class="form-control" value=model.plc.manufacturer}}
+				</div>
+				<div class="form-group">
+					<label>Category</label>
+					{{input type="text" class="form-control" value=model.plc.category}}
+				</div>
+				<div class="form-group">
+					<label>Model</label>
+					{{input type="text" class="form-control" value=model.plc.model}}
+				</div>
+			</div>
+		</div>
+		</div>
+		<div class="col-lg-4 col-md-4 col-sm-4 col-xs-4">
+		<div class="box box-primary">
+			<div class="box-header with-border">
+				<h3 class="box-title">Protocol Details</h3>
+			</div>
+			<div class="box-body">
+				<div class="form-group">
+					<label>Name</label>
+					{{input type="text" class="form-control" value=model.protocol.name}}
+				</div>
+				<div class="form-group">
+					<label>Version</label>
+					{{input type="text" class="form-control" value=model.protocol.version}}
+				</div>
+			</div>
+		</div>
+		</div>
+	</div>
+	{{else}}
 	<div class="box-body">
 		<div class="col-lg-8 col-md-8 col-sm-8 col-xs-12" style="padding-left:0px;">
 		<div class="box box-default">
@@ -174,6 +267,7 @@
 			</div>
 		</div>
 	</div>
+	{{/if}}
 </div>
 </script>
 
@@ -551,7 +645,7 @@
 			<td style="vertical-align:middle;">{{tenantMachine.formattedCreatedOn}}</td>
 		</tr>
 	{{else}}
-		<tr style="cursor:pointer;" {{action "controller-action" "select-machine" tenantMachine bubbles=false}}>
+		<tr id="organization-manager-tenant-machine-management-machine-{{tenantMachine.id}}" style="cursor:pointer;" {{action "controller-action" "select-machine" tenantMachine bubbles=false}}>
 			<td style="vertical-align:middle;">{{tenantMachine.name}}</td>
 			<td style="vertical-align:middle;">{{tenantMachine.machine.manufacturer}}<br />{{tenantMachine.machine.model}}</td>
 			<td style="vertical-align:middle;">{{tenantMachine.plc.manufacturer}}<br />{{tenantMachine.plc.model}}</td>

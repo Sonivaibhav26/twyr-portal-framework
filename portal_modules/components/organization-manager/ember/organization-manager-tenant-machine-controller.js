@@ -35,15 +35,65 @@ define(
 				});
 			},
 
+			'add-machine': function(data) {
+				var newMachine = data.organization.store.createRecord('organization-manager-machine', {
+					'name': 'New Machine'
+				})
+
+				var newPLC = data.organization.store.createRecord('organization-manager-plc', {
+					'name': 'New PLC'
+				})
+
+				var newProtocol = data.organization.store.createRecord('organization-manager-protocol', {
+					'name': 'New Protocol'
+				})
+
+				var newTenantMachine = data.organization.store.createRecord('organization-manager-tenant-machine', {
+					'id': data.machineId,
+					'name': 'New Tenant Machine',
+					'tenant': data.organization,
+
+					'machine': newMachine,
+					'plc': newPLC,
+					'protocol': newProtocol
+				})
+
+				data.organization.get('machines').addObject(newTenantMachine);
+			},
+
 			'save-machine': function(data) {
 				var self = this;
 
-				data.machine.save()
+				if(!data.machine.get('isNew')) {
+					data.machine.save()
+					.then(function() {
+						self.send('portal-action', 'display-status-message', { 'type': 'success', 'message': data.machine.get('name') + ' Machine has been updated' });
+					})
+					.catch(function(reason) {
+						self.send('portal-action', 'display-status-message', { 'type': 'error', 'errorModel': data.machine });
+						data.machine.rollbackAttributes();
+					});
+
+					return;
+				}
+
+				var promiseResolutions = [];
+				promiseResolutions.push(data.machine.get('machine').content.save());
+				promiseResolutions.push(data.machine.get('plc').content.save());
+				promiseResolutions.push(data.machine.get('protocol').content.save());
+
+				window.Ember.RSVP.Promise.all(promiseResolutions)
+				.then(function(results) {
+					return data.machine.save();
+				})
 				.then(function() {
-					self.send('portal-action', 'display-status-message', { 'type': 'success', 'message': data.machine.get('name') + ' Machine has been updated' });
+					self.send('portal-action', 'display-status-message', { 'type': 'success', 'message': data.machine.get('name') + ' Machine has been created' });
 				})
 				.catch(function(reason) {
+					console.error(reason);
 					self.send('portal-action', 'display-status-message', { 'type': 'error', 'errorModel': data.machine });
+					
+					data.organization.get('machines').removeObject(data.machine);
 					data.machine.rollbackAttributes();
 				});
 			},

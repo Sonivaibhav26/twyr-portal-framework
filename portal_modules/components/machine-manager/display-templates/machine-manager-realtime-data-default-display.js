@@ -1,7 +1,7 @@
 <script type="text/x-handlebars" data-template-name="components/machine-manager-realtime-data-default-display">
 <div class="box box-default" style="text-align:left; margin-bottom:0px; box-shadow:none;">
-	<div class="box-body row" style="margin-bottom:15px;">
-		<div class="col-md-3">
+	<div class="box-body" style="margin-bottom:15px;">
+		<div class="col-lg-3 col-md-3 col-sm-3 col-xs-3">
 		<div class="box box-primary">
 			<div class="box-header with-border">
 				<h3 class="box-title">Instance Details</h3>
@@ -22,7 +22,7 @@
 			</div>
 		</div>
 		</div>
-		<div class="col-md-3">
+		<div class="col-lg-3 col-md-3 col-sm-3 col-xs-3">
 		<div class="box box-primary">
 			<div class="box-header with-border">
 				<h3 class="box-title">Machine Details</h3>
@@ -43,7 +43,7 @@
 			</div>
 		</div>
 		</div>
-		<div class="col-md-3">
+		<div class="col-lg-3 col-md-3 col-sm-3 col-xs-3">
 		<div class="box box-primary">
 			<div class="box-header with-border">
 				<h3 class="box-title">PLC Details</h3>
@@ -64,7 +64,7 @@
 			</div>
 		</div>
 		</div>
-		<div class="col-md-3">
+		<div class="col-lg-3 col-md-3 col-sm-3 col-xs-3">
 		<div class="box box-primary">
 			<div class="box-header with-border">
 				<h3 class="box-title">Protocol Details</h3>
@@ -100,11 +100,25 @@
 		<tr>
 			<td style="vertical-align:middle;">{{tag.displayName}}</td>
 			<td style="vertical-align:middle;">{{tag.value}}</td>
-			<td style="text-align:center; vertical-align:middle;">
-			{{#if tag.alert}}
-				<div class="alert alert-warning" style="margin:0px; padding:0px; width:20%; display:inline-block;">&nbsp;</div>
-			{{else}}
-				<div class="alert alert-success" style="margin:0px; padding:0px; width:20%; display:inline-block;">&nbsp;</div>
+			<td style="vertical-align:middle;">
+			{{#if tag.lowlowalert}}
+				<div class="alert alert-danger" style="margin:0px; padding:0px; width:20%; display:inline-block;">&nbsp;</div>
+			{{/if}}
+
+			{{#if tag.lowalert}}
+				<div class="alert alert-warning" style="position:relative; left:20%; margin:0px; padding:0px; width:20%; display:inline-block;">&nbsp;</div>
+			{{/if}}
+
+			{{#if tag.noalert}}
+				<div class="alert alert-success" style="position:relative; left:40%; margin:0px; padding:0px; width:20%; display:inline-block;">&nbsp;</div>
+			{{/if}}
+
+			{{#if tag.highalert}}
+				<div class="alert alert-warning" style="position:relative; left:60%; margin:0px; padding:0px; width:20%; display:inline-block;">&nbsp;</div>
+			{{/if}}
+
+			{{#if tag.highhighalert}}
+				<div class="alert alert-danger" style="position:relative; left:80%; margin:0px; padding:0px; width:20%; display:inline-block;">&nbsp;</div>
 			{{/if}}
 			</td>
 		</tr>
@@ -113,7 +127,27 @@
 		<tr>
 			<td style="vertical-align:middle;">{{computedTag.displayName}}</td>
 			<td style="vertical-align:middle;">{{computedTag.value}}</td>
-			<td style="text-align:center; vertical-align:middle;">&nbsp;</td>
+			<td style="vertical-align:middle;">
+			{{#if computedTag.lowlowalert}}
+				<div class="alert alert-danger" style="margin:0px; padding:0px; width:20%; display:inline-block;">&nbsp;</div>
+			{{/if}}
+
+			{{#if computedTag.lowalert}}
+				<div class="alert alert-warning" style="position:relative; left:20%; margin:0px; padding:0px; width:20%; display:inline-block;">&nbsp;</div>
+			{{/if}}
+
+			{{#if computedTag.noalert}}
+				<div class="alert alert-success" style="position:relative; left:40%; margin:0px; padding:0px; width:20%; display:inline-block;">&nbsp;</div>
+			{{/if}}
+
+			{{#if computedTag.highalert}}
+				<div class="alert alert-warning" style="position:relative; left:60%; margin:0px; padding:0px; width:20%; display:inline-block;">&nbsp;</div>
+			{{/if}}
+
+			{{#if computedTag.highhighalert}}
+				<div class="alert alert-danger" style="position:relative; left:80%; margin:0px; padding:0px; width:20%; display:inline-block;">&nbsp;</div>
+			{{/if}}
+			</td>
 		</tr>
 		{{/each}}
 		</tbody>

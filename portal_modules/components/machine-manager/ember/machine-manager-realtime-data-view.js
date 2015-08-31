@@ -79,17 +79,16 @@ define(
 			'_machineDataProcessor': function(machineData) {
 				if(!machineData) return;
 
+				if(window.developmentMode) console.log('twyrPortal/components/machine-manager-realtime-data-machine-tabs::_machineDataProcessor:\n', machineData);
+
 				// Non-aggregate, real-time data
 				if(machineData.machineId.indexOf('!Aggregate!Data') < 0) {
-					var machineModel = (this.get('model').filterBy('id', machineData.machineId))[0],
+					var machineModel = (this.get('model').filterBy('tenantMachineId', machineData.machineId))[0],
 						tags = machineModel.get('tags');
 
 					tags.forEach(function(tag) {
-						var tagData = machineData.data[tag.get('name')];
-						if(tagData) {
-							tag.set('value', tagData.value);
-							tag.set('alert', !!parseInt(tagData.alert));
-						}
+						var tagValue = machineData.data[tag.get('name')];
+						if(tagValue) tag.set('value', tagValue);
 					});
 				}
 				else {
@@ -98,7 +97,7 @@ define(
 					var machineId = machineData.machineId.substring(0, machineData.machineId.indexOf('!')),
 						aggregateType = (machineData.machineId.substring(1 + machineData.machineId.indexOf('!'))).toLowerCase();
 
-					var machineRecords = this.get('model').filterBy('id', machineId);
+					var machineRecords = this.get('model').filterBy('tenantMachineId', machineId);
 					for(var midx = 0; midx < machineRecords.length; midx++) {
 						var thisMachine = machineRecords[midx];
 		
@@ -123,7 +122,7 @@ define(
 			'unwatch': function(machine) {
 				this.get('streamer').write({
 					'command': 'unsubscribe',
-					'machineId': machine.get('id')
+					'machineId': machine.get('tenantMachineId')
 				});
 
 				machine.set('isWatched', false);
@@ -200,7 +199,7 @@ define(
 
 				self.get('streamer').write({
 					'command': 'subscribe',
-					'machineId': self.get('model').get('id')
+					'machineId': self.get('model').get('tenantMachineId')
 				});
 
 				return true;
@@ -213,7 +212,7 @@ define(
 
 				self.get('streamer').write({
 					'command': 'subscribe',
-					'machineId': self.get('model').get('id')
+					'machineId': self.get('model').get('tenantMachineId')
 				});
 			})
 		});

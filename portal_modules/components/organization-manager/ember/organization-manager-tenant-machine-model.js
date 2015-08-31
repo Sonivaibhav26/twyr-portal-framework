@@ -192,10 +192,10 @@ define(
 			'name': window.DS.attr('string'),
 			'displayName': window.DS.attr('string'),
 
-			'lowLowValue': window.DS.attr('string'),
-			'lowValue': window.DS.attr('string'),
-			'highValue': window.DS.attr('string'),
-			'highHighValue': window.DS.attr('string'),
+			'lowLowValue': window.DS.attr('number'),
+			'lowValue': window.DS.attr('number'),
+			'highValue': window.DS.attr('number'),
+			'highHighValue': window.DS.attr('number'),
 
 			'persist': window.DS.attr('boolean'),
 			'persistFrequency': window.DS.attr('string', { 'defaultValue': 'none' }),
@@ -240,10 +240,10 @@ define(
 			'displayName': window.DS.attr('string'),
 			'expression': window.DS.attr('string'),
 
-			'lowLowValue': window.DS.attr('string'),
-			'lowValue': window.DS.attr('string'),
-			'highValue': window.DS.attr('string'),
-			'highHighValue': window.DS.attr('string'),
+			'lowLowValue': window.DS.attr('number'),
+			'lowValue': window.DS.attr('number'),
+			'highValue': window.DS.attr('number'),
+			'highHighValue': window.DS.attr('number'),
 
 			'persist': window.DS.attr('boolean'),
 			'persistFrequency': window.DS.attr('string', { 'defaultValue': 'none' }),

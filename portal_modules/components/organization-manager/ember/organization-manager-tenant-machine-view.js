@@ -290,6 +290,7 @@ define(
 
 				window.Ember.run.scheduleOnce('afterRender', this, function() {
 					tag.set('isEditing', false);
+					tag.save();
 				});
 			},
 
@@ -336,6 +337,7 @@ define(
 
 				window.Ember.run.scheduleOnce('afterRender', this, function() {
 					tag.set('isEditing', false);
+					tag.save();
 				});
 			},
 
@@ -497,7 +499,7 @@ define(
 
 		var OrganizationManagerTenantMachineManagementMachineDetailsComponent = window.Ember.Component.extend({
 			'save': function() {
-				this.sendAction('controller-action', 'save', this.get('model'));
+				this.sendAction('controller-action', 'save-machine', this.get('model'));
 			},
 
 			'cancel': function() {
@@ -505,7 +507,7 @@ define(
 			},
 
 			'delete': function() {
-				this.sendAction('controller-action', 'delete', this.get('model'));
+				this.sendAction('controller-action', 'delete-machine', this.get('model'));
 			},
 
 			'actions': {
@@ -525,8 +527,8 @@ define(
 
 define(
 	"twyrPortal/components/organization-manager-tenant-machine-management-machine",
-	["exports"],
-	function(exports) {
+	["exports", "twyrPortal/app"],
+	function(exports, app) {
 		if(window.developmentMode) console.log('DEFINE: twyrPortal/components/organization-manager-tenant-machine-management-machine');
 
 		var OrganizationManagerTenantMachineManagementMachineComponent = window.Ember.Component.extend({
@@ -538,13 +540,27 @@ define(
 				return true;
 			},
 
-			'save': function(machine) {
+			'add-machine': function() {
+				var machineId = app.default.generateUUID();
+				this.sendAction('controller-action', 'add-machine', {
+					'machineId': machineId,
+					'organization': this.get('model')
+				});
+
+				var self = this;
+				window.Ember.run.scheduleOnce('afterRender', this, function() {
+					self.$('tr#organization-manager-tenant-machine-management-machine-' + machineId).click();
+				});
+			},
+
+			'save-machine': function(machine) {
 				this.sendAction('controller-action', 'save-machine', {
+					'organization': this.get('model'),
 					'machine': machine
 				});
 			},
 
-			'delete': function(machine) {
+			'delete-machine': function(machine) {
 				machine.set('isSelected', false);
 				this.set('currentlySelectedMachine', null);
 
