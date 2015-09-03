@@ -21,25 +21,6 @@ define(
 			}
 		});
 
-		setInterval(function() {
-			var leftSidebar = window.Ember.$('div#div-bhairavi-left-sidebar'),
-				rightSidebar = window.Ember.$('div#div-bhairavi-right-sidebar'),
-				outlet = window.Ember.$('div#div-bhairavi-outlet');
-
-			if(leftSidebar) leftSidebar.css('height', 'auto');
-			if(rightSidebar) rightSidebar.css('height', 'auto');
-			if(outlet) outlet.css('height', 'auto');
-
-			if(window.Ember.$(':animated').length)
-				return;
-
-			var maxHeight = Math.max((leftSidebar ? leftSidebar.outerHeight() : 0), (rightSidebar ? rightSidebar.outerHeight() : 0), (outlet ? outlet.outerHeight(): 0));
-
-			if(leftSidebar && (leftSidebar.outerHeight() < maxHeight)) leftSidebar.height(maxHeight);
-			if(rightSidebar && (rightSidebar.outerHeight() < maxHeight)) rightSidebar.height(maxHeight);
-			if(outlet && (outlet.outerHeight() < maxHeight)) outlet.height(maxHeight);
-		}, 50)
-
 		exports['default'] = ApplicationRoute;
 	}
 );
