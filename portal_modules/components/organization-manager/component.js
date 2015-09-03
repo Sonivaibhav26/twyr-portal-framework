@@ -65,7 +65,32 @@ var organizationManagerComponent = prime({
 
 	'_getClientMVC': function(request, response, next) {
 		response.type('application/javascript');
-		response.status(200).send('');
+		if(!request.user) {
+			response.status(200).send('');
+			return;
+		}
+
+		var self = this;
+		self._checkPermissionAsync(request, requiredPermission)
+		.then(function(allowed) {
+			if(!allowed) {
+				return [];
+			}
+
+			var promiseResolutions = [];
+
+			promiseResolutions.push(filesystem.readFileAsync(path.join(__dirname, 'ember/organization-manager-organization-structure-model.js')));
+			promiseResolutions.push(filesystem.readFileAsync(path.join(__dirname, 'ember/organization-manager-organization-structure-view.js')));
+			promiseResolutions.push(filesystem.readFileAsync(path.join(__dirname, 'ember/organization-manager-organization-structure-controller.js')));
+
+			return promises.all(promiseResolutions);
+		})
+		.then(function(mvcFiles) {
+			response.status(200).send(mvcFiles.join('\n'));
+		})
+		.catch(function(err) {
+			response.status(err.code || err.number || 500).json(err);
+		});
 	},
 
 	'_getClientTemplate': function(request, response, next) {
@@ -83,82 +108,13 @@ var organizationManagerComponent = prime({
 				return [];
 			}
 
-			var promiseResolutions = [];
-	
-			promiseResolutions.push(filesystem.readFileAsync(path.join(__dirname, 'ember/organization-manager-organization-structure-template.js')));
-			promiseResolutions.push(filesystem.readFileAsync(path.join(__dirname, 'ember/organization-manager-tenant-machine-template.js')));
-	
-			return promises.all(promiseResolutions);
+			return filesystem.readFileAsync(path.join(__dirname, 'ember/organization-manager-organization-structure-template.js'));
 		})		
 		.then(function(tmplFile) {
-			response.status(200).send(tmplFile.join('\n'));
+			response.status(200).send(tmplFile);
 		})
 		.catch(function(err) {
 			response.status(err.code || err.number || 500).json(err);
-		});
-	},
-
-	'_addRoutes': function() {
-		var self = this;
-
-		this.$router.get('/mvc/OrganizationManagerOrganizationStructure', function(request, response, next) {
-			response.type('application/javascript');
-			if(!request.user) {
-				response.status(200).send('');
-				return;
-			}
-
-			self._checkPermissionAsync(request, requiredPermission)
-			.then(function(allowed) {
-				if(!allowed) {
-					return [];
-				}
-
-				var promiseResolutions = [];
-
-				promiseResolutions.push(filesystem.readFileAsync(path.join(__dirname, 'ember/organization-manager-organization-structure-model.js')));
-				promiseResolutions.push(filesystem.readFileAsync(path.join(__dirname, 'ember/organization-manager-tenant-machine-model.js')));
-				promiseResolutions.push(filesystem.readFileAsync(path.join(__dirname, 'ember/organization-manager-organization-structure-view.js')));
-				promiseResolutions.push(filesystem.readFileAsync(path.join(__dirname, 'ember/organization-manager-organization-structure-controller.js')));
-
-				return promises.all(promiseResolutions);
-			})
-			.then(function(mvcFiles) {
-				response.status(200).send(mvcFiles.join('\n'));
-			})
-			.catch(function(err) {
-				response.status(err.code || err.number || 500).json(err);
-			});
-		});
-
-		this.$router.get('/mvc/OrganizationManagerTenantMachineManagement', function(request, response, next) {
-			response.type('application/javascript');
-			if(!request.user) {
-				response.status(200).send('');
-				return;
-			}
-
-			self._checkPermissionAsync(request, requiredPermission)
-			.then(function(allowed) {
-				if(!allowed) {
-					return [];
-				}
-
-				var promiseResolutions = [];
-
-				promiseResolutions.push(filesystem.readFileAsync(path.join(__dirname, 'ember/organization-manager-organization-structure-model.js')));
-				promiseResolutions.push(filesystem.readFileAsync(path.join(__dirname, 'ember/organization-manager-tenant-machine-model.js')));
-				promiseResolutions.push(filesystem.readFileAsync(path.join(__dirname, 'ember/organization-manager-tenant-machine-view.js')));
-				promiseResolutions.push(filesystem.readFileAsync(path.join(__dirname, 'ember/organization-manager-tenant-machine-controller.js')));
-
-				return promises.all(promiseResolutions);
-			})
-			.then(function(mvcFiles) {
-				response.status(200).send(mvcFiles.join('\n'));
-			})
-			.catch(function(err) {
-				response.status(err.code || err.number || 500).json(err);
-			});
 		});
 	},
 

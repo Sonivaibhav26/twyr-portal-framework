@@ -11,7 +11,7 @@
 
 <script type="text/x-handlebars" data-template-name="loading">
 <div class="row">
-	<div class="col-lg-12 col-md-12 col-sm-12 col-xs-12" style="padding:20px; text-align:center;">
+	<div class="col-md-12" style="padding:20px; text-align:center;">
 		<i class="fa fa-spinner fa-spin" />
 	</div>
 </div>

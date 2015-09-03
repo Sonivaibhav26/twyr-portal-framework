@@ -65,6 +65,7 @@
 		"pg": "*",
 		"prime": "*",
 		"seneca": "*",
+		"uglify-js": "*",
 		"winston": "*"
 	},
 	"devDependencies": {

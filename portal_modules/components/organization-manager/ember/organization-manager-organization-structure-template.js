@@ -90,15 +90,15 @@
 		{{/if}}
 	</div>
 	<div class="box-body row">
-		<div class="form-group col-lg-4 col-md-4 col-sm-4 col-xs-4">
+		<div class="form-group col-md-4">
 			<label>Group Name</label>
 			{{input type="text" value=model.displayName class="form-control" placeholder="Group Name"}}
 		</div>
-		<div class="form-group col-lg-4 col-md-4 col-sm-4 col-xs-4">
+		<div class="form-group col-md-4">
 			<label>Parent Group</label>
 			{{input type="text" value=model.parent.displayName class="form-control" placeholder="Parent Group Name" readonly="readonly"}}
 		</div>
-		<div class="form-group col-lg-4 col-md-4 col-sm-4 col-xs-4">
+		<div class="form-group col-md-4">
 			<label>Created On</label>
 			{{input type="text" value=model.formattedCreatedOn class="form-control" placeholder="Created On" readonly="readonly"}}
 		</div>
@@ -119,15 +119,15 @@
 
 <script type="text/x-handlebars" data-template-name="components/organization-manager-organization-structure-organization-groups">
 <div class="row" style="margin:0px;">
-	<div class="col-lg-3 col-md-3 col-sm-3 col-xs-3" style="max-height:320px; overflow:auto; padding:0px;">
+	<div class="col-md-3" style="max-height:320px; overflow:auto; padding:0px;">
 		{{organization-manager-organization-structure-groups-tree model=model controller-action="controller-action"}}
 	</div>
-	<div class="col-lg-9 col-md-9 col-sm-9 col-xs-9" style=" padding:0px;">
+	<div class="col-md-9" style=" padding:0px;">
 		{{organization-manager-organization-structure-group-detail model=currentModel controller-action="controller-action"}}
 	</div>
 </div>
 <div class="row" style="margin:30px 0px 0px 0px;">
-	<div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+	<div class="col-md-12">
 		{{organization-manager-organization-structure-group-permissions model=currentModel controller-action="controller-action"}}
 	</div>
 </div>
@@ -140,19 +140,19 @@
 	</div>
 	<div class="box-body">
 	<div class="row">
-		<div class="form-group col-lg-4 col-md-4 col-sm-4 col-xs-4">
+		<div class="form-group col-md-4">
 			<label>Email<sup>*</sup></label>
 			{{input id="organization-manager-organization-structure-organization-users-input-email" type="text" class="form-control" placeholder="root@twyrportal.com"}}
 		</div>
-		<div class="form-group col-lg-3 col-md-3 col-sm-3 col-xs-3">
+		<div class="form-group col-md-3">
 			<label>First Name<sup>*</sup></label>
 			{{input id="organization-manager-organization-structure-organization-users-input-first-name" type="text" class="form-control" placeholder="First/Given Name"}}
 		</div>
-		<div class="form-group col-lg-3 col-md-3 col-sm-3 col-xs-3">
+		<div class="form-group col-md-3">
 			<label>Last Name<sup>*</sup></label>
 			{{input id="organization-manager-organization-structure-organization-users-input-last-name" type="text" class="form-control" placeholder="Family Name / Surname"}}
 		</div>
-		<div class="form-group col-lg-2 col-md-2 col-sm-2 col-xs-2" style="padding-top:25px; text-align:right;">
+		<div class="form-group col-md-2" style="padding-top:25px; text-align:right;">
 		    <button type="button" class="btn btn-success btn-sm" {{action "controller-action" "create" model}}>
 				<i class="fa fa-plus" style="margin-right:5px;" /><span>Create New User</span>
 		    </button>
@@ -320,22 +320,22 @@
 		{{/if}}
 	</div>
 	<div class="box-body row">
-		<div class="form-group col-lg-4 col-md-4 col-sm-4 col-xs-4">
+		<div class="form-group col-md-4">
 			<label>Organization Name</label>
 			{{input type="text" value=model.name class="form-control" placeholder="Company Name"}}
 		</div>
-		<div class="form-group col-lg-4 col-md-4 col-sm-4 col-xs-4">
+		<div class="form-group col-md-4">
 			<label>Parent Organization</label>
 			{{input type="text" value=model.parent.name class="form-control" placeholder="Parent Name" readonly="readonly"}}
 		</div>
-		<div class="form-group col-lg-4 col-md-4 col-sm-4 col-xs-4">
+		<div class="form-group col-md-4">
 			<label>Member Since</label>
 			{{input type="text" value=model.formattedCreatedOn class="form-control" placeholder="Member since" readonly="readonly"}}
 		</div>
 	</div>
 	{{#unless model.isNew}}
 	<div class="box-body row">
-		<div class="col-lg-6 col-lg-offset-6 col-md-6 col-md-offset-6 col-sm-6 col-sm-offset-6 col-xs-12" style="text-align:right;">
+		<div class="col-md-6 col-md-offset-6" style="text-align:right;">
 			{{#unless model.isDepartment}}
 		    <button type="button" class="btn btn-primary btn-sm" {{action "controller-action" "add" "subsidiary" bubbles=false}}>
 				<i class="fa fa-plus" style="margin-right:5px;" /><span>Add Subsidiary</span>
@@ -455,10 +455,10 @@
 		<h3 class="box-title">Organization Structure</h3>
 	</div>
 	<div class="box-body">
-		<div class="col-lg-2 col-md-2 col-sm-2 col-xs-2" style="max-height:640px; overflow:auto;">
+		<div class="col-md-3" style="max-height:640px; overflow:auto;">
 			{{organization-manager-organization-structure-tree model=currentModel controller-action="controller-action"}}
 		</div>
-		<div class="col-lg-10 col-md-10 col-sm-10 col-xs-10">
+		<div class="col-md-9">
 			{{component currentComponent model=currentModel controller-action="controller-action"}}
 		</div>
 	</div>

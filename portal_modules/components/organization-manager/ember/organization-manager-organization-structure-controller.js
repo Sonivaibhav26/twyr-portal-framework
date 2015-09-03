@@ -46,7 +46,7 @@ define(
 				var newEntity = this.get('currentModel').store.createRecord(data.type, recordData);
 				self.get('currentModel').get('suborganizations').addObject(newEntity);
 				self.get('currentModel').set('contextChange', newEntity);
-			},
+				},
 
 			'save-org': function(data) {
 				var self = this,
@@ -76,9 +76,11 @@ define(
 
 				var self = this,
 					delFn = function() {
-						self.get('currentModel').destroyRecord()
+						var delOrgName = self.get('currentModel').get('name');
+						self.get('currentModel')
+						.destroyRecord()
 						.then(function() {
-							self.send('portal-action', 'display-status-message', { 'type': 'success', 'message': self.get('currentModel').get('name') + ' information has been deleted' });
+							self.send('portal-action', 'display-status-message', { 'type': 'success', 'message': delOrgName + ' information has been deleted' });
 						})
 						.catch(function(reason) {
 							self.send('portal-action', 'display-status-message', { 'type': 'error', 'errorModel': self.get('currentModel') });

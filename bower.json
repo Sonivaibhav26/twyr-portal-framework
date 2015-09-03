@@ -46,11 +46,14 @@
     "bootstrap-jstree-theme": "*",
     "jquery": "*",
     "jquery-confirm": "*",
-	"mathjs": "*",
+    "mathjs": "*",
     "moment": "*",
     "normalize-css": "*",
     "select2": "*",
     "validatorjs": "*"
   },
-  "devDependencies": {}
+  "devDependencies": {},
+  "resolutions": {
+    "ember": "^2.0.0"
+  }
 }

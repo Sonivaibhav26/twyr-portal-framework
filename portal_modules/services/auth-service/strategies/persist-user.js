@@ -78,7 +78,7 @@ exports.socialAuthenticate = (function(request, profile, token, done) {
 					'first_name': profile.name.givenName,
 					'last_name': profile.name.familyName,
 					'email': profile.emails[0].value,
-					'password': bcrypt.hashSync('SkandaPortal')
+					'password': bcrypt.hashSync('twyrportal')
 				}).save();
 			})
 			.then(function(userRecord) {

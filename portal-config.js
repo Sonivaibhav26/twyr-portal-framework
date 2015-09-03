@@ -129,7 +129,7 @@ exports.test = ({
 	'port': 8080,
 
 	'favicon': './public/favicon.ico',
-	'poweredBy': 'Myndbee Inc.',
+	'poweredBy': 'Twyr Portal',
 	
 	'browser': {
 		'cacheTime': 86400
@@ -213,7 +213,7 @@ exports.stage = ({
 	'port': 80,
 
 	'favicon': './public/favicon.ico',
-	'poweredBy': 'Myndbee Inc.',
+	'poweredBy': 'Twyr Portal',
 	
 	'browser': {
 		'cacheTime': 86400
@@ -297,7 +297,7 @@ exports.production = ({
 	'port': 80,
 
 	'favicon': './public/favicon.ico',
-	'poweredBy': 'Myndbee Inc.',
+	'poweredBy': 'Twyr Portal',
 	
 	'browser': {
 		'cacheTime': 86400
