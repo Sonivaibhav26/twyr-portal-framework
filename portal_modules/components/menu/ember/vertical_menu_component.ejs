@@ -53,13 +53,15 @@ define(
 					else if ((checkElement.is('.treeview-menu')) && (!checkElement.is(':visible'))) {
 						// Get the parent menu
 						var parent = $this.parents('ul').first();
-
+/*
 						// Close all open menus within the parent
-						var ul = parent.find('ul:visible').slideUp('normal');
+						var ul = parent.find('ul:visible');
 
 						// Remove the menu-open class from the parent
-						ul.removeClass('menu-open');
-
+						ul.slideUp('normal', function() {
+							ul.removeClass('menu-open');
+						});
+*/
 						// Get the parent li
 						var parent_li = $this.parent("li");
 				
