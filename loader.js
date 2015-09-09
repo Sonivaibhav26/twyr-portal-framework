@@ -384,6 +384,11 @@ var twyrLoader = prime({
 					currentDependency = null;
 
 				while(!!currentModule && !currentDependency) {
+					if(!currentModule.$services) {
+						currentModule = currentModule.$module;
+						continue;
+					}
+
 					currentDependency = currentModule.$services[thisServiceDependency];
 					if(!currentDependency) currentModule = currentModule.$module;
 				}
@@ -429,6 +434,11 @@ var twyrLoader = prime({
 					currentDependency = null;
 
 				while(!!currentModule && !currentDependency) {
+					if(!currentModule.$services) {
+						currentModule = currentModule.$module;
+						continue;
+					}
+
 					currentDependency = currentModule.$services[thisComponentDependency];
 					if(!currentDependency) currentModule = currentModule.$module;
 				}

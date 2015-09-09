@@ -26,7 +26,16 @@ var inflection = require('inflection'),
 var simpleComponent = prime({
 	'constructor': function() {
 		console.log('Constructor of the ' + this.name + ' Component');
+
+		// Promisify what we need...
 		this._checkPermissionAsync = promises.promisify(this._checkPermission);
+
+		this._getResourcesAsync = promises.promisify(this._getResources);
+		this._getRoutesAsync = promises.promisify(this._getRoutes);
+		this._getTemplatesAsync = promises.promisify(this._getTemplates);
+		this._getMVCAsync = promises.promisify(this._getMVC);
+
+		this._constructRouteMapAsync = promises.promisify(this._constructRouteMap);
 	},
 
 	'load': function(module, loader, callback) {
@@ -72,7 +81,7 @@ var simpleComponent = prime({
 			for(var idx in self.$components) {
 				var thisComponent = self.$components[idx],
 					router = thisComponent.getRouter(),
-					mountPath = self.$config ? (self.$config.componentMountPath || '') : '';
+					mountPath = self.$config ? (self.$config.componentMountPath || '/') : '/';
 
 				self.$router.use(path.join(mountPath, thisComponent.name), router);
 			}
@@ -176,15 +185,200 @@ var simpleComponent = prime({
 	},
 
 	'_getClientRouter': function(request, response, next) {
-		next();
+		var promiseResolutions = [],
+			renderFunc = promises.promisify(response.render.bind(response)),
+			self = this;
+
+		response.type('application/javascript');
+
+		promiseResolutions.push(self._getResourcesAsync(request, renderFunc));
+		promiseResolutions.push(self._getRoutesAsync(request, renderFunc));
+
+		promises.all(promiseResolutions)
+		.then(function(resourceRoutes) {
+			var resources = resourceRoutes[0],
+				routes = resourceRoutes[1];
+
+			if(!Array.isArray(resources))
+				resources = [resources];
+
+			var routeMapResolutions = [];
+			for(var idx in resources) {
+				routeMapResolutions.push(self._constructRouteMapAsync(resources[idx]));
+			}
+
+			routeMapResolutions.push(routes);
+			return promises.all(routeMapResolutions);
+		})
+		.then(function(result) {
+			var routeMaps = result,
+				routes = result.pop(),
+				returnedRoutes = '';
+
+			for(var idx in routeMaps) {
+				var routeMap = routeMaps[idx];
+
+				returnedRoutes += 'var Router = require(\'twyrPortal/router\')[\'default\'];\n';
+				returnedRoutes += 'Router.map(function() {\n';
+				returnedRoutes += '\t' + routeMap;
+				returnedRoutes += '\n});\n';
+			}
+
+			response.status(200).send(returnedRoutes + '\n' + routes);
+		})
+		.catch(function(err) {
+			self.$dependencies.logger.error('Error getting component resources for ' + self.name + ':\n', err);
+			response.status(500).send(err.message);
+		});
 	},
 
 	'_getClientMVC': function(request, response, next) {
-		next();
+		var renderFunc = promises.promisify(response.render.bind(response)),
+			self = this;
+
+		response.type('application/javascript');
+		self._getMVCAsync(request, renderFunc)
+		.then(function(componentMVCs) {
+			response.status(200).send(componentMVCs);
+		})
+		.catch(function(err) {
+			self.$dependencies.logger.error('Error sending MVCs: ', err);
+			response.status(500).send(err.message);
+		});
 	},
 
 	'_getClientTemplate': function(request, response, next) {
-		next();
+		var renderFunc = promises.promisify(response.render.bind(response)),
+			self = this;
+
+		response.type('application/javascript');
+		self._getTemplatesAsync(request, renderFunc)
+		.then(function(componentTemplates) {
+			response.status(200).send(componentTemplates);
+		})
+		.catch(function(err) {
+			self.$dependencies.logger.error('Error sending templates: ', err);
+			response.status(500).send(err.message);
+		});
+	},
+
+	'_getResources': function(request, renderFunc, callback) {
+		var promiseResolutions = [],
+			self = this;
+
+		for(var idx in self.$components) {
+			var thisComponent = self.$components[idx];
+			promiseResolutions.push(thisComponent._getResourcesAsync(request, renderFunc));
+		}
+
+		promises.all(promiseResolutions)
+		.then(function(componentResources) {
+			callback(null, componentResources);
+		})
+		.catch(function(err) {
+			callback(err);
+		});
+	},
+
+	'_getRoutes': function(request, renderFunc, callback) {
+		var promiseResolutions = [],
+			self = this;
+
+		for(var idx in self.$components) {
+			var thisComponent = self.$components[idx];
+			promiseResolutions.push(thisComponent._getRoutesAsync(request, renderFunc));
+		}
+
+		promises.all(promiseResolutions)
+		.then(function(componentRoutes) {
+			callback(null, componentRoutes.join('\n'));
+		})
+		.catch(function(err) {
+			callback(err);
+		});
+	},
+
+	'_getTemplates': function(request, renderFunc, callback) {
+		var promiseResolutions = [],
+			self = this;
+
+		for(var idx in self.$components) {
+			var thisComponent = self.$components[idx];
+			promiseResolutions.push(thisComponent._getTemplatesAsync(request, renderFunc));
+		}
+
+		promises.all(promiseResolutions)
+		.then(function(componentTemplates) {
+			callback(null, componentTemplates.join('\n'));
+		})
+		.catch(function(err) {
+			callback(err);
+		});
+	},
+
+	'_getMVC': function(request, renderFunc, callback) {
+		var promiseResolutions = [],
+			self = this;
+
+		for(var idx in self.$components) {
+			var thisComponent = self.$components[idx];
+			promiseResolutions.push(thisComponent._getMVCAsync(request, renderFunc));
+		}
+
+		promises.all(promiseResolutions)
+		.then(function(componentMVCs) {
+			callback(null, componentMVCs.join('\n'));
+		})
+		.catch(function(err) {
+			callback(err);
+		});
+	},
+
+	'_constructRouteMap': function(resources, callback) {
+		var routeMap = '',
+			self = this;
+
+		if(resources.subRoutes && resources.subRoutes.length) {
+			var promiseResolutions = [];
+			for(var idx in resources.subRoutes) {
+				promiseResolutions.push(this._constructRouteMapAsync(resources.subRoutes[idx]));
+			}
+
+			promises.all(promiseResolutions)
+			.then(function(subRouteMaps) {
+				var subRoutes = subRouteMaps.join('\n').trim();
+
+				if(subRoutes != '') {
+					routeMap = 'this.route(\'' + resources.name + '\', { \'path\': \'' + resources.path + '\'}, function() {\n';
+					routeMap = routeMap + '\t' + subRoutes + '\n});\n';
+
+					callback(null, routeMap);
+					return;
+				}
+
+				if(resources.name && resources.path) {
+					routeMap = 'this.route(\'' + resources.name + '\', { \'path\': \'' + resources.path + '\'});';
+					callback(null, routeMap);
+					return;
+				}
+
+				callback(null, '');
+			})
+			.catch(function(err) {
+				self.$dependencies.logger.error('Error constructing route map: ', err);
+				callback(err);
+			});
+
+			return;
+		}
+
+		if(resources.name && resources.path) {
+			routeMap = 'this.route(\'' + resources.name + '\', { \'path\': \'' + resources.path + '\'});';
+			callback(null, routeMap);
+			return;
+		}
+
+		callback(null, '');
 	},
 
 	'_checkPermission': function(request, permission, tenantId, callback) {

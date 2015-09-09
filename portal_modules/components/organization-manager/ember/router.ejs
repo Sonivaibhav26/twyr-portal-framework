@@ -1,27 +1,26 @@
-var Router = require('twyrPortal/router')['default'];
-Router.map(function() {
-	this.route('organization-manager-organization-structure', { 'path': '/organization/structure' });
-});
-
 define(
-	"twyrPortal/routes/organization-manager-organization-structure",
+	"twyrPortal/routes/organization-manager",
 	["exports"],
 	function(exports) {
-		if(window.developmentMode) console.log('DEFINE: twyrPortal/routes/organization-manager-organization-structure');
-		var OrganizationManagerOrganizationStructureRoute = window.Ember.Route.extend({
+		if(window.developmentMode) console.log('DEFINE: twyrPortal/routes/organization-manager');
+		var OrganizationManagerRoute = window.Ember.Route.extend({
 			'beforeModel': function() {
 				return window.Ember.$.getScript('<%= mountPath %>/mvc');
 			},
 
 			'model': function() {
-				return this.store.findRecord('organization-manager-organization-structure', '<%= tenantId %>');
+				var promiseResolutions = [];
+				<% for (var idx=0; idx < tenantIds.length; idx++) { %>
+				promiseResolutions.push(this.store.findRecord('organization-manager', '<%= tenantIds[idx] %>'));
+				<% } %>
+				return window.Ember.RSVP.Promise.all(promiseResolutions);
 			},
 
 			'setupController': function(controller, model) {
-				controller.set('model', model);
+				controller.set('model', model[0]);
 			}
 		});
 
-		exports['default'] = OrganizationManagerOrganizationStructureRoute;
+		exports['default'] = OrganizationManagerRoute;
 	}
 );

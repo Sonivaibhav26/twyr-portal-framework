@@ -7,7 +7,10 @@
 				<% if(menuItems[idx].icon_class) { %>
 					<i class="<%= menuItems[idx].icon_class %>"></i>
 				<% } %>
-				<%= menuItems[idx].display_name %>
+				<% if(menuItems[idx].display_name) { %>
+					<%= menuItems[idx].display_name %>
+				<% } %>
+				<span class="caret" />
 			</a>
 			<ul class="dropdown-menu">
 				<% for(var subIdx = 0; subIdx < menuItems[idx].subRoutes.length; subIdx++) { %>
@@ -16,7 +19,9 @@
 							<% if(menuItems[idx].subRoutes[subIdx].icon_class) { %>
 								<i class="<%= menuItems[idx].subRoutes[subIdx].icon_class %>"></i>
 							<% } %>
-							<%= menuItems[idx].subRoutes[subIdx].display_name %>
+							<% if(menuItems[idx].subRoutes[subIdx].display_name) { %>
+								<%= menuItems[idx].subRoutes[subIdx].display_name %>
+							<% } %>
 						{{/link-to}}
 					</li>
 				<% } %>
@@ -28,7 +33,9 @@
 				<% if(menuItems[idx].icon_class) { %>
 					<i class="<%= menuItems[idx].icon_class %>"></i>
 				<% } %>
-				<%= menuItems[idx].display_name %>
+				<% if(menuItems[idx].display_name) { %>
+					<%= menuItems[idx].display_name %>
+				<% } %>
 			{{/link-to}}
 		</li>
 	<% } %>

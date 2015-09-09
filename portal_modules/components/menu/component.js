@@ -36,123 +36,126 @@ var menuComponent = prime({
 		this._renderMenuComponentsAsync = promises.promisify(this._renderMenuComponents);
 	},
 
-	'_getClientRouter': function(request, response, next) {
-		this.$dependencies.logger.debug('Servicing request "' + request.path + '":\nQuery: ', request.query, '\nBody: ', request.body, '\nParams: ', request.params);
-		response.type('application/javascript');
-
+	'_getRoutes': function(request, renderFunc, callback) {
 		var cacheSrvc = this.$dependencies.cacheService,
 			self = this,
 			userId = ((request.user && request.user.id) ? request.user.id : 'public');
 
-		cacheSrvc.getAsync('twyr!portal!user!' + userId)
-		.then(function(userData) {
-			userData = JSON.parse(userData);
-			if(!userData) {
-				throw({ 'code': 404, 'message': 'User not found' })
+		menuComponent.parent._getRoutes.call(self, request, renderFunc, function(err, componentRoutes) {
+			if(err) {
+				callback(err);
 				return;
 			}
 
-			// Step 1: Get the data we are supposed to use for constructing menus
-			var currentTenantData = ((userId == 'public') ? userData : userData.currentTenant);
-
-			// Step 2: If the data has already been processed, render it and be done...
-			if(currentTenantData.sessionData && currentTenantData.sessionData[self.name]) {
-				self._renderMenuComponentsAsync(currentTenantData.sessionData[self.name], response)
-				.then(function(tmpl) {
-					response.status(200).send(tmpl);
+			cacheSrvc.getAsync('twyr!portal!user!' + userId)
+			.then(function(userData) {
+				userData = JSON.parse(userData);
+				if(!userData) {
+					throw({ 'code': 404, 'message': 'User not found' })
+					return;
+				}
+	
+				// Step 1: Get the data we are supposed to use for constructing menus
+				var currentTenantData = ((userId == 'public') ? userData : userData.currentTenant);
+	
+				// Step 2: If the data has already been processed, render it and be done...
+				if(currentTenantData.sessionData && currentTenantData.sessionData[self.name]) {
+					self._renderMenuComponentsAsync(currentTenantData.sessionData[self.name], renderFunc)
+					.then(function(menuComponents) {
+						callback(null, menuComponents + '\n' + componentRoutes);
+					})
+					.catch(function(err) {
+						self.$dependencies.logger.error('Error Servicing request "' + request.path + '":\nQuery: ', request.query, '\nBody: ', request.body, '\nParams: ', request.params, '\nError: ', err);
+						callback(err);
+					});
+	
+					return;
+				}
+	
+				// Step 3: Cache all the required data...
+				self._setupMenuCacheAsync(userId, userData)
+				// Step 4: Render the newly retrieved menu items...
+				.then(function() {
+					return self._renderMenuComponentsAsync(currentTenantData.sessionData[self.name], renderFunc);
 				})
-				.catch(function(err) {
-					self.$dependencies.logger.error('Error Servicing request "' + request.path + '":\nQuery: ', request.query, '\nBody: ', request.body, '\nParams: ', request.params, '\nError: ', err);
-					response.status(500).json(err);
-				});
-
-				return;
-			}
-
-			// Step 3: Cache all the required data...
-			self._setupMenuCacheAsync(userId, userData)
-			// Step 4: Render the newly retrieved menu items...
-			.then(function() {
-				return self._renderMenuComponentsAsync(currentTenantData.sessionData[self.name], response);
-			})
-			// Step 5: Send the rendered templates back...
-			.then(function(tmpl) {
-				response.status(200).send(tmpl);
-			})
-			.catch(function(err) {
-				self.$dependencies.logger.error('Error fetching menu items from database for user: ' + userId + '\n', err);
-				response.status(500).json(err);
-			});
-		})
-		.catch(function(err) {
-			self.$dependencies.logger.error('Error Servicing request "' + request.path + '":\nQuery: ', request.query, '\nBody: ', request.body, '\nParams: ', request.params, '\nError: ', err);
-			response.status(500).json(err);
-		});
-	},
-
-	'_getClientMVC': function(request, response, next) {
-		response.type('application/javascript');
-		response.status(200).send('');
-	},
-
-	'_getClientTemplate': function(request, response, next) {
-		response.type('application/javascript');
-
-		var cacheSrvc = this.$dependencies.cacheService,
-			self = this;
-
-		var userId = ((request.user && request.user.id) ? request.user.id : 'public'),
-			currentTenantData = null;
-
-		cacheSrvc.getAsync('twyr!portal!user!' + userId)
-		.then(function(userData) {
-			userData = JSON.parse(userData);
-			if(!userData) {
-				throw({ 'code': 404, 'message': 'User not found' })
-				return;
-			}
-
-			// Step 1: Get the data we are supposed to use for constructing menus
-			currentTenantData = ((userId == 'public') ? userData : userData.currentTenant);
-
-			// Step 2: If the data has already been processed, render it and be done...
-			if(currentTenantData.sessionData && currentTenantData.sessionData[self.name]) {
-				self._renderMenuTemplatesAsync(currentTenantData.sessionData[self.name], response)
-				.then(function(tmpl) {
-					response.status(200).send(tmpl);
+				// Step 5: Send the rendered templates back...
+				.then(function(menuComponents) {
+					callback(null, menuComponents + '\n' + componentRoutes);
 				})
 				.catch(function(err) {
 					self.$dependencies.logger.error('Error fetching menu items from database for user: ' + userId + '\n', err);
-					response.status(500).json(err);
+					callback(err);
 				});
-
-				return;
-			}
-
-			// Step 3: Cache all the required data...
-			self._setupMenuCacheAsync(userId, userData)
-			// Step 4: Render the newly retrieved menu items...
-			.then(function() {
-				return self._renderMenuTemplatesAsync(currentTenantData.sessionData[self.name], response);
-			})
-			// Step 5: Send the rendered templates back...
-			.then(function(tmpl) {
-				response.status(200).send(tmpl);
 			})
 			.catch(function(err) {
-				self.$dependencies.logger.error('Error fetching menu items from database for user: ' + userId + '\n', err);
-				response.status(500).json(err);
+				self.$dependencies.logger.error('Error Servicing request "' + request.path + '":\nQuery: ', request.query, '\nBody: ', request.body, '\nParams: ', request.params, '\nError: ', err);
+				callback(err);
 			});
-		})
-		.catch(function(err) {
-			self.$dependencies.logger.error('Error fetching menu items from database for user: ' + userId + '\n', err);
-			response.status(500).json(err);
 		});
 	},
 
-	'_renderMenuTemplates': function(menuData, response, callback) {
-		var renderAsync = promises.promisify(response.render.bind(response)),
-			promiseResolutions = [];
+	'_getTemplates': function(request, renderFunc, callback) {
+		var cacheSrvc = this.$dependencies.cacheService,
+			self = this;
+
+		menuComponent.parent._getTemplates.call(self, request, renderFunc, function(err, componentTemplates) {
+			if(err) {
+				callback(err);
+				return;
+			}
+
+			var userId = ((request.user && request.user.id) ? request.user.id : 'public'),
+				currentTenantData = null;
+	
+			cacheSrvc.getAsync('twyr!portal!user!' + userId)
+			.then(function(userData) {
+				userData = JSON.parse(userData);
+				if(!userData) {
+					throw({ 'code': 404, 'message': 'User not found' })
+					return;
+				}
+	
+				// Step 1: Get the data we are supposed to use for constructing menus
+				currentTenantData = ((userId == 'public') ? userData : userData.currentTenant);
+	
+				// Step 2: If the data has already been processed, render it and be done...
+				if(currentTenantData.sessionData && currentTenantData.sessionData[self.name]) {
+					self._renderMenuTemplatesAsync(currentTenantData.sessionData[self.name], renderFunc)
+					.then(function(tmpl) {
+						callback(null, tmpl + '\n' + componentTemplates);
+					})
+					.catch(function(err) {
+						self.$dependencies.logger.error('Error fetching menu items from database for user: ' + userId + '\n', err);
+						callback(err);
+					});
+	
+					return;
+				}
+	
+				// Step 3: Cache all the required data...
+				self._setupMenuCacheAsync(userId, userData)
+				// Step 4: Render the newly retrieved menu items...
+				.then(function() {
+					return self._renderMenuTemplatesAsync(currentTenantData.sessionData[self.name], renderFunc);
+				})
+				// Step 5: Send the rendered templates back...
+				.then(function(tmpl) {
+					callback(null, tmpl + '\n' + componentTemplates);
+				})
+				.catch(function(err) {
+					self.$dependencies.logger.error('Error fetching menu items from database for user: ' + userId + '\n', err);
+					callback(err);
+				});
+			})
+			.catch(function(err) {
+				self.$dependencies.logger.error('Error fetching menu items from database for user: ' + userId + '\n', err);
+				callback(err);
+			});
+		});
+	},
+
+	'_renderMenuTemplates': function(menuData, renderAsync, callback) {
+		var promiseResolutions = [];
 
 		Object.keys(menuData).forEach(function(componentName) {
 			var emberComponentName = inflection.camelize(componentName.replace(/-/g, '_')) + 'Component',
@@ -176,12 +179,10 @@ var menuComponent = prime({
 		});
 	},
 
-	'_renderMenuComponents': function(menuData, response, callback) {
-		var renderAsync = promises.promisify(response.render.bind(response)),
-			promiseResolutions = [];
+	'_renderMenuComponents': function(menuData, renderAsync, callback) {
+		var promiseResolutions = [];
 
 		Object.keys(menuData).forEach(function(componentName) {
-			console.log(menuData[componentName]);
 			if(menuData[componentName].template != 'vertical')
 				return;
 
@@ -210,8 +211,6 @@ var menuComponent = prime({
 		var cacheSrvc = this.$dependencies.cacheService,
 			databaseSrvc = this.$dependencies.databaseService,
 			self = this;
-
-		console.log('_setupMenuCache parameters:\nuserId: ', userId, '\nuserData: ', userData);
 
 		var currentTenantData = ((userId == 'public') ? userData : userData.currentTenant),
 			widgetList = currentTenantData.widgets,

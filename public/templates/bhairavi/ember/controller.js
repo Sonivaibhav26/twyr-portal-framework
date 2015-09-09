@@ -42,7 +42,7 @@ define(
 				var self = this;
 				window.Ember.run.later(self, function() {
 					window.Ember.$('div#bhairavi-status-message').removeClass('callout-' + data.type);
-					self.resetStatusMessages();
+					self.resetStatusMessages(600);
 				}, 10000);
 			},
 

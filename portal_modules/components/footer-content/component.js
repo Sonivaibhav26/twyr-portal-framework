@@ -31,32 +31,45 @@ var footerComponent = prime({
 		base.call(this);
 	},
 
-	'_getClientRouter': function(request, response, next) {
-		response.type('application/javascript');
+	'_getTemplates': function(request, renderFunc, callback) {
+		var self = this;
+		footerComponent.parent._getTemplates.call(self, request, renderFunc, function(err, componentTemplates) {
+			if(err) {
+				callback(err);
+				return;
+			}
 
-		filesystem.readFileAsync(path.join(__dirname, 'ember/router.js'))
-		.then(function(router) {
-			response.status(200).send(router);
-		})
-		.catch(function(err) {
-			response.status(500).json(err);
+			filesystem.readFileAsync(path.join(__dirname, 'ember/templates.js'))
+			.then(function(tmpl) {
+				callback(null, tmpl + '\n' + componentTemplates);
+			})
+			.catch(function(err) {
+				callback(err);
+			});
 		});
 	},
 
-	'_getClientMVC': function(request, response, next) {
-		response.type('application/javascript');
-		response.status(200).send('');
-	},
+	'_getResources': function(request, renderFunc, callback) {
+		var self = this;
+		footerComponent.parent._getResources.call(self, request, renderFunc, function(err, componentResources) {
+			if(err) {
+				callback(err);
+				return;
+			}
 
-	'_getClientTemplate': function(request, response, next) {
-		response.type('application/javascript');
-
-		filesystem.readFileAsync(path.join(__dirname, 'ember/templates.js'))
-		.then(function(tmpl) {
-			response.status(200).send(tmpl);
-		})
-		.catch(function(err) {
-			response.status(500).json(err);
+			callback(null, [{
+				'name': 'about',
+				'path': '/about'
+			}, {
+				'name': 'terms',
+				'path': '/terms'
+			}, {
+				'name': 'privacy',
+				'path': '/privacy'
+			}, {
+				'name': 'contact',
+				'path': '/contact'
+			}]);
 		});
 	},
 

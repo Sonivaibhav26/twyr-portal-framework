@@ -44,7 +44,7 @@
     "ionicons": "*",
     "jstree": "*",
     "bootstrap-jstree-theme": "*",
-    "jquery": "*",
+    "jquery": "2.*",
     "jquery-confirm": "*",
     "mathjs": "*",
     "moment": "*",
@@ -54,6 +54,7 @@
   },
   "devDependencies": {},
   "resolutions": {
-    "ember": "^2.0.0"
+    "ember": "^2.0.2",
+    "jquery": "2.*"
   }
 }

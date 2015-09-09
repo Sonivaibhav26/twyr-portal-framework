@@ -174,8 +174,8 @@ var app = prime({
 				var thisComponent = self.$components[idx],
 					router = thisComponent.getRouter();
 
-				console.log('Loading ' + thisComponent.name + ' @ ' + path.join((self.$config.componentMountPath || ''), thisComponent.name));
-				portalServer.use(path.join((self.$config.componentMountPath || ''), thisComponent.name), router);
+				console.log('Loading ' + thisComponent.name + ' @ ' + path.join((self.$config.componentMountPath || '/'), thisComponent.name));
+				portalServer.use(path.join((self.$config.componentMountPath || '/'), thisComponent.name), router);
 			}
 
 			// Step 3.5: Add in the framework router...

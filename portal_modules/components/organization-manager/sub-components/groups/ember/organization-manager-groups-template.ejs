@@ -1,0 +1,222 @@
+<script type="text/x-handlebars" data-template-name="components/organization-manager-groups-editor">
+<div class="box box-default" style="text-align:left; margin-bottom:0px; border-radius:0px; border-top-width:1px;">
+	<div class="box-header with-border" style="height:50px;">
+		<h3 class="box-title">{{model.name}} Group</h3>
+		{{#if model.parent}}
+		<div class="pull-right" style="cursor:pointer; margin:0px 5px;" {{action "controller-action" "delete-group" model bubbles=false}}>
+		    <button type="button" class="btn btn-danger btn-sm">
+				<i class="fa fa-remove" style="margin-right:5px;" /><span>Delete</span>
+		    </button>
+		</div>
+		{{/if}}
+		{{#if model.hasDirtyAttributes}}
+		{{#unless model.isNew}}
+		<div class="pull-right" style="cursor:pointer; margin:0px 5px;" {{action "controller-action" "cancel" bubbles=false}}>
+		    <button type="button" class="btn btn-warning btn-sm">
+				<i class="fa fa-undo" style="margin-right:5px;" /><span>Cancel</span>
+		    </button>
+		</div>
+		{{/unless}}
+		<div class="pull-right" style="cursor:pointer; margin:0px 5px;" {{action "controller-action" "save-group" model bubbles=false}}>
+		    <button type="submit" class="btn btn-primary btn-sm">
+				<i class="fa fa-save" style="margin-right:5px;" /><span>Save</span>	
+		    </button>
+		</div>
+		{{/if}}
+	</div>
+	<div class="box-body">
+		<div class="form-group col-md-4">
+			<label>Group Name</label>
+			{{input type="text" value=model.name class="form-control" placeholder="Group Name"}}
+		</div>
+		<div class="form-group col-md-4">
+			<label>Parent Group</label>
+			{{input type="text" value=model.parent.name class="form-control" placeholder="Parent Group Name" readonly="readonly"}}
+		</div>
+		<div class="form-group col-md-4">
+			<label>Created On</label>
+			{{input type="text" value=model.formattedCreatedOn class="form-control" placeholder="Created On" readonly="readonly"}}
+		</div>
+	</div>
+	{{#unless model.isNew}}
+	<div class="box-body no-padding" style="margin-top:20px;">
+	<div class="nav-tabs-custom" style="margin:0px;">
+		<ul class="nav nav-tabs">
+			<li class="active"><a href="#organization-manager-group-permissions-tab" data-toggle="tab">Permissions</a></li>
+			<li><a href="#organization-manager-group-subgroups-tab" data-toggle="tab">Subgroups</a></li>
+			<li><a href="#organization-manager-group-users-tab" data-toggle="tab">Users</a></li>
+		</ul>
+		<div class="tab-content" style="padding:0px;">
+			<div class="tab-pane active" id="organization-manager-group-permissions-tab">
+				<table class="table table-bordered table-striped table-hover" style="margin-bottom:0px;">
+				<thead>
+					<tr>
+						<th style="vertical-align:middle;">Component</th>
+						<th style="vertical-align:middle;">Permission</th>
+						<th style="vertical-align:middle;">Description</th>
+						<th style="vertical-align:middle;">Added On</th>
+						<th style="text-align:right; vertical-align:middle;">
+						{{#if model.parent}}
+						    <button type="button" class="btn btn-primary btn-sm" {{action "controller-action" "add-group-permission" model bubbles=false}}>
+								<i class="fa fa-plus" style="margin-right:5px;" /><span>Add Permission</span>
+						    </button>
+						{{else}}
+							&nbsp;
+						{{/if}}
+						</th>
+					</tr>
+				</thead>
+				<tbody>
+				{{#each model.permissions as |groupPermission index|}}
+					<tr>
+					{{#if groupPermission.isNew}}
+						<td colspan="3" class="form-group" style="vertical-align:middle;">
+							<select id="organization-manager-group-permissions-tab-select-{{groupPermission.id}}" class="form-control" style="width:100%;" />
+						</td>
+						<td style="vertical-align:middle;">{{groupPermission.formattedCreatedOn}}</td>
+						<td style="text-align:right; vertical-align:middle;">
+						    <button type="button" class="btn btn-danger btn-sm" {{action "controller-action" "delete-group-permission" groupPermission bubbles=false}}>
+								<i class="fa fa-remove" style="margin-right:5px;" /><span>Delete</span>
+						    </button>
+						</td>
+					{{else}}
+						<td style="vertical-align:middle;">{{groupPermission.permission.componentName}}</td>
+						<td style="vertical-align:middle;">{{groupPermission.permission.displayName}}</td>
+						<td style="vertical-align:middle;">{{groupPermission.permission.description}}</td>
+						<td style="vertical-align:middle;">{{groupPermission.formattedCreatedOn}}</td>
+						<td style="text-align:right; vertical-align:middle;">
+						{{#if model.parent}}
+						    <button type="button" class="btn btn-danger btn-sm" {{action "controller-action" "delete-group-permission" groupPermission bubbles=false}}>
+								<i class="fa fa-remove" style="margin-right:5px;" /><span>Delete</span>
+						    </button>
+						{{else}}
+								&nbsp;
+						{{/if}}
+						</td>
+					{{/if}}
+					</tr>
+				{{/each}}
+				</tbody>
+				</table>
+			</div>
+			<div class="tab-pane" id="organization-manager-group-subgroups-tab">
+				<table class="table table-bordered table-striped table-hover" style="margin-bottom:0px;">
+				<thead>
+					<tr>
+						<th style="vertical-align:middle;">Name</th>
+						<th style="vertical-align:middle;">Created On</th>
+						<th style="text-align:right; vertical-align:middle;">
+						    <button type="button" class="btn btn-primary btn-sm" {{action "controller-action" "add-group" model bubbles=false}}>
+								<i class="fa fa-plus" style="margin-right:5px;" /><span>Add Subgroup</span>
+						    </button>
+						</th>
+					</tr>
+				</thead>
+				<tbody>
+				{{#each model.subgroups as |subgroup index|}}
+				<tr>
+				{{#if subgroup.isNew}}
+					<td class="form-group" style="vertical-align:middle;">{{input type="text" class="form-control" value=subgroup.name}}</td>
+					<td style="vertical-align:middle;">{{subgroup.formattedCreatedOn}}</td>
+					<td style="text-align:right; vertical-align:middle;">
+					    <button type="button" class="btn btn-primary btn-sm" {{action "controller-action" "save-group" subgroup bubbles=false}}>
+							<i class="fa fa-save" style="margin-right:5px;" /><span>Save</span>
+					    </button>
+					    <button type="button" class="btn btn-danger btn-sm" {{action "controller-action" "delete-group" subgroup bubbles=false}}>
+							<i class="fa fa-remove" style="margin-right:5px;" /><span>Delete</span>
+					    </button>
+					</td>
+				{{else}}
+					<td style="vertical-align:middle;">{{subgroup.name}}</td>
+					<td style="vertical-align:middle;">{{subgroup.formattedCreatedOn}}</td>
+					<td style="text-align:right; vertical-align:middle;">
+					    <button type="button" class="btn btn-danger btn-sm" {{action "controller-action" "delete-group" subgroup bubbles=false}}>
+							<i class="fa fa-remove" style="margin-right:5px;" /><span>Delete</span>
+					    </button>
+					</td>
+				{{/if}}
+				</tr>
+				{{/each}}
+				</tbody>
+				</table>
+			</div>
+			<div class="tab-pane" id="organization-manager-group-users-tab">
+				<table class="table table-bordered table-striped table-hover" style="margin-bottom:0px;">
+				<thead>
+					<tr>
+						<th style="vertical-align:middle;">Login</th>
+						<th style="vertical-align:middle;">First Name</th>
+						<th style="vertical-align:middle;">Last Name</th>
+						<th style="vertical-align:middle;">Added On</th>
+						<th style="text-align:right; vertical-align:middle;">
+						    <button type="button" class="btn btn-primary btn-sm" {{action "controller-action" "add-group-user" model bubbles=false}}>
+								<i class="fa fa-plus" style="margin-right:5px;" /><span>Add Registered User</span>
+						    </button>
+						</th>
+					</tr>
+				</thead>
+				<tbody>
+				{{#each model.users as |groupUser index|}}
+				<tr>
+				{{#if groupUser.isNew}}
+					<td colspan="3" class="form-group" style="vertical-align:middle;">
+						<select id="organization-manager-group-users-tab-select-{{groupUser.id}}" class="form-control" style="width:100%;" />
+					</td>
+					<td style="vertical-align:middle;">{{groupUser.formattedCreatedOn}}</td>
+					<td style="text-align:right; vertical-align:middle;">
+					    <button type="button" class="btn btn-danger btn-sm" {{action "controller-action" "delete-group-user" groupUser bubbles=false}}>
+							<i class="fa fa-remove" style="margin-right:5px;" /><span>Delete</span>
+					    </button>
+					</td>
+				{{else}}
+					<td style="vertical-align:middle;">{{groupUser.user.login}}</td>
+					<td style="vertical-align:middle;">{{groupUser.user.firstName}}</td>
+					<td style="vertical-align:middle;">{{groupUser.user.lastName}}</td>
+					<td style="vertical-align:middle;">{{groupUser.formattedCreatedOn}}</td>
+					<td style="text-align:right; vertical-align:middle;">
+					    <button type="button" class="btn btn-danger btn-sm" {{action "controller-action" "delete-group-user" groupUser bubbles=false}}>
+							<i class="fa fa-remove" style="margin-right:5px;" /><span>Delete</span>
+					    </button>
+					</td>
+				{{/if}}
+				</tr>
+				{{/each}}
+				</tbody>
+				</table>
+			</div>
+		</div>
+	</div>
+	</div>
+	{{/unless}}
+</div>
+</script>
+
+
+<script type="text/x-handlebars" data-template-name="components/organization-manager-groups-tree">
+<div class="box box-default" style="text-align:left; margin-bottom:0px; border-radius:0px; border-top-width:1px; box-shadow:none;">
+	<div class="box-header with-border" style="height:50px;">
+		<h3 class="box-title">Groups Menu</h3>
+	</div>
+	<div class="box-body">
+		<div id="organization-manager-groups-tree-container">&nbsp;</div>
+	</div>
+</div>
+</script>
+
+
+<script type="text/x-handlebars" data-template-name="components/organization-manager-groups">
+<div class="box box-default" style="text-align:left; margin-bottom:0px;">
+	<div class="box-header with-border">
+		<h3 class="box-title">{{model.name}} Groups</h3>
+	</div>
+	<div class="box-body no-padding">
+		<div class="col-md-3" style="padding:0px;">
+			{{organization-manager-groups-tree model=currentModel tenantModel=model deleteTreeNode=deleteTreeNode controller-action="controller-action"}}
+		</div>
+		<div class="col-md-9" style="padding:0px;">
+			{{organization-manager-groups-editor model=currentModel controller-action="controller-action"}}
+		</div>
+	</div>
+</div>
+</script>
+

@@ -108,10 +108,6 @@ window.curl(window.templates)
 							}
 						}
 					});
-
-					App.Router.reopen({
-						'location': 'history'
-					});
 		
 					App.generateUUID = function() {
 						return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {

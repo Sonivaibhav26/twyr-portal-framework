@@ -49,80 +49,137 @@ var profileComponent = prime({
 		this._existsAsync = promises.promisify(this._exists);
 	},
 
-	'_getClientRouter': function(request, response, next) {
-		this.$dependencies.logger.silly('Servicing request "' + request.path + '":\nQuery: ', request.query, '\nBody: ', request.body, '\nParams: ', request.params);
+	'_getResources': function(request, renderFunc, callback) {
+		var self = this;
+		profileComponent.parent._getResources.call(self, request, renderFunc, function(err, componentResources) {
+			if(err) {
+				callback(err);
+				return;
+			}
 
-		var routerFile = '',
-			renderOptions = {};
+			if(!request.user) {
+				callback(null, {});
+				return;
+			}
 
-		renderOptions.mountPath = path.join(this.$module.$config.componentMountPath, this.name);
-		if(!request.user) {
-			routerFile = this['publicRouter'];
-		}
-		else {
-			routerFile = this['registeredRouter'];
-			renderOptions.userId = request.user.id;
-		}
-
-		response.render(routerFile, renderOptions);
-	},
-
-	'_getClientMVC': function(request, response, next) {
-		this.$dependencies.logger.silly('Servicing request "' + request.path + '":\nQuery: ', request.query, '\nBody: ', request.body, '\nParams: ', request.params);
-
-		var controllerFile = '',
-			modelFile = null,
-			viewFile = '',
-			self = this;
-
-		if(!request.user) {
-			controllerFile = this['publicCtrl'];
-		}
-		else {
-			modelFile =  this['registeredModel'];
-			viewFile = this['registeredView'];
-			controllerFile = this['registeredCtrl'];
-		}
-
-		var promiseResolutions = [];
-		promiseResolutions.push(filesystem.readFileAsync(controllerFile));
-		if(modelFile) promiseResolutions.push(filesystem.readFileAsync(modelFile));
-		if(viewFile) promiseResolutions.push(filesystem.readFileAsync(viewFile));
-
-		response.type('application/javascript');
-
-		promises.all(promiseResolutions)
-		.then(function(files) {
-			self.$dependencies.logger.silly('Servicing request "' + request.path + '":\nQuery: ', request.query, '\nBody: ', request.body, '\nParams: ', request.params, '\nResponse: ', files.join('\n'));
-			response.status(200).send(files.join('\n'));
-		})
-		.catch(function(err) {
-			self.$dependencies.logger.error('Error servicing request "' + request.path + '":\nQuery: ', request.query, '\nBody: ', request.body, '\nParams: ', request.params, '\nError: ', err);
-			response.status(500).json(err);
+			callback(null, {
+				'name': 'profile',
+				'path': '/profile'
+			});
 		});
 	},
 
-	'_getClientTemplate': function(request, response, next) {
-		this.$dependencies.logger.silly('Servicing request "' + request.path + '":\nQuery: ', request.query, '\nBody: ', request.body, '\nParams: ', request.params);
-		response.type('application/javascript');
+	'_getRoutes': function(request, renderFunc, callback) {
+		var self = this;
+		profileComponent.parent._getRoutes.call(self, request, renderFunc, function(err, componentRoutes) {
+			if(err) {
+				callback(err);
+				return;
+			}
 
-		var tmplFile = '',
-			renderOptions = {};
+			var routerFile = '',
+				renderOptions = {};
+	
+			renderOptions.mountPath = path.join(self.$module.$config.componentMountPath, self.name);
+			if(!request.user) {
+				routerFile = self['publicRouter'];
+			}
+			else {
+				routerFile = self['registeredRouter'];
+				renderOptions.userId = request.user.id;
+			}
+	
+			renderFunc(routerFile, renderOptions)
+			.then(function(renderedRoute) {
+				callback(null, renderedRoute + '\n' + componentRoutes);
+			})
+			.catch(function(err) {
+				callback(err);
+			});
+		});
+	},
 
-		if(!request.user) {
-			tmplFile = this['publicTmpl'];
-		}
-		else {
-			tmplFile = this['registeredTmpl'];
-			renderOptions.mountPath = path.join(this.$module.$config.componentMountPath, this.name);
-		}
+	'_getMVC': function(request, renderFunc, callback) {
+		var self = this;
+		profileComponent.parent._getMVC.call(self, request, renderFunc, function(err, componentMVC) {
+			if(err) {
+				callback(err);
+				return;
+			}
 
-		response.render(tmplFile, renderOptions);
+			var controllerFile = '',
+				modelFile = null,
+				viewFile = '';
+	
+			if(!request.user) {
+				controllerFile = self['publicCtrl'];
+			}
+			else {
+				modelFile =  self['registeredModel'];
+				viewFile = self['registeredView'];
+				controllerFile = self['registeredCtrl'];
+			}
+	
+			var promiseResolutions = [];
+			promiseResolutions.push(filesystem.readFileAsync(controllerFile));
+			if(modelFile) promiseResolutions.push(filesystem.readFileAsync(modelFile));
+			if(viewFile) promiseResolutions.push(filesystem.readFileAsync(viewFile));
+
+			promises.all(promiseResolutions)
+			.then(function(files) {
+				files.push(componentMVC);
+				callback(null, files.join('\n'));
+			})
+			.catch(function(err) {
+				callback(err);
+			});
+		});
+	},
+
+	'_getTemplates': function(request, renderFunc, callback) {
+		var self = this;
+		profileComponent.parent._getTemplates.call(self, request, renderFunc, function(err, componentTemplates) {
+			if(err) {
+				callback(err);
+				return;
+			}
+
+			var tmplFile = '',
+				renderOptions = {};
+	
+			if(!request.user) {
+				tmplFile = self['publicTmpl'];
+			}
+			else {
+				tmplFile = self['registeredTmpl'];
+				renderOptions.mountPath = path.join(self.$module.$config.componentMountPath, self.name);
+			}
+	
+			renderFunc(tmplFile, renderOptions)
+			.then(function(renderedTemplate) {
+				callback(null, renderedTemplate + '\n' + componentTemplates);
+			})
+			.catch(function(err) {
+				callback(err);
+			});
+		});
 	},
 
 	'_addRoutes': function() {
 		var self = this,
 			anonImg = path.join(self.$config.profileImagePath, 'anonymous.png');
+
+		this.$router.get('/logoutComponent', function(request, response, next) {
+			response.type('application/javascript');
+
+			filesystem.readFileAsync(path.join(__dirname, 'ember/logoutcomponent.js'))
+			.then(function(logoutcomponent) {
+				response.status(200).send(logoutcomponent);
+			})
+			.catch(function(err) {
+				response.status(500).json(err);
+			});
+		});
 
 		this.$router.get('/profileImage', function(request, response, next) {
 			self.$dependencies.logger.silly('Servicing request "' + request.path + '":\nQuery: ', request.query, '\nBody: ', request.body, '\nParams: ', request.params);

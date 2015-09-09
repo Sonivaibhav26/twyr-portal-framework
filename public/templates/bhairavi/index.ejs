@@ -128,7 +128,7 @@
 
 	<!-- Position: menubar -->
 	<% if(widgets.menubar) { %>
-	<div id="bhairavi-menubar" class="row" style="min-height:0px; margin:0px; border:0px; padding:0px;">
+	<div id="bhairavi-menubar" class="row" style="min-height:0px; margin:0px; border:0px; padding:0px; background-color:#fff;">
 		<div class = "col-md-12" style="min-height:0px; margin:0px; border:0px; padding:0px; text-align:center;">
 			<% for(var widgetIdx = 0; widgetIdx < widgets.menubar.length; widgetIdx++) { %>
 				{{<%= widgets.menubar[widgetIdx].ember_component %>}}
@@ -176,7 +176,7 @@
 		</div>
 		<% } %>
 
-		<div id="div-bhairavi-outlet" class="col-md-<%= widgets.mainComponentColWidth %>" style="margin:0px; border:0px; padding:10px;">
+		<div id="div-bhairavi-outlet" class="col-md-<%= widgets.mainComponentColWidth %>" style="margin:0px; border:0px; padding:0px;">
 			{{outlet}}
 		</div>
 
