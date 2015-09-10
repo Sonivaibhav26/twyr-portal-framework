@@ -99,6 +99,52 @@ define(
 				}
 			},
 
+			'create-tenant-user': function(data) {
+				var self = this,
+					newUserId = app.default.generateUUID(),
+					newUserRelId = app.default.generateUUID(),
+					tenant = data.organization;
+
+				var newUserRel = null,
+					newUser = self.get('model').store.createRecord('organization-manager-user', {
+					'id': newUserId,
+					'firstName': data.firstName,
+					'lastName': data.lastName,
+					'login': data.login
+				});
+
+				self.send('portal-action', 'display-status-message', { 'type': 'info', 'message': 'Creating ' + newUser.get('fullName') + ' record in the database' });
+				newUser.save()
+				.catch(function(err) {
+					throw err;
+				})
+				.then(function() {
+					newUserRel = self.get('model').store.createRecord('organization-manager-tenant-user', {
+						'id': newUserRelId,
+						'tenant': tenant,
+						'user': newUser
+					});
+
+					self.send('portal-action', 'display-status-message', { 'type': 'info', 'message': 'Adding ' + newUser.get('fullName') + ' to ' + tenant.get('name') + ' Organization' });
+					return newUserRel.save();
+				})
+				.then(function() {
+					return tenant.get('users').addObject(newUserRel);
+				})
+				.then(function() {
+					self.send('portal-action', 'display-status-message', { 'type': 'success', 'message': newUser.get('fullName') + ' has been added to the ' + tenant.get('name') + ' Organization' });
+				})
+				.catch(function(err) {
+					self.send('portal-action', 'display-status-message', { 'type': 'error', 'errorModel': (newUserRel ? newUserRel : newUser) });
+					newUser.rollbackAttributes();
+
+					if(newUserRel) {
+						tenant.get('users').removeObject(newUserRel);
+						newUserRel.rollbackAttributes();
+					}
+				});
+			},
+
 			'add-tenant-user': function(data) {
 				var newTenantUser = data.tenant.store.createRecord('organization-manager-tenant-user', {
 					'id': data.tenantUserId,

@@ -4,6 +4,27 @@
 		<h3 class="box-title">{{model.name}} Users</h3>
 	</div>
 	<div class="box-body no-padding">
+	<div class="row" style="margin:0px; background-color:#eee; padding:10px;">
+		<div class="form-group col-md-4">
+			<label>Email<sup>*</sup></label>
+			{{input id="organization-manager-users-input-email" type="text" class="form-control" placeholder="root@twyrportal.com"}}
+		</div>
+		<div class="form-group col-md-3">
+			<label>First Name<sup>*</sup></label>
+			{{input id="organization-manager-users-input-first-name" type="text" class="form-control" placeholder="First/Given Name"}}
+		</div>
+		<div class="form-group col-md-3">
+			<label>Last Name<sup>*</sup></label>
+			{{input id="organization-manager-users-input-last-name" type="text" class="form-control" placeholder="Family Name / Surname"}}
+		</div>
+		<div class="form-group col-md-2" style="padding-top:25px; text-align:right;">
+		    <button type="button" class="btn btn-success btn-sm" {{action "controller-action" "create-tenant-user" model}}>
+				<i class="fa fa-plus" style="margin-right:5px;" /><span>Create New User</span>
+		    </button>
+		</div>
+	</div>
+	</div>
+	<div class="box-body no-padding">
 		<table class="table table-bordered table-striped table-hover">
 		<thead>
 			<tr>

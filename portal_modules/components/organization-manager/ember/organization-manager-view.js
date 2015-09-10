@@ -279,6 +279,23 @@ define(
 				});
 			}),
 
+			'create-tenant-user': function(tenant) {
+				var self = this;
+
+				this.sendAction('controller-action', 'create-tenant-user', {
+					'organization': tenant,
+					'login': self.$('input#organization-manager-users-input-email').val(),
+					'firstName': self.$('input#organization-manager-users-input-first-name').val(),
+					'lastName': self.$('input#organization-manager-users-input-last-name').val()
+				});
+
+				window.Ember.run.scheduleOnce('afterRender', self, function() {
+					self.$('input#organization-manager-users-input-email').val('');
+					self.$('input#organization-manager-users-input-first-name').val('');
+					self.$('input#organization-manager-users-input-last-name').val('');
+				});
+			},
+
 			'add-tenant-user': function(tenant) {
 				var self = this,
 					data = {
