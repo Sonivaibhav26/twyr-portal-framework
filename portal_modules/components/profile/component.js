@@ -31,15 +31,11 @@ var profileComponent = prime({
 		base.call(this);
 		this._loadConfig(path.join(__dirname, 'config.js'));
 
-		this['publicRouter'] = path.join(__dirname, 'ember/router-public.ejs');
-		this['publicTmpl'] = path.join(__dirname, 'ember/template-public.ejs');
-		this['publicCtrl'] = path.join(__dirname, 'ember/controller-public.js');
-
-		this['registeredTmpl'] = path.join(__dirname, 'ember/template-registered.ejs');
-		this['registeredRouter'] = path.join(__dirname, 'ember/router-registered.ejs');
-		this['registeredModel'] = path.join(__dirname, 'ember/model-registered.js');
-		this['registeredView'] = path.join(__dirname, 'ember/view-registered.js');
-		this['registeredCtrl'] = path.join(__dirname, 'ember/controller-registered.js');
+		this['router'] = path.join(__dirname, 'ember/router.ejs');
+		this['tmpl'] = path.join(__dirname, 'ember/template.ejs');
+		this['ctrl'] = path.join(__dirname, 'ember/controller.js');
+		this['view'] = path.join(__dirname, 'ember/view.js');
+		this['model'] = path.join(__dirname, 'ember/model.js');
 
 		if(this.$config.profileImagePath[0] != '/') {
 			this.$config.profileImagePath = path.join(__dirname, this.$config.profileImagePath);
@@ -77,19 +73,16 @@ var profileComponent = prime({
 				return;
 			}
 
-			var routerFile = '',
-				renderOptions = {};
-	
-			renderOptions.mountPath = path.join(self.$module.$config.componentMountPath, self.name);
 			if(!request.user) {
-				routerFile = self['publicRouter'];
+				callback(null, '');
+				return;
 			}
-			else {
-				routerFile = self['registeredRouter'];
-				renderOptions.userId = request.user.id;
-			}
-	
-			renderFunc(routerFile, renderOptions)
+
+			var renderOptions = {};
+			renderOptions.mountPath = path.join(self.$module.$config.componentMountPath, self.name);
+			renderOptions.userId = request.user.id;
+
+			renderFunc(self['router'], renderOptions)
 			.then(function(renderedRoute) {
 				callback(null, renderedRoute + '\n' + componentRoutes);
 			})
@@ -107,23 +100,15 @@ var profileComponent = prime({
 				return;
 			}
 
-			var controllerFile = '',
-				modelFile = null,
-				viewFile = '';
-	
 			if(!request.user) {
-				controllerFile = self['publicCtrl'];
+				callback(null, '');
+				return;
 			}
-			else {
-				modelFile =  self['registeredModel'];
-				viewFile = self['registeredView'];
-				controllerFile = self['registeredCtrl'];
-			}
-	
+
 			var promiseResolutions = [];
-			promiseResolutions.push(filesystem.readFileAsync(controllerFile));
-			if(modelFile) promiseResolutions.push(filesystem.readFileAsync(modelFile));
-			if(viewFile) promiseResolutions.push(filesystem.readFileAsync(viewFile));
+			promiseResolutions.push(filesystem.readFileAsync(self['ctrl']));
+			promiseResolutions.push(filesystem.readFileAsync(self['model']));
+			promiseResolutions.push(filesystem.readFileAsync(self['view']));
 
 			promises.all(promiseResolutions)
 			.then(function(files) {
@@ -144,18 +129,15 @@ var profileComponent = prime({
 				return;
 			}
 
-			var tmplFile = '',
-				renderOptions = {};
-	
 			if(!request.user) {
-				tmplFile = self['publicTmpl'];
+				callback(null, '');
+				return;
 			}
-			else {
-				tmplFile = self['registeredTmpl'];
-				renderOptions.mountPath = path.join(self.$module.$config.componentMountPath, self.name);
-			}
+
+			var renderOptions = {};
+			renderOptions.mountPath = path.join(self.$module.$config.componentMountPath, self.name);
 	
-			renderFunc(tmplFile, renderOptions)
+			renderFunc(self['tmpl'], renderOptions)
 			.then(function(renderedTemplate) {
 				callback(null, renderedTemplate + '\n' + componentTemplates);
 			})
@@ -168,18 +150,6 @@ var profileComponent = prime({
 	'_addRoutes': function() {
 		var self = this,
 			anonImg = path.join(self.$config.profileImagePath, 'anonymous.png');
-
-		this.$router.get('/logoutComponent', function(request, response, next) {
-			response.type('application/javascript');
-
-			filesystem.readFileAsync(path.join(__dirname, 'ember/logoutcomponent.js'))
-			.then(function(logoutcomponent) {
-				response.status(200).send(logoutcomponent);
-			})
-			.catch(function(err) {
-				response.status(500).json(err);
-			});
-		});
 
 		this.$router.get('/profileImage', function(request, response, next) {
 			self.$dependencies.logger.silly('Servicing request "' + request.path + '":\nQuery: ', request.query, '\nBody: ', request.body, '\nParams: ', request.params);

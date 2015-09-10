@@ -152,7 +152,7 @@ define(
 
 				window.Ember.$.ajax({
 					'type': 'POST',
-					'url': window.apiServer + 'profiles/doLogin',
+					'url': window.apiServer + 'login/doLogin',
 			
 					'dataType': 'json',
 					'data': {
@@ -192,7 +192,7 @@ define(
 
 			'doSocialLogin': function(socialNetwork) {
 				var currentLocation = window.location.href;
-				window.location.href = window.apiServer + 'profiles/' + socialNetwork + '?currentLocation=' + currentLocation;
+				window.location.href = window.apiServer + 'login/' + socialNetwork + '?currentLocation=' + currentLocation;
 			},
 
 			'resetPassword': function() {
@@ -203,7 +203,7 @@ define(
 
 				window.Ember.$.ajax({
 					'type': 'POST',
-					'url': window.apiServer + 'profiles/resetPassword',
+					'url': window.apiServer + 'login/resetPassword',
 		
 					'dataType': 'json',
 					'data': {
@@ -250,7 +250,7 @@ define(
 
 				window.Ember.$.ajax({
 					'type': 'POST',
-					'url': window.apiServer + 'profiles/registerAccount',
+					'url': window.apiServer + 'login/registerAccount',
 		
 					'dataType': 'json',
 					'data': {

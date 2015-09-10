@@ -66,7 +66,7 @@ var organizationManagerComponent = prime({
 			})
 			.catch(function(err) {
 				self.$dependencies.logger.error('Error servicing request "' + request.path + '":\nQuery: ', request.query, '\nBody: ', request.body, '\nParams: ', request.params, '\nError: ', err);
-				callback(err);
+				callback(null, {});
 			});
 		});
 	},

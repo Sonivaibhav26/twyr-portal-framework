@@ -8,7 +8,7 @@ define(
 			'doLogout': function() {
 				window.Ember.$.ajax({
 					'type': 'GET',
-					'url': window.apiServer + 'profiles/doLogout',
+					'url': window.apiServer + 'login/doLogout',
 					'dataType': 'json',
 
 					'success': function(data) {
@@ -39,4 +39,3 @@ define(
 		exports['default'] = LogoutFormComponent;
 	}
 );
-

@@ -54,7 +54,7 @@
   },
   "devDependencies": {},
   "resolutions": {
-    "ember": "^2.0.2",
-    "jquery": "2.*"
+    "ember": "> 2.0.0",
+    "jquery": ">= 1.7.0 < 2.2.0"
   }
 }
