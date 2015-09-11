@@ -443,11 +443,12 @@ define(
 						'delay': 250,
 						'dataType': 'json',
 
-						'url': window.apiServer + 'masterdata/emails',
+						'url': window.apiServer + 'masterdata/tenantEmails',
 
 						'data': function (params) {
 							var queryParameters = {
-								'filter': params.term
+								'filter': params.term,
+								'tenant': self.get('model').get('tenant').get('id')
 							}
 
 							return queryParameters;
