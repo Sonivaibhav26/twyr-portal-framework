@@ -38,8 +38,7 @@ var menuComponent = prime({
 
 	'_getRoutes': function(request, renderFunc, callback) {
 		var cacheSrvc = this.$dependencies.cacheService,
-			self = this,
-			userId = ((request.user && request.user.id) ? request.user.id : 'public');
+			self = this;
 
 		menuComponent.parent._getRoutes.call(self, request, renderFunc, function(err, componentRoutes) {
 			if(err) {
@@ -47,45 +46,27 @@ var menuComponent = prime({
 				return;
 			}
 
+			var userId = ((request.user && request.user.id) ? request.user.id : 'public'),
+				userData = null;
+
 			cacheSrvc.getAsync('twyr!portal!user!' + userId)
-			.then(function(userData) {
-				userData = JSON.parse(userData);
+			.then(function(cachedData) {
+				userData = JSON.parse(cachedData);
 				if(!userData) {
 					throw({ 'code': 404, 'message': 'User not found' })
 					return;
 				}
 	
-				// Step 1: Get the data we are supposed to use for constructing menus
-				var currentTenantData = ((userId == 'public') ? userData : userData.currentTenant);
-	
-				// Step 2: If the data has already been processed, render it and be done...
-				if(currentTenantData.sessionData && currentTenantData.sessionData[self.name]) {
-					self._renderMenuComponentsAsync(currentTenantData.sessionData[self.name], renderFunc)
-					.then(function(menuComponents) {
-						callback(null, menuComponents + '\n' + componentRoutes);
-					})
-					.catch(function(err) {
-						self.$dependencies.logger.error('Error Servicing request "' + request.path + '":\nQuery: ', request.query, '\nBody: ', request.body, '\nParams: ', request.params, '\nError: ', err);
-						callback(err);
-					});
-	
+				if(userData.sessionData && userData.sessionData[self.name])
 					return;
-				}
-	
-				// Step 3: Cache all the required data...
-				self._setupMenuCacheAsync(userId, userData)
-				// Step 4: Render the newly retrieved menu items...
-				.then(function() {
-					return self._renderMenuComponentsAsync(currentTenantData.sessionData[self.name], renderFunc);
-				})
-				// Step 5: Send the rendered templates back...
-				.then(function(menuComponents) {
-					callback(null, menuComponents + '\n' + componentRoutes);
-				})
-				.catch(function(err) {
-					self.$dependencies.logger.error('Error fetching menu items from database for user: ' + userId + '\n', err);
-					callback(err);
-				});
+
+				return self._setupMenuCacheAsync(userId, userData);
+			})
+			.then(function() {
+				return self._renderMenuComponentsAsync(userData.sessionData[self.name], renderFunc);
+			})
+			.then(function(menuComponents) {
+				callback(null, menuComponents + '\n' + componentRoutes);
 			})
 			.catch(function(err) {
 				self.$dependencies.logger.error('Error Servicing request "' + request.path + '":\nQuery: ', request.query, '\nBody: ', request.body, '\nParams: ', request.params, '\nError: ', err);
@@ -105,47 +86,26 @@ var menuComponent = prime({
 			}
 
 			var userId = ((request.user && request.user.id) ? request.user.id : 'public'),
-				currentTenantData = null;
-	
+				userData = null;
+
 			cacheSrvc.getAsync('twyr!portal!user!' + userId)
-			.then(function(userData) {
-				userData = JSON.parse(userData);
+			.then(function(cachedData) {
+				userData = JSON.parse(cachedData);
 				if(!userData) {
 					throw({ 'code': 404, 'message': 'User not found' })
 					return;
 				}
 	
-				// Step 1: Get the data we are supposed to use for constructing menus
-				currentTenantData = ((userId == 'public') ? userData : userData.currentTenant);
-	
-				// Step 2: If the data has already been processed, render it and be done...
-				if(currentTenantData.sessionData && currentTenantData.sessionData[self.name]) {
-					self._renderMenuTemplatesAsync(currentTenantData.sessionData[self.name], renderFunc)
-					.then(function(tmpl) {
-						callback(null, tmpl + '\n' + componentTemplates);
-					})
-					.catch(function(err) {
-						self.$dependencies.logger.error('Error fetching menu items from database for user: ' + userId + '\n', err);
-						callback(err);
-					});
-	
+				if(userData.sessionData && userData.sessionData[self.name])
 					return;
-				}
 	
-				// Step 3: Cache all the required data...
-				self._setupMenuCacheAsync(userId, userData)
-				// Step 4: Render the newly retrieved menu items...
-				.then(function() {
-					return self._renderMenuTemplatesAsync(currentTenantData.sessionData[self.name], renderFunc);
-				})
-				// Step 5: Send the rendered templates back...
-				.then(function(tmpl) {
-					callback(null, tmpl + '\n' + componentTemplates);
-				})
-				.catch(function(err) {
-					self.$dependencies.logger.error('Error fetching menu items from database for user: ' + userId + '\n', err);
-					callback(err);
-				});
+				return self._setupMenuCacheAsync(userId, userData);
+			})
+			.then(function() {
+				return self._renderMenuTemplatesAsync(userData.sessionData[self.name], renderFunc);
+			})
+			.then(function(tmpl) {
+				callback(null, tmpl + '\n' + componentTemplates);
 			})
 			.catch(function(err) {
 				self.$dependencies.logger.error('Error fetching menu items from database for user: ' + userId + '\n', err);
@@ -194,7 +154,6 @@ var menuComponent = prime({
 					'menuItems': menuData[componentName].menuItems
 				};
 
-
 			promiseResolutions.push(renderAsync(templatePath, renderOptions));
 		});
 
@@ -212,9 +171,8 @@ var menuComponent = prime({
 			databaseSrvc = this.$dependencies.databaseService,
 			self = this;
 
-		var currentTenantData = ((userId == 'public') ? userData : userData.currentTenant),
-			widgetList = currentTenantData.widgets,
-			menuList = currentTenantData.menus,
+		var widgetList = userData.widgets,
+			menuList = userData.menus,
 			promiseResolutions = [];
 
 		Object.keys(widgetList).forEach(function(widgetPosition) {
@@ -277,8 +235,8 @@ var menuComponent = prime({
 			}
 
 			// Store the re-organized menu items back into the cache...
-			if(!currentTenantData.sessionData) currentTenantData.sessionData = {};
-			currentTenantData.sessionData[self.name] = sessionMenus;
+			if(!userData.sessionData) userData.sessionData = {};
+			userData.sessionData[self.name] = sessionMenus;
 
 			return cacheSrvc.setAsync('twyr!portal!user!' + userId, JSON.stringify(userData));
 		})

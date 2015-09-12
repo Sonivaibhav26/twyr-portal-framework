@@ -24,7 +24,6 @@ define(
 			'tenantType': window.DS.attr('string'),
 
 			'suborganizations': window.DS.hasMany('organization-manager', { 'async': true, 'inverse': 'parent' }),
-			'users': window.DS.hasMany('organization-manager-tenant-user', { 'async': true, 'inverse': 'tenant' }),
 
 			'isDepartment': window.Ember.computed('tenantType', {
 				'get': function(key) {
@@ -49,44 +48,6 @@ define(
 		exports['default'] = OrganizationManagerModel;
 	}
 );
-
-
-define(
-	"twyrPortal/adapters/organization-manager-tenant-user",
-	["exports", "twyrPortal/app"],
-	function(exports, app) {
-		if(window.developmentMode) console.log('DEFINE: twyrPortal/models/organization-manager-tenant-user');
-
-		var OrganizationManagerTenantUserAdapter = app.default.ApplicationAdapter.extend({
-			'namespace': 'organization-manager'
-		});
-
-		exports['default'] = OrganizationManagerTenantUserAdapter;
-	}
-);
-
-define(
-	"twyrPortal/models/organization-manager-tenant-user",
-	["exports", "twyrPortal/app"],
-	function(exports, app) {
-		if(window.developmentMode) console.log('DEFINE: twyrPortal/models/organization-manager-tenant-user');
-
-		var OrganizationManagerTenantUserModel = window.DS.Model.extend({
-			'tenant': window.DS.belongsTo('organization-manager', { 'async': true, 'inverse': 'users' }),
-			'user': window.DS.belongsTo('organization-manager-user', { 'async': true, 'inverse': null }),
-
-			'createdOn': window.DS.attr('date', { 'defaultValue': (new Date()) }),
-			'formattedCreatedOn': window.Ember.computed('createdOn', {
-				'get': function(key) {
-					return window.moment(this.get('createdOn')).format('Do MMM YYYY');
-				}
-			})
-		});
-
-		exports['default'] = OrganizationManagerTenantUserModel;
-	}
-);
-
 
 define(
 	"twyrPortal/adapters/organization-manager-user",

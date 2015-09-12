@@ -274,6 +274,7 @@ var publicRootPathRenderer = function(request, response, next) {
 var registeredRootPathRenderer = function(request, response, next) {
 	var cacheSrvc = this.$services.cacheService.getInterface(),
 		loggerSrvc = this.$services.logger.getInterface(),
+		renderAsync = promises.promisify(response.render.bind(response)),
 		self = this;
 
 	var renderOptions = {
@@ -305,58 +306,101 @@ var registeredRootPathRenderer = function(request, response, next) {
 			return;
 		}
 
-		// TODO: Add functionality to store "currentTenant" in the database, and use that always
-		var userTenant = cachedData.currentTenant || cachedData.tenants[(Object.keys(cachedData.tenants)[0])];
-		renderOptions.widgets = userTenant.widgets;
+		var widgets = {},
+			unique_ember_components = {},
+			menus = [],
+			unique_ember_routes = [];
+
+		Object.keys(cachedData.tenants).forEach(function(key) {
+			var userTenant = cachedData.tenants[key];
+
+			Object.keys(userTenant.widgets).forEach(function(position) {
+				var thisPositionWidgets = userTenant.widgets[position];
+
+				for(var idx in thisPositionWidgets) {
+					var thisWidget = thisPositionWidgets[idx];
+
+					if(!widgets[position])
+						widgets[position] = [];
+
+					if(!unique_ember_components[position])
+						unique_ember_components[position] = [];
+
+					if(unique_ember_components[position].indexOf(thisWidget.ember_component) >= 0)
+						continue;
+
+					unique_ember_components[position].push(thisWidget.ember_component);
+					widgets[position].push(thisWidget);
+				}
+			});
+
+			for(var idx in userTenant.menus) {
+				var thisMenu = userTenant.menus[idx];
+				if(unique_ember_routes.indexOf(thisMenu.ember_route) >= 0)
+					continue;
+
+				unique_ember_routes.push(thisMenu.ember_route);
+				menus.push(thisMenu);
+			};
+		});
+
+		Object.keys(widgets).forEach(function(position) {
+			var widgetsInThisPosition = widgets[position];
+			widgetsInThisPosition.sort(function(left, right) {
+				var retVal = left.display_order - right.display_order;
+				
+				delete left.position_name;
+				delete left.display_order;
+
+				delete right.position_name;
+				delete right.display_order;
+
+				return retVal;
+			});
+		});
+
+		renderOptions.widgets = widgets;
 
 		var numModulePositions = 0,
 			numFooterPositions = 1,
 			mainComponentWidth = 12;
 
-		if(userTenant.widgets.module1 && userTenant.widgets.module1.length)
+		if(widgets.module1 && widgets.module1.length)
 			numModulePositions++;
 
-		if(userTenant.widgets.module2 && userTenant.widgets.module2.length)
+		if(widgets.module2 && widgets.module2.length)
 			numModulePositions++;
 
-		if(userTenant.widgets.module3 && userTenant.widgets.module3.length)
+		if(widgets.module3 && widgets.module3.length)
 			numModulePositions++;
 
-		if(userTenant.widgets.footer1 && userTenant.widgets.footer1.length)
+		if(widgets.footer1 && widgets.footer1.length)
 			numFooterPositions++;
 
-		if(userTenant.widgets.footer2 && userTenant.widgets.footer2.length)
+		if(widgets.footer2 && widgets.footer2.length)
 			numFooterPositions++;
 
-		if(userTenant.widgets.leftsidebar && userTenant.widgets.leftsidebar.length)
+		if(widgets.leftsidebar && widgets.leftsidebar.length)
 			mainComponentWidth = mainComponentWidth - 2;
 
-		if(userTenant.widgets.rightsidebar && userTenant.widgets.rightsidebar.length)
+		if(widgets.rightsidebar && widgets.rightsidebar.length)
 			mainComponentWidth = mainComponentWidth - 2;
 
-		userTenant.widgets.moduleBar1ColWidth = (numModulePositions > 0) ? 12/numModulePositions : 12;
-		userTenant.widgets.moduleFooterColWidth = 12/numFooterPositions;
-		userTenant.widgets.mainComponentColWidth = mainComponentWidth;
+		widgets.moduleBar1ColWidth = (numModulePositions > 0) ? 12/numModulePositions : 12;
+		widgets.moduleFooterColWidth = 12/numFooterPositions;
+		widgets.mainComponentColWidth = mainComponentWidth;
 
-		cachedData.currentTenant = userTenant;
+		cachedData.menus = menus;
+		cachedData.widgets = renderOptions.widgets;
 
-		var cacheMulti = promises.promisifyAll(cacheSrvc.multi());
-		cacheMulti.setAsync('twyr!portal!user!' + request.user.id, JSON.stringify(cachedData));
-		cacheMulti.expireAsync('twyr!portal!user!' + request.user.id, self.$config.session.ttl);
-	
-		return cacheMulti.execAsync();
+		return cacheSrvc.setAsync('twyr!portal!user!' + request.user.id, JSON.stringify(cachedData));
 	})
 	.then(function() {
-		response.render(path.join(self.$config.templates.path, self.$config.currentTemplate.name, self.$config.currentTemplate.client_index_file), renderOptions, function(err, html) {
-			if(err) {
-				loggerSrvc.error('Template Router Render Error: ', request.path, ' with:\nQuery: ', request.query, '\nBody: ', request.body, '\nParams: ', request.params, '\nError: ', err, '\nHTML: ', html);
-				response.status(err.code || err.number || 404).redirect('/error');
-				return;
-			}
-	
-			loggerSrvc.silly('Template Router Render Result: ', request.path, ' with:\nQuery: ', request.query, '\nBody: ', request.body, '\nParams: ', request.params, '\nHTML: ', html);
-			response.status(200).send(html);
-		});
+		return renderAsync(path.join(self.$config.templates.path, self.$config.currentTemplate.name, self.$config.currentTemplate.client_index_file), renderOptions);
+	})
+	.then(function(html) {	
+		loggerSrvc.silly('Template Router Render Result: ', request.path, ' with:\nQuery: ', request.query, '\nBody: ', request.body, '\nParams: ', request.params, '\nHTML: ', html);
+		response.status(200).send(html);
 	})
 	.catch(function(err) {
 		loggerSrvc.error('Template Router Render Error: ', request.path, ' with:\nQuery: ', request.query, '\nBody: ', request.body, '\nParams: ', request.params, '\nError: ', err);
