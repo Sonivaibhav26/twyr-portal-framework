@@ -1,0 +1,97 @@
+/*
+ * Name			: portal_modules/components/organization-manager/sub-components/locations/component.js
+ * Author		: Vish Desai (vishwakarma_d@hotmail.com)
+ * Version		: 0.6.1
+ * Copyright	: Copyright (c) 2014 Vish Desai (https://www.linkedin.com/in/vishdesai).
+ * License		: The MIT License (http://opensource.org/licenses/MIT).
+ * Description	: The Twy'r Portal Organization Manager Locations Sub-component
+ *
+ */
+
+"use strict";
+
+/**
+ * Module dependencies, required for ALL Twy'r modules
+ */
+var base = require('./../../../component-base').baseComponent,
+	prime = require('prime'),
+	promises = require('bluebird');
+
+/**
+ * Module dependencies, required for this module
+ */
+var filesystem = promises.promisifyAll(require('fs')),
+	path = require('path'),
+	uuid = require('node-uuid');
+
+/**
+ * Magic Numbers
+ */
+var requiredPermission = '00000000-0000-0000-0000-000000000000';
+
+var organizationManagerLocationsComponent = prime({
+	'inherits': base,
+
+	'constructor': function() {
+		base.call(this);
+	},
+
+	'_getMVC': function(request, renderFunc, callback) {
+		if(!request.user) {
+			callback(null, '');
+			return;
+		}
+
+		var self = this;
+		self._checkPermissionAsync(request, requiredPermission)
+		.then(function(allowed) {
+			if(!allowed) {
+				return [];
+			}
+
+			var promiseResolutions = [];
+
+			promiseResolutions.push(filesystem.readFileAsync(path.join(__dirname, 'ember/organization-manager-locations-model.js')));
+			promiseResolutions.push(filesystem.readFileAsync(path.join(__dirname, 'ember/organization-manager-locations-view.js')));
+
+			return promises.all(promiseResolutions);
+		})
+		.then(function(mvcFiles) {
+			callback(null, mvcFiles.join('\n'));
+		})
+		.catch(function(err) {
+			self.$dependencies.logger.error('Error servicing request "' + request.path + '":\nQuery: ', request.query, '\nBody: ', request.body, '\nParams: ', request.params, '\nError: ', err);
+			callback(null, '');
+		});
+	},
+
+	'_getTemplates': function(request, renderFunc, callback) {
+		if(!request.user) {
+			callback(null, '');
+			return;
+		}
+
+		var self = this;
+		self._checkPermissionAsync(request, requiredPermission)
+		.then(function(allowed) {
+			if(!allowed) {
+				return '';
+			}
+
+			return renderFunc(path.join(__dirname, 'ember/organization-manager-locations-template.ejs'));
+		})		
+		.then(function(tmplFile) {
+			callback(null, tmplFile);
+		})
+		.catch(function(err) {
+			self.$dependencies.logger.error('Error servicing request "' + request.path + '":\nQuery: ', request.query, '\nBody: ', request.body, '\nParams: ', request.params, '\nError: ', err);
+			callback(err);
+		});
+	},
+
+	'name': 'organization-manager-locations',
+	'displayName': 'Locations',
+	'dependencies': ['logger', 'databaseService']
+});
+
+exports.component = organizationManagerLocationsComponent;

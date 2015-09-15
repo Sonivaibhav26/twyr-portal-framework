@@ -1,0 +1,149 @@
+<!-- Google Maps -->
+<script type="application/javascript">
+var mapInit = function() {};
+</script>
+<script type="application/javascript" src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDof1Dp2E9O1x5oe78cOm0nDbYcnrWiPgA&callback=mapInit"></script>
+
+<script type="text/x-handlebars" data-template-name="components/organization-manager-locations">
+<div class="box box-default" style="text-align:left; margin-bottom:0px;">
+	<div class="box-header with-border">
+		<h3 class="box-title">{{model.name}} Locations</h3>
+		<div class="pull-right" style="cursor:pointer; margin:0px 5px;">
+		{{#if isCreating}}
+		    <button type="button" class="btn btn-warning btn-sm" {{action "controller-action" "hide-create-address" bubbles=false}}>
+				<span>Cancel New Address<i class="fa fa-caret-up" style="margin-left:5px;" /></span>
+		    </button>
+		{{else}}
+		    <button type="button" class="btn btn-success btn-sm" {{action "controller-action" "show-create-address" bubbles=false}}>
+				<span>Create New Address <i class="fa fa-caret-down" style="margin-left:5px;" /></span>
+		    </button>
+		{{/if}}
+		</div>
+	</div>
+	<div id="organization-manager-locations-create-address" class="box-body no-padding" style="display:none;">
+	<div class="col-md-8" style="padding:0px;">
+		<div class="box box-primary" style="text-align:left; margin-bottom:0px;">
+			<div class="box-header with-border" style="height:50px;">
+				<h3 class="box-title">Mark New Location</h3>
+			</div>
+			<div class="box-body">
+			<div class="col-md-10" style="padding-left:0px;">
+				<div class="form-group">
+					<label>Approximate Location</label>
+					{{input id="organization-manager-locations-input-address" type="text" class="form-control" value=approxLocation placeholder="Approximate Location (e.g., Big Ben, London)"}}
+				</div>
+			</div>
+			<div class="col-md-2" style="padding-right:0px;">
+				<div class="form-group" style="margin-top:25px;">
+				    <button type="button" class="btn btn-primary btn-sm form-control" {{action "controller-action" "show-google-map"}}>
+						<span>Locate</span>
+				    </button>
+				</div>
+			</div>
+			</div>
+			<div class="box-body">
+				<div id="organization-manager-locations-google-map" style="width:100%; min-height:350px;"></div>
+			</div>
+		</div>
+	</div>
+	<div class="col-md-4" style="padding:0px;">
+		<div class="box box-primary" style="text-align:left; margin-bottom:0px;">
+			<div class="box-header with-border" style="height:50px;">
+				<h3 class="box-title">Address</h3>
+				{{#if marker}}
+				<div class="pull-right" style="cursor:pointer; margin:0px 5px;">
+				    <button type="button" class="btn btn-primary btn-sm" {{action "controller-action" "create-tenant-location" model bubbles=false}}>
+						<i class="fa fa-plus" style="margin-right:5px;" /><span>Save</span>
+				    </button>
+				</div>
+				{{/if}}
+			</div>
+			<div class="box-body">
+				<div class="form-group">
+					<label>Name</label>
+					{{#if marker}}
+						{{input type="text" class="form-control" value=locationName placeholder="Corporate Office, for e.g."}}
+					{{else}}
+						{{input type="text" class="form-control" value=locationName placeholder="Corporate Office, for e.g." readonly="readonly"}}
+					{{/if}}
+				</div>
+				<div class="form-group">
+					<label>Route</label>
+					{{#if marker}}
+						{{input type="text" class="form-control" value=route placeholder="Street Address"}}
+					{{else}}
+						{{input type="text" class="form-control" value=route placeholder="Street Address" readonly="readonly"}}
+					{{/if}}
+				</div>
+				<div class="form-group">
+					<label>Area</label>
+					{{#if marker}}
+						{{input type="text" class="form-control" value=area placeholder="Area"}}
+					{{else}}
+						{{input type="text" class="form-control" value=area placeholder="Area" readonly="readonly"}}
+					{{/if}}
+				</div>
+				<div class="form-group">
+					<label>City</label>
+					{{input type="text" class="form-control" value=city placeholder="City" readonly="readonly"}}
+				</div>
+				<div class="form-group">
+					<label>State</label>
+					{{input type="text" class="form-control" value=state placeholder="State" readonly="readonly"}}
+				</div>
+				<div class="form-group">
+					<label>Postal / ZIP Code</label>
+					{{input type="text" class="form-control" value=postal_code placeholder="Postal / ZIP Code" readonly="readonly"}}
+				</div>
+				<div class="form-group">
+					<label>Country</label>
+					{{input type="text" class="form-control" value=country placeholder="Country" readonly="readonly"}}
+				</div>
+			</div>
+		</div>
+	</div>
+	</div>
+	<div class="box-body no-padding" style="margin-top:40px;">
+		<table id="organization-manager-users-list-table" class="table table-bordered table-striped" role="grid">
+		<thead>
+			<tr>
+				<th style="vertical-align:middle;">Name</th>
+				<th style="vertical-align:middle;">Street Address</th>
+				<th style="vertical-align:middle;">City, State, Country</th>
+				<th style="vertical-align:middle;">Geographical Coordinates</th>
+				<th style="vertical-align:middle;">Added On</th>
+				<th style="text-align:right; vertical-align:middle; padding-right:8px;">
+					&nbsp;
+				</th>
+			</tr>
+		</thead>
+		<tbody>
+		{{#each tenantLocations as |tenantLocation index|}}
+		<tr>
+			<td style="vertical-align:middle;">{{tenantLocation.name}}</td>
+			<td style="vertical-align:middle;">
+				{{tenantLocation.location.route}},<br />
+				{{tenantLocation.location.area}}
+			</td>
+			<td style="vertical-align:middle;">
+				{{tenantLocation.location.city}},<br />
+				{{tenantLocation.location.state}},<br />
+				{{tenantLocation.location.country}} {{tenantLocation.location.postalCode}}
+			</td>
+			<td style="vertical-align:middle;">
+				Latitude: {{tenantLocation.location.latitude}}<br />
+				Longitude: {{tenantLocation.location.longitude}}
+			</td>
+			<td style="vertical-align:middle;">{{tenantLocation.formattedCreatedOn}}</td>
+			<td style="text-align:right; vertical-align:middle;">
+			    <button type="button" class="btn btn-danger btn-sm" {{action "controller-action" "delete-tenant-location" tenantLocation bubbles=false}}>
+					<i class="fa fa-remove" style="margin-right:5px;" /><span>Delete</span>
+			    </button>
+			</td>
+		</tr>
+		{{/each}}
+		</tbody>
+		</table>
+	</div>
+</div>
+</script>

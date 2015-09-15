@@ -5,6 +5,67 @@ define(
 		if(window.developmentMode) console.log('DEFINE: twyrPortal/components/organization-manager-users');
 
 		var OrganizationManagerUsersComponent = window.Ember.Component.extend({
+			'isCreating': false,
+			'canDeleteUsers': false,
+
+			'didInsertElement': function() {
+				var self = this;
+				self._super();
+
+				if(!self.get('model'))
+					return true;
+
+				self.get('model').store.query('organization-manager-tenant-user', { 'tenant': self.get('model').get('id') })
+				.then(function(tenantUsers) {
+					self.set('tenantUsers', tenantUsers);
+
+					window.Ember.run.later(self, function() {
+						self.get('tenantUsers').forEach(function(tenantUser) {
+							if(!tenantUser.get('isNew')) {
+								return;
+							}
+	
+							self._initNewTenantUserSelect(tenantUser.get('id'));
+						});
+					}, 500);
+				})
+				.catch(function(err) {
+					console.error('Error fetching users for ' + self.get('model').get('name') + '\n', err);
+				});
+
+				return true;
+			},
+
+			'_modelChangeReactor': window.Ember.observer('model', function() {
+				if(!this.get('model')) {
+					this.set('tenantUsers', null);
+					return;
+				}
+
+				var self = this;
+				self.get('model').store.query('organization-manager-tenant-user', { 'tenant': self.get('model').get('id') })
+				.then(function(tenantUsers) {
+					self.set('tenantUsers', tenantUsers);
+
+					window.Ember.run.later(self, function() {
+						self.get('tenantUsers').forEach(function(tenantUser) {
+							if(!tenantUser.get('isNew')) {
+								return;
+							}
+	
+							self._initNewTenantUserSelect(tenantUser.get('id'));
+						});
+					}, 500);
+				})
+				.catch(function(err) {
+					console.error('Error fetching users for ' + self.get('model').get('name') + '\n', err);
+				});
+			}),
+
+			'_numUsersChangeReactor': window.Ember.observer('tenantUsers.length', function() {
+				this.set('canDeleteUsers', (this.get('tenantUsers').get('length') > 1));
+			}),
+
 			'_initNewTenantUserSelect': function(tenantUserId) {
 				var self = this,
 					selectElem = self.$('select#organization-manager-users-tab-select-' + tenantUserId);
@@ -59,31 +120,25 @@ define(
 				});
 			},
 
-			'_modelChangeReactor': window.Ember.observer('model', function() {
-				if(!this.get('model')) {
-					this.set('tenantUsers', null);
-					return;
-				}
-
+			'show-create-user': function() {
 				var self = this;
-				self.get('model').store.query('organization-manager-tenant-user', { 'tenant': self.get('model').get('id') })
-				.then(function(tenantUsers) {
-					self.set('tenantUsers', tenantUsers);
 
-					window.Ember.run.later(self, function() {
-						self.get('tenantUsers').forEach(function(tenantUser) {
-							if(!tenantUser.get('isNew')) {
-								return;
-							}
-	
-							self._initNewTenantUserSelect(tenantUser.get('id'));
-						});
-					}, 500);
-				})
-				.catch(function(err) {
-					console.error('Error fetching users for ' + self.get('model').get('name') + '\n', err);
+				self.$('div#organization-manager-users-create-user').slideDown(600, function() {
+					self.set('isCreating', true);
 				});
-			}),
+			},
+
+			'hide-create-user': function() {
+				var self = this;
+
+				self.$('div#organization-manager-users-create-user').slideUp(600, function() {
+					self.set('isCreating', false);
+
+					self.$('input#organization-manager-users-input-first-name').val('');
+					self.$('input#organization-manager-users-input-last-name').val('');
+					self.$('input#organization-manager-users-input-email').val('');
+				});
+			},
 
 			'add-tenant-user': function(tenant) {
 				var self = this,
@@ -135,9 +190,7 @@ define(
 					self.sendAction('controller-action', 'display-status-message', { 'type': 'success', 'message': newUser.get('fullName') + ' has been added to the ' + tenant.get('name') + ' Organization' });
 
 					window.Ember.run.scheduleOnce('afterRender', self, function() {
-						self.$('input#organization-manager-users-input-email').val('');
-						self.$('input#organization-manager-users-input-first-name').val('');
-						self.$('input#organization-manager-users-input-last-name').val('');
+						self['hide-create-user']();
 					});
 				})
 				.catch(function(err) {
