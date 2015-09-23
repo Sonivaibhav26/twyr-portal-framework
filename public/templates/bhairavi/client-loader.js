@@ -10,136 +10,122 @@
 
 "use strict";
 
-if(window.developmentMode) console.log('Loading Ember Templates: ', window.templates);
-window.curl(window.templates)
-.then(function() {
-	if(window.developmentMode) console.log('Injecting Ember Templates...');
-	for(var idx = 0; idx < arguments.length; idx++) {
-		if(!arguments[idx])
-			continue;
+// Define the services...
+define(
+	"twyrPortal/services/realtime-data",
+	["exports", "twyrPortal/application"],
+	function(exports, application) {
+		if(window.developmentMode) console.log('DEFINE: twyrPortal/services/realtime-data');
 
-		if(arguments[idx] == '')
-			continue;
+		var RealtimeService = window.Ember.Service.extend(window.Ember.Evented, {
+			'init': function() {
+				if(window.developmentMode) console.log('twyrPortal/services/websockets::init: ', arguments);
 
-		window.$('head').append(arguments[idx]);
-	}
+				var self = this,
+					dataProcessor = self._websocketDataProcessor.bind(self),
+					streamer = window.Primus.connect(window.apiServer, {
+						'strategy': 'online, disconnect',
+						'ping': 3000,
+						'pong': 6000
+					});
 
-	var loadedEmberResolverScripts = [];
+				streamer.on('open', function() {
+					if(window.developmentMode) console.log('twyrPortal/services/websockets::streamer::on::open: ', arguments);
 
-	if(window.developmentMode) console.log('Loading Ember Resolvers: ', window.emberResolverScripts);
-	window.curl(window.emberResolverScripts)
-	.then(function() {
-		for(var idx = 0; idx < arguments.length; idx++) {
-			if(!arguments[idx])
-				continue;
+					self.set('streamer', streamer);
+					self.get('streamer').on('data', dataProcessor);
 
-			if(arguments[idx] == '')
-				continue;
+					self.trigger('websocket-connection');
+				});
 
-			loadedEmberResolverScripts.push('<script type="application/javascript">' + arguments[idx] + '</script>');
-		}
-	
-		if(window.developmentMode) console.log('Loading Ember Routes: ', window.routes);
-		window.curl(window.routes)
-		.then(function() {
-			if(window.developmentMode) console.log('Injecting Ember Resolvers...');
-			for(var idx = 0; idx < loadedEmberResolverScripts.length; idx++) {
-				window.$('head').append(loadedEmberResolverScripts[idx]);
+				streamer.on('close', function() {
+					if(window.developmentMode) console.log('twyrPortal/services/websockets::streamer::on::close: ', arguments);
+					self.trigger('websocket-disconnection');
+
+					self.get('streamer').off('data', dataProcessor);
+					self.set('streamer', null);
+				});
+
+				streamer.on('error', function() {
+					if(window.developmentMode) console.error('twyrPortal/services/websockets::streamer::on::error: ', arguments);
+				});
+
+				this._super.apply(this, arguments);
+			},
+
+			'_websocketDataProcessor': function(websocketData) {
+				if(window.developmentMode) console.log('twyrPortal/services/websockets::streamer::on::data: ', arguments);
+				this.trigger('websocket-data::' + websocketData.channel, websocketData.data);
 			}
-		
-			if(window.developmentMode) console.log('Defining Ember App, Router, etc...');
-			define(
-				"twyrPortal/router",
-				["exports"],
-				function(exports) {
-					if(window.developmentMode) console.log('DEFINE: twyrPortal/router');
-					var Router = window.Ember.Router.extend();
-
-					Router.reopen({
-						location: 'history'
-					});
-
-					exports['default'] = Router;
-				}
-			);
-
-			define(
-				"twyrPortal/application",
-				["ember/resolver","exports"],
-				function(emberResolver, exports) {
-					if(window.developmentMode) console.log('DEFINE: twyrPortal/application');
-					var Resolver = emberResolver['default'];
-
-					var TwyrApplication = window.Ember.Application.extend({
-						'modulePrefix': 'twyrPortal',
-						'Resolver': Resolver['default']
-					});
-
-					exports['default'] = TwyrApplication;
-				}
-			);
-
-			define(
-				"twyrPortal/app",
-				["exports", "twyrPortal/application"],
-				function(exports, application) {
-					if(window.developmentMode) console.log('DEFINE: twyrPortal/app');
-
-					var App = application.default.create({
-						LOG_RESOLVER: window.developmentMode,
-						LOG_ACTIVE_GENERATION: window.developmentMode, 
-						LOG_TRANSITIONS: window.developmentMode, 
-						LOG_TRANSITIONS_INTERNAL: window.developmentMode,
-						LOG_VIEW_LOOKUPS: window.developmentMode
-					});
-
-					App.ApplicationAdapter = window.DS.RESTAdapter.extend({
-						'namespace': '',
-						'host': window.apiServer.substring(0, window.apiServer.length - 1),
-
-						'ajaxError': function(jqXHR) {
-							if (jqXHR && jqXHR.status == 422) {
-								var jsonErrors = window.Ember.$.parseJSON(jqXHR.responseText)["errors"];
-								return new window.DS.InvalidError(jsonErrors);
-							}
-							else {
-								var error = this._super(jqXHR);
-								return error;
-							}
-						}
-					});
-		
-					App.generateUUID = function() {
-						return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
-							var r = Math.random()*16|0, v = c == 'x' ? r : (r&0x3|0x8);
-							return v.toString(16);
-						});
-					};
-
-					exports['default'] = App;
-				}
-			);
-
-			if(window.developmentMode) console.log('Injecting Ember Routes...');
-			for(var idx = 0; idx < arguments.length; idx++) {
-				if(!arguments[idx])
-					continue;
-
-				if(arguments[idx] == '')
-					continue;
-
-				window.$('head').append('<script type="application/javascript">' + arguments[idx] + '</script>');
-			}
-
-			// Start off the Application...
-			if(window.developmentMode) console.log('Starting the Twyr Portal Browser App');
-			window.TwyrPortal = require('twyrPortal/app')['default'];
-		}, function(err) {
-			console.error('Error loading Ember Routes: ', err);
 		});
-	}, function(err) {
-		console.error('Error loading Ember Resolver Scripts: ', err);
-	});
-}, function(err) {
-	console.error('Could not load Ember Templates: ', err);
-});
+
+		exports['default'] = RealtimeService;
+	}
+);
+
+// Define the Application and the Router
+if(window.developmentMode) console.log('Defining Ember App, Router, etc...');
+define(
+	"twyrPortal/router",
+	["exports"],
+	function(exports) {
+		if(window.developmentMode) console.log('DEFINE: twyrPortal/router');
+		var Router = window.Ember.Router.extend();
+
+		Router.reopen({
+			location: 'history'
+		});
+
+		exports['default'] = Router;
+	}
+);
+
+define(
+	"twyrPortal/application",
+	["exports", "ember/resolver"],
+	function(exports, emberResolver) {
+		if(window.developmentMode) console.log('DEFINE: twyrPortal/application');
+		var Resolver = emberResolver['default'];
+
+		var TwyrApplication = window.Ember.Application.extend({
+			'modulePrefix': 'twyrPortal',
+			'Resolver': Resolver['default']
+		});
+
+		exports['default'] = TwyrApplication;
+	}
+);
+
+define(
+	"twyrPortal/app",
+	["exports", "twyrPortal/application"],
+	function(exports, application) {
+		if(window.developmentMode) console.log('DEFINE: twyrPortal/app');
+
+		var App = application.default.create({
+			LOG_RESOLVER: window.developmentMode,
+			LOG_ACTIVE_GENERATION: window.developmentMode, 
+			LOG_TRANSITIONS: window.developmentMode, 
+			LOG_TRANSITIONS_INTERNAL: window.developmentMode,
+			LOG_VIEW_LOOKUPS: window.developmentMode
+		});
+
+		App.ApplicationAdapter = window.DS.JSONAPIAdapter.extend({
+			'namespace': '',
+			'host': window.apiServer.substring(0, window.apiServer.length - 1)
+		});
+
+		App.generateUUID = function() {
+			return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+				var r = Math.random()*16|0, v = c == 'x' ? r : (r&0x3|0x8);
+				return v.toString(16);
+			});
+		};
+
+		exports['default'] = App;
+	}
+);
+
+// Start off the Application...
+if(window.developmentMode) console.log('Starting the Twyr Portal Browser App');
+window.TwyrPortal = require('twyrPortal/app')['default'];

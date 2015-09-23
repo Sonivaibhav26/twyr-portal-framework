@@ -34,12 +34,11 @@
 		</div>
 	</div>
 	<div class="box-body no-padding" style="margin-top:40px;">
+	<div class="col-md-5" style="padding:0px;">
 		<table id="organization-manager-users-list-table" class="table table-bordered table-striped" role="grid">
 		<thead>
 			<tr>
-				<th style="vertical-align:middle;">Login</th>
-				<th style="vertical-align:middle;">First Name</th>
-				<th style="vertical-align:middle;">Last Name</th>
+				<th style="vertical-align:middle;">User</th>
 				<th style="vertical-align:middle;">Added On</th>
 				<th style="text-align:right; vertical-align:middle; padding-right:8px;">
 				    <button type="button" class="btn btn-primary btn-sm" {{action "controller-action" "add-tenant-user" model bubbles=false}}>
@@ -52,7 +51,7 @@
 		{{#each tenantUsers as |tenantUser index|}}
 		<tr>
 		{{#if tenantUser.isNew}}
-			<td colspan="3" class="form-group" style="vertical-align:middle;">
+			<td class="form-group" style="vertical-align:middle;">
 				<select id="organization-manager-users-tab-select-{{tenantUser.id}}" class="form-control" style="width:100%;" />
 			</td>
 			<td style="vertical-align:middle;">{{tenantUser.formattedCreatedOn}}</td>
@@ -62,9 +61,10 @@
 			    </button>
 			</td>
 		{{else}}
-			<td style="vertical-align:middle;">{{tenantUser.user.login}}</td>
-			<td style="vertical-align:middle;">{{tenantUser.user.firstName}}</td>
-			<td style="vertical-align:middle;">{{tenantUser.user.lastName}}</td>
+			<td style="vertical-align:middle;">
+				{{tenantUser.user.fullName}}<br />
+				({{tenantUser.user.login}})
+			</td>
 			<td style="vertical-align:middle;">{{tenantUser.formattedCreatedOn}}</td>
 			<td style="text-align:right; vertical-align:middle;">
 				{{#if canDeleteUsers}}
@@ -80,6 +80,9 @@
 		{{/each}}
 		</tbody>
 		</table>
+	</div>
+	<div class="col-md-7" style="padding:0px;">
+	</div>
 	</div>
 </div>
 </script>

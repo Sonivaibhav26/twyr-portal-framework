@@ -212,19 +212,27 @@ var simpleComponent = prime({
 		})
 		.then(function(result) {
 			var routeMaps = result,
-				routes = result.pop(),
-				returnedRoutes = '';
+				routes = result.pop();
 
+			var routeContent = [];
 			for(var idx in routeMaps) {
 				var routeMap = routeMaps[idx];
-
-				returnedRoutes += 'var Router = require(\'twyrPortal/router\')[\'default\'];\n';
-				returnedRoutes += 'Router.map(function() {\n';
-				returnedRoutes += '\t' + routeMap;
-				returnedRoutes += '\n});\n';
+				if(routeMap.trim() == '') continue;
+				routeContent.push('\t' + routeMap + '\n');
 			}
 
-			response.status(200).send(returnedRoutes + '\n' + routes);
+			routeContent = routeContent.join('').trim();
+			if(routeContent != '') {
+				var returnedRoutes = 'var Router = require(\'twyrPortal/router\')[\'default\'];\n';
+				returnedRoutes += 'Router.map(function() {\n';
+				returnedRoutes += '\t' + routeContent;
+				returnedRoutes += '\n});\n';
+	
+				response.status(200).send(returnedRoutes + '\n' + routes);
+			}
+			else {
+				response.status(200).send(routes);
+			}
 		})
 		.catch(function(err) {
 			self.$dependencies.logger.error('Error getting component resources for ' + self.name + ':\n', err);

@@ -63,7 +63,8 @@ define(
 			}),
 
 			'_numUsersChangeReactor': window.Ember.observer('tenantUsers.length', function() {
-				this.set('canDeleteUsers', (this.get('tenantUsers').get('length') > 1));
+				var oldUsers = this.get('tenantUsers').filterBy('isNew', false);
+				this.set('canDeleteUsers', (oldUsers.get('length') > 1));
 			}),
 
 			'_initNewTenantUserSelect': function(tenantUserId) {
@@ -218,7 +219,7 @@ define(
 				})
 				.catch(function(reason) {
 					self.sendAction('controller-action', 'display-status-message', { 'type': 'error', 'errorModel': tenantUser });
-					tenantUser.rollbackAttributes();
+					self.get('tenantUsers').removeObject(tenantUser);
 				});
 			},
 

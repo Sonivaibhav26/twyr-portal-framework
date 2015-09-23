@@ -4,6 +4,17 @@ define(
 	function(exports) {
 		if(window.developmentMode) console.log('DEFINE: twyrPortal/application/controller');
 		var ApplicationController = window.Ember.Controller.extend({
+			'realtimeData': window.Ember.inject.service('realtime-data'),
+
+			'init': function() {
+				this._super.apply(this, arguments);
+
+				var self = this;
+				this.get('realtimeData').on('websocket-data::display-status-message', function(data) {
+					self['display-status-message']({ 'type': 'info', 'message': data});
+				});
+			},
+
 			'widgetFilter': window.Ember.computed('currentPath', {
 				'get': function(key) {
 					var currPath = this.get('currentPath'),

@@ -18,8 +18,8 @@
 	},
 	"main": "index.js",
 	"scripts": {
-		"postinstall": "bower install",
-		"postupdate": "bower update",
+		"postinstall": "bower install -p",
+		"postupdate": "bower update -p",
 		"start": "BLUEBIRD_DEBUG=1 node index.js",
 		"test": "echo \"Error: no test specified! Configure in package.json\" && exit 1"
 	},
