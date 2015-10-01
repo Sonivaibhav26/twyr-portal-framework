@@ -126,14 +126,27 @@ define(
 
 					if(!self.get('map')) {
 						self.set('map', new window.google.maps.Map(mapCanvas, mapOptions));
+
 						self.get('map').addListener('click', function(position) {
 							var markerPosition = { 'latLng': {} };
-							markerPosition.latLng.lat = position.latLng.G;
-							markerPosition.latLng.lng = position.latLng.K;
+							markerPosition.latLng.lat = position.latLng.H;
+							markerPosition.latLng.lng = position.latLng.L;
 
-							self.get('map').setCenter(markerPosition);
 							self._replaceMarker(markerPosition);
+							window.Ember.run.later(self, function() {
+								self.get('map').setCenter(position.latLng);
+							}, 400);
 						});
+/*
+						self.get('map').addListener('center_changed', function() {
+							window.Ember.run.later(self, function() {
+								if(!self.get('marker'))
+									return;
+
+								self.get('map').panTo(self.get('marker').getPosition());
+							}, 400);
+						});
+*/
 					}
 
 					if (navigator.geolocation) {

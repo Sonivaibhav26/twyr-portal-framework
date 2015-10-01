@@ -16,7 +16,7 @@ define(
 							'multiple': false,
 
 							'data': {
-								'url':window.apiServer + 'organization-manager/organizationStructureTree',
+								'url':window.apiServer + 'organization-manager/organization-structure-tree',
 								'dataType': 'json',
 								'data': function(node) {
 									return { 'id': (node ? node.id : null) };

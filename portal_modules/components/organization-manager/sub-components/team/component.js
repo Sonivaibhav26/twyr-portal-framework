@@ -1,10 +1,10 @@
 /*
- * Name			: portal_modules/components/organization-manager/sub-components/users/component.js
+ * Name			: portal_modules/components/organization-manager/sub-components/team/component.js
  * Author		: Vish Desai (vishwakarma_d@hotmail.com)
  * Version		: 0.6.1
  * Copyright	: Copyright (c) 2014 Vish Desai (https://www.linkedin.com/in/vishdesai).
  * License		: The MIT License (http://opensource.org/licenses/MIT).
- * Description	: The Twy'r Portal Organization Manager Users Sub-component
+ * Description	: The Twy'r Portal Organization Manager Team Sub-component
  *
  */
 
@@ -29,7 +29,7 @@ var filesystem = promises.promisifyAll(require('fs')),
  */
 var requiredPermission = '00000000-0000-0000-0000-000000000000';
 
-var organizationManagerUsersComponent = prime({
+var organizationManagerTeamComponent = prime({
 	'inherits': base,
 
 	'constructor': function() {
@@ -51,8 +51,8 @@ var organizationManagerUsersComponent = prime({
 
 			var promiseResolutions = [];
 
-			promiseResolutions.push(filesystem.readFileAsync(path.join(__dirname, 'ember/organization-manager-users-model.js')));
-			promiseResolutions.push(filesystem.readFileAsync(path.join(__dirname, 'ember/organization-manager-users-view.js')));
+			promiseResolutions.push(filesystem.readFileAsync(path.join(__dirname, 'ember/organization-manager-team-model.js')));
+			promiseResolutions.push(filesystem.readFileAsync(path.join(__dirname, 'ember/organization-manager-team-view.js')));
 
 			return promises.all(promiseResolutions);
 		})
@@ -78,7 +78,7 @@ var organizationManagerUsersComponent = prime({
 				return '';
 			}
 
-			return renderFunc(path.join(__dirname, 'ember/organization-manager-users-template.ejs'));
+			return renderFunc(path.join(__dirname, 'ember/organization-manager-team-template.ejs'));
 		})		
 		.then(function(tmplFile) {
 			callback(null, tmplFile);
@@ -89,9 +89,9 @@ var organizationManagerUsersComponent = prime({
 		});
 	},
 
-	'name': 'organization-manager-users',
+	'name': 'organization-manager-team',
 	'displayName': 'Users',
 	'dependencies': ['logger', 'databaseService']
 });
 
-exports.component = organizationManagerUsersComponent;
+exports.component = organizationManagerTeamComponent;

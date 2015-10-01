@@ -28,7 +28,7 @@ define(
 						'multiple': false,
 
 						'data': {
-							'url':window.apiServer + 'organization-manager/organization-manager-groups/organizationGroupsTree',
+							'url':window.apiServer + 'organization-manager/organization-manager-groups/organization-manager-groups-tree',
 							'dataType': 'json',
 							'data': function(node) {
 								return { 
@@ -187,12 +187,14 @@ define(
 
 		var OrganizationManagerGroupsComponent = window.Ember.Component.extend({
 			'_modelChangeReactor': window.Ember.observer('model', function() {
+				var self = this;
+
 				if(!this.get('model'))
 					return;
 
 				this.get('model').store.query('organization-manager-group', { 'tenant': this.get('model').get('id') })
 				.catch(function(err) {
-					console.error('Error fetching groups for Tenant: ' + this.get('model').get('id') + '\n', err);
+					console.error('Error fetching groups for Tenant: ' + self.get('model').get('id') + '\n', err);
 				});
 			}),
 

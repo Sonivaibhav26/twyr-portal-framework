@@ -1,4 +1,4 @@
-<script type="text/x-handlebars" data-template-name="components/organization-manager-users">
+<script type="text/x-handlebars" data-template-name="components/organization-manager-team">
 <div class="box box-default" style="text-align:left; margin-bottom:0px;">
 	<div class="box-header with-border">
 		<h3 class="box-title">{{model.name}} Users</h3>
@@ -14,18 +14,18 @@
 		{{/if}}
 		</div>
 	</div>
-	<div id="organization-manager-users-create-user" class="box-body" style="margin:0px; background-color:#eee; padding:10px 0px; display:none;">
+	<div id="organization-manager-team-create-user" class="box-body" style="margin:0px; background-color:#eee; padding:10px 0px; display:none;">
 		<div class="form-group col-md-4">
 			<label>Email<sup>*</sup></label>
-			{{input id="organization-manager-users-input-email" type="text" class="form-control" placeholder="root@twyrportal.com"}}
+			{{input id="organization-manager-team-input-email" type="text" class="form-control" placeholder="root@twyrportal.com"}}
 		</div>
 		<div class="form-group col-md-3">
 			<label>First Name<sup>*</sup></label>
-			{{input id="organization-manager-users-input-first-name" type="text" class="form-control" placeholder="First/Given Name"}}
+			{{input id="organization-manager-team-input-first-name" type="text" class="form-control" placeholder="First/Given Name"}}
 		</div>
 		<div class="form-group col-md-3">
 			<label>Last Name<sup>*</sup></label>
-			{{input id="organization-manager-users-input-last-name" type="text" class="form-control" placeholder="Family Name / Surname"}}
+			{{input id="organization-manager-team-input-last-name" type="text" class="form-control" placeholder="Family Name / Surname"}}
 		</div>
 		<div class="form-group col-md-2" style="padding-top:25px; text-align:right;">
 		    <button type="button" class="btn btn-primary btn-sm" {{action "controller-action" "create-tenant-user" model}}>
@@ -35,7 +35,7 @@
 	</div>
 	<div class="box-body no-padding" style="margin-top:40px;">
 	<div class="col-md-5" style="padding:0px;">
-		<table id="organization-manager-users-list-table" class="table table-bordered table-striped" role="grid">
+		<table id="organization-manager-team-list-table" class="table table-bordered table-striped" role="grid">
 		<thead>
 			<tr>
 				<th style="vertical-align:middle;">User</th>
@@ -48,11 +48,11 @@
 			</tr>
 		</thead>
 		<tbody>
-		{{#each tenantUsers as |tenantUser index|}}
-		<tr>
+		{{#each tenantTeam as |tenantUser index|}}
 		{{#if tenantUser.isNew}}
+		<tr>
 			<td class="form-group" style="vertical-align:middle;">
-				<select id="organization-manager-users-tab-select-{{tenantUser.id}}" class="form-control" style="width:100%;" />
+				<select id="organization-manager-team-tab-select-{{tenantUser.id}}" class="form-control" style="width:100%;" />
 			</td>
 			<td style="vertical-align:middle;">{{tenantUser.formattedCreatedOn}}</td>
 			<td style="text-align:right; vertical-align:middle;">
@@ -60,23 +60,44 @@
 					<i class="fa fa-remove" style="margin-right:5px;" /><span>Delete</span>
 			    </button>
 			</td>
-		{{else}}
-			<td style="vertical-align:middle;">
-				{{tenantUser.user.fullName}}<br />
-				({{tenantUser.user.login}})
-			</td>
-			<td style="vertical-align:middle;">{{tenantUser.formattedCreatedOn}}</td>
-			<td style="text-align:right; vertical-align:middle;">
-				{{#if canDeleteUsers}}
-			    <button type="button" class="btn btn-danger btn-sm" {{action "controller-action" "delete-tenant-user" tenantUser bubbles=false}}>
-					<i class="fa fa-remove" style="margin-right:5px;" /><span>Delete</span>
-			    </button>
-				{{else}}
-					&nbsp;
-				{{/if}}
-			</td>
-		{{/if}}
 		</tr>
+		{{else}}
+		{{#if tenantUser.isSelected}}
+			<tr style="background-color:#428bca; color:#fff;">
+				<td style="vertical-align:middle;">
+					{{tenantUser.user.fullName}}<br />
+					({{tenantUser.user.login}})
+				</td>
+				<td style="vertical-align:middle;">{{tenantUser.formattedCreatedOn}}</td>
+				<td style="text-align:right; vertical-align:middle;">
+					{{#if canDeleteUsers}}
+				    <button type="button" class="btn btn-danger btn-sm" {{action "controller-action" "delete-tenant-user" tenantUser bubbles=false}}>
+						<i class="fa fa-remove" style="margin-right:5px;" /><span>Delete</span>
+				    </button>
+					{{else}}
+						&nbsp;
+					{{/if}}
+				</td>
+			</tr>
+		{{else}}
+			<tr {{action "controller-action" "select-tenant-user" tenantUser bubbles=false}}>
+				<td style="vertical-align:middle;">
+					{{tenantUser.user.fullName}}<br />
+					({{tenantUser.user.login}})
+				</td>
+				<td style="vertical-align:middle;">{{tenantUser.formattedCreatedOn}}</td>
+				<td style="text-align:right; vertical-align:middle;">
+					{{#if canDeleteUsers}}
+				    <button type="button" class="btn btn-danger btn-sm" {{action "controller-action" "delete-tenant-user" tenantUser bubbles=false}}>
+						<i class="fa fa-remove" style="margin-right:5px;" /><span>Delete</span>
+				    </button>
+					{{else}}
+						&nbsp;
+					{{/if}}
+				</td>
+			</tr>
+		{{/if}}
+		{{/if}}
 		{{/each}}
 		</tbody>
 		</table>
