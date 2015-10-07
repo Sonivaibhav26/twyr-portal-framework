@@ -17,6 +17,7 @@ define(
 			},
 
 			'setupController': function(controller, model) {
+				if(window.developmentMode) console.log('twyrPortal/routes/organization-manager::setupController');
 				controller.set('model', model[0]);
 			}
 		});

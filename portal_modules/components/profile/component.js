@@ -82,9 +82,14 @@ var profileComponent = prime({
 			renderOptions.mountPath = path.join(self.$module.$config.componentMountPath, self.name);
 			renderOptions.userId = request.user.id;
 
-			renderFunc(self['router'], renderOptions)
-			.then(function(renderedRoute) {
-				callback(null, renderedRoute + '\n' + componentRoutes);
+			var promiseResolutions = [];
+			promiseResolutions.push(filesystem.readFileAsync(self['ctrl']));
+			promiseResolutions.push(renderFunc(self['router'], renderOptions));
+
+			promises.all(promiseResolutions)
+			.then(function(renderedRouteComponent) {
+				renderedRouteComponent.push(componentRoutes);
+				callback(null, renderedRouteComponent.join('\n'));
 			})
 			.catch(function(err) {
 				callback(err);
@@ -106,7 +111,6 @@ var profileComponent = prime({
 			}
 
 			var promiseResolutions = [];
-			promiseResolutions.push(filesystem.readFileAsync(self['ctrl']));
 			promiseResolutions.push(filesystem.readFileAsync(self['model']));
 			promiseResolutions.push(filesystem.readFileAsync(self['view']));
 

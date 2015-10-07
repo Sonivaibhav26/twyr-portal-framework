@@ -163,10 +163,10 @@
 	</div>
 	<div class="box-body no-padding">
 		<div class="col-md-2" style="padding:0px;">
-			{{organization-manager-tree model=currentModel deleteTreeNode=deleteTreeNode controller-action="controller-action"}}
+			{{organization-manager-tree model=currentModel deleteTreeNode="deleteTreeNode" controller-action=(action 'controller-action')}}
 		</div>
 		<div class="col-md-10" style="padding:0px;">
-			{{organization-manager-editor model=currentModel controller-action="controller-action"}}
+			{{organization-manager-editor model=currentModel controller-action=(action 'controller-action')}}
 		</div>
 	</div>
 </div>

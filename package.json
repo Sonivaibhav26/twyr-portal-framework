@@ -18,8 +18,8 @@
 	},
 	"main": "index.js",
 	"scripts": {
-		"postinstall": "bower install -p",
-		"postupdate": "bower update -p",
+		"postinstall": "bower install -p && cp -r ./to_be_copied/bower_components/* ./public/bower_components",
+		"postupdate": "bower update -p && ember install ember-resolver",
 		"start": "BLUEBIRD_DEBUG=1 node index.js",
 		"test": "echo \"Error: no test specified! Configure in package.json\" && exit 1"
 	},

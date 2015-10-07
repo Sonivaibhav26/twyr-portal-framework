@@ -8,20 +8,12 @@ define(
 			'isCreating': false,
 
 			'didInsertElement': function() {
-				var self = this;
-				self._super();
+				this._super();
 
-				if(!self.get('model'))
+				if(!this.get('model'))
 					return true;
 
-				this.get('model').store.query('organization-manager-tenant-location', { 'tenant': this.get('model').get('id') })
-				.then(function(tenantLocations) {
-					self.set('tenantLocations', tenantLocations);
-				})
-				.catch(function(err) {
-					console.error('Error fetching locations for Tenant: ' + self.get('model').get('id') + '\n', err);
-				});
-
+				this._setTenantLocations();
 				return true;
 			},
 
@@ -31,15 +23,20 @@ define(
 					return;
 				}
 
+				this._setTenantLocations();
+			}),
+
+			'_setTenantLocations': function() {
 				var self = this;
-				this.get('model').store.query('organization-manager-tenant-location', { 'tenant': this.get('model').get('id') })
+
+				self.get('model').store.query('organization-manager-tenant-location', { 'tenant': self.get('model').get('id') })
 				.then(function(tenantLocations) {
 					self.set('tenantLocations', tenantLocations);
 				})
 				.catch(function(err) {
 					console.error('Error fetching locations for Tenant: ' + self.get('model').get('id') + '\n', err);
 				});
-			}),
+			},
 
 			'_replaceMarker': function(location) {
 				var self = this,

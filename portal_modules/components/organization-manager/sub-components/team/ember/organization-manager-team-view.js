@@ -13,6 +13,8 @@ define(
 
 				if(!this.get('model')) {
 					this.set('tenantTeam', null);
+					this.set('selectedTenantUser', null);
+
 					return true;
 				}
 
@@ -23,6 +25,8 @@ define(
 			'_modelChangeReactor': window.Ember.observer('model', function() {
 				if(!this.get('model')) {
 					this.set('tenantTeam', null);
+					this.set('selectedTenantUser', null);
+
 					return;
 				}
 
@@ -41,10 +45,9 @@ define(
 				self.get('model').store.query('organization-manager-team', { 'tenant': self.get('model').get('id') })
 				.then(function(tenantTeam) {
 					self.set('tenantTeam', tenantTeam);
+					console.log('Setting Tenant Team: ', tenantTeam);
 
 					window.Ember.run.later(self, function() {
-						console.log('twyrPortal/components/organization-manager-team::_setTenantTeam');
-
 						self.get('tenantTeam').forEach(function(tenantUser) {
 							tenantUser.set('isSelected', false);
 							if(!tenantUser.get('isNew')) {
@@ -55,6 +58,7 @@ define(
 						});
 
 						self.get('tenantTeam').get('firstObject').set('isSelected', true);
+						self.set('selectedTenantUser', self.get('tenantTeam').get('firstObject'));
 					}, 500);
 				})
 				.catch(function(err) {
@@ -258,6 +262,7 @@ define(
 				});
 
 				tenantUser.set('isSelected', true);
+				this.set('selectedTenantUser', tenantUser);
 			},
 
 			'actions': {

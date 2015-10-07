@@ -13,7 +13,6 @@
 	<link href="/bower_components/normalize-css/normalize.css" rel="stylesheet" type="text/css" />
 
 	<!-- jQuery plugin styles -->
-	<link href="/bower_components/datatables/media/css/dataTables.bootstrap.min.css" rel="stylesheet" type="text/css" />
 	<link href="/bower_components/select2/dist/css/select2.min.css" rel="stylesheet" type="text/css" />
 	<link href="/bower_components/bootstrap-jstree-theme/dist/themes/bootstrap/style.min.css" rel="stylesheet" type="text/css" />
 
@@ -23,7 +22,6 @@
 
 	<!-- Bootstrap plugin styles -->
 	<link href="/bower_components/bootstrap-datepicker/dist/css/bootstrap-datepicker3.min.css" rel="stylesheet" type="text/css" />
-	<link href="/bower_components/datatables-bootstrap3-plugin/media/css/datatables-bootstrap3.min.css" rel="stylesheet" type="text/css" />
 	
 	<!-- Font Awesome, for the Glyphs -->
 	<link href="/bower_components/fontawesome/css/font-awesome.min.css" rel="stylesheet" type="text/css" />
@@ -251,18 +249,19 @@ window.apiServer = '<%= apiServer.protocol %>://<%= apiServer.host %>:<%= apiSer
 window.developmentMode = <%= developmentMode %>;
 </script>
 
+<!-- Ember loader - minimal AMD support -->
+<script type="application/javascript" src="/bower_components/loader.js/loader.js"></script>
+
 <!-- Ember.js, for the client-side MVC Framework -->
 <% if(developmentMode) { %>
 <script type="application/javascript" src="/bower_components/ember/ember.debug.js"></script>
 <script type="application/javascript" src="/bower_components/ember-data/ember-data.js"></script>
+<script type="application/javascript" src="/bower_components/ember-resolver/dist/ember-resolver.js"></script>
 <% } else { %>
 <script type="application/javascript" src="/bower_components/ember/ember.min.js"></script>
 <script type="application/javascript" src="/bower_components/ember-data/ember-data.min.js"></script>
+<script type="application/javascript" src="/bower_components/ember-resolver/dist/ember-resolver.min.js"></script>
 <% } %>
-
-<!-- Loading Ember ES6 Transpilers -->
-<script type="application/javascript" src="/bower_components/loader.js/loader.js"></script>
-<script type="application/javascript" src="/bower_components/ember-resolver/dist/ember-resolver.js"></script>
 
 <!-- Loading Non-Ember ES6 Mobules -->
 <script type="application/javascript" src="/bower_components/ember/ember-template-compiler.js"></script>

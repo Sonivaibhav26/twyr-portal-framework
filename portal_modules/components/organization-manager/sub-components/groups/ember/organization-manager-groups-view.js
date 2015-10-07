@@ -189,8 +189,10 @@ define(
 			'_modelChangeReactor': window.Ember.observer('model', function() {
 				var self = this;
 
-				if(!this.get('model'))
+				if(!this.get('model')) {
+					this.set('currentModel', null);
 					return;
+				}
 
 				this.get('model').store.query('organization-manager-group', { 'tenant': this.get('model').get('id') })
 				.catch(function(err) {

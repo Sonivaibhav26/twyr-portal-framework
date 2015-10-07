@@ -31,13 +31,9 @@
   "dependencies": {
     "bootstrap": "*",
     "bootstrap-datepicker": "*",
-    "curl": "*",
-    "datatables": "*",
-    "datatables-bootstrap3-plugin": "*",
     "ember": "*",
     "ember-data": "*",
-    "ember-resolver": "*",
-    "loader.js": "ember-cli/loader.js",
+    "loader.js": "*",
     "fastclick": "*",
     "fontawesome": "*",
     "handlebars": "*",
@@ -52,9 +48,5 @@
     "select2": "*",
     "validatorjs": "*"
   },
-  "devDependencies": {},
-  "resolutions": {
-    "ember": "> 2.0.0",
-	"jquery": "> 2.0.0"
-  }
+  "devDependencies": {}
 }

@@ -91,18 +91,32 @@ var organizationManagerComponent = prime({
 					return;
 				}
 
+				var promiseResolutions = [];
+				Object.keys(request.user.tenants).forEach(function(tenantId) {
+					promiseResolutions.push(self._checkPermissionAsync(request, requiredPermission, tenantId));
+				});
+
+				return promises.all(promiseResolutions);
+			})
+			.then(function(allowedTenants) {
 				var renderOptions = {};
 				renderOptions.mountPath = path.join(self.$module.$config.componentMountPath, self.name);
 				renderOptions.tenantIds = [];
-	
+
+				var idx = 0;
 				Object.keys(request.user.tenants).forEach(function(tenantId) {
-					renderOptions.tenantIds.push(tenantId);
+					if(allowedTenants[idx]) renderOptions.tenantIds.push(tenantId);
+					idx++;
 				});
-	
-				return renderFunc(path.join(__dirname, 'ember/router.ejs'), renderOptions);
+
+				var promiseResolutions = [];
+				promiseResolutions.push(renderFunc(path.join(__dirname, 'ember/router.ejs'), renderOptions));
+				promiseResolutions.push(filesystem.readFileAsync(path.join(__dirname, 'ember/organization-manager-controller.js')));
+				return promises.all(promiseResolutions);
 			})
-			.then(function(renderedRoute) {
-				callback(null, renderedRoute + '\n' + componentRoutes);
+			.then(function(renderedRouteController) {
+				renderedRouteController.push(componentRoutes);
+				callback(null, renderedRouteController.join('\n'));
 			})
 			.catch(function(err) {
 				self.$dependencies.logger.error('Error servicing request "' + request.path + '":\nQuery: ', request.query, '\nBody: ', request.body, '\nParams: ', request.params, '\nError: ', err);
@@ -132,11 +146,8 @@ var organizationManagerComponent = prime({
 				}
 	
 				var promiseResolutions = [];
-	
-				promiseResolutions.push(filesystem.readFileAsync(path.join(__dirname, 'ember/organization-manager-model.js')));
 				promiseResolutions.push(filesystem.readFileAsync(path.join(__dirname, 'ember/organization-manager-view.js')));
-				promiseResolutions.push(filesystem.readFileAsync(path.join(__dirname, 'ember/organization-manager-controller.js')));
-	
+				promiseResolutions.push(filesystem.readFileAsync(path.join(__dirname, 'ember/organization-manager-model.js')));
 				return promises.all(promiseResolutions);
 			})
 			.then(function(mvcFiles) {
