@@ -31,7 +31,7 @@ define(
 							'url':window.apiServer + 'organization-manager/organization-manager-groups/organization-manager-groups-tree',
 							'dataType': 'json',
 							'data': function(node) {
-								return { 
+								return {
 									'tenant': tenantId,
 									'group': (node ? node.id : null)
 								};
@@ -72,27 +72,33 @@ define(
 				// If model is NULL, return...
 				if(!newEntity) return;
 
-				// If user selected an existing organization, simply open it and return
-				newEntityNode = self.$('div#organization-manager-groups-tree-container').jstree('get_node', newEntity.get('id'));
-				if(newEntityNode) {
-					self.$('div#organization-manager-groups-tree-container').jstree('open_node', newEntityNode);
-					return;
-				}
+				newEntity.reload()
+				.then(function(reloadedModel) {
+					// If user selected an existing group, simply open it and return
+					newEntityNode = self.$('div#organization-manager-groups-tree-container').jstree('get_node', reloadedModel.get('id'));
+					if(newEntityNode) {
+						self.$('div#organization-manager-groups-tree-container').jstree('open_node', newEntityNode);
+						return;
+					}
 
-				// If user created a new organization, add node, then open it, and finally return
-				var parentNodeId = newEntity.get('parent').get('id');
+					// If user created a new group, add node, then open it, and finally return
+					var parentNodeId = reloadedModel.get('parent').get('id');
 
-				var parentNode = self.$('div#organization-manager-groups-tree-container').jstree('get_node', parentNodeId);
-				if(!self.$('div#organization-manager-groups-tree-container').jstree('is_open', parentNode))
-					self.$('div#organization-manager-groups-tree-container').jstree('open_node', parentNode);
+					var parentNode = self.$('div#organization-manager-groups-tree-container').jstree('get_node', parentNodeId);
+					if(!self.$('div#organization-manager-groups-tree-container').jstree('is_open', parentNode))
+						self.$('div#organization-manager-groups-tree-container').jstree('open_node', parentNode);
 
-				self.$('div#organization-manager-groups-tree-container').jstree('create_node', parentNode, {
-					'id': newEntity.get('id'),
-					'text': newEntity.get('name'),
-					'parent': parentNodeId,
-					'children': true
-				}, 'last', function() {
-					self.$('div#organization-manager-groups-tree-container').jstree('activate_node', newEntity.get('id'), false, false);
+					self.$('div#organization-manager-groups-tree-container').jstree('create_node', parentNode, {
+						'id': reloadedModel.get('id'),
+						'text': reloadedModel.get('name'),
+						'parent': parentNodeId,
+						'children': true
+					}, 'last', function() {
+						self.$('div#organization-manager-groups-tree-container').jstree('activate_node', reloadedModel.get('id'), false, false);
+					});
+				})
+				.catch(function(err) {
+					self.sendAction('controller-action', 'display-status-message', { 'type': 'error', 'errorModel': newEntity });
 				});
 			}),
 
@@ -118,18 +124,18 @@ define(
 				if(this.get('model').get('isDeleted') === true) {
 					var selNodes = this.$('div#organization-manager-groups-tree-container').jstree('get_selected', true),
 						selNodeIdx = null;
-	
+
 					for(var idx = 0; idx < selNodes.length; idx++){
 						if(this.get('model').get('id') != selNodes[idx].id)
 							continue;
-	
+
 						selNodeIdx = idx;
 						break;
 					}
-	
+
 					if(selNodeIdx === null)
 						return;
-	
+
 					var parentNode = this.$('div#organization-manager-groups-tree-container').jstree('get_node', selNodes[selNodeIdx].parent);
 
 					window.Ember.run.scheduleOnce('afterRender', this, function() {
@@ -203,7 +209,7 @@ define(
 			'selected-group-changed': function(data) {
 				var newGroupId = data.id,
 					self = this;
-				
+
 				this.get('model').store
 				.find('organization-manager-group', newGroupId)
 				.then(function(group) {
@@ -272,9 +278,9 @@ define(
 					window.Ember.$.confirm({
 						'text': 'Are you sure that you want to delete <strong>"' + groupName + '"</strong>?',
 						'title': 'Delete <strong>' + groupName + '</strong>?',
-	
+
 						'confirm': delFn,
-	
+
 						'cancel': function() {
 							// Do nothing...
 						}
@@ -339,9 +345,9 @@ define(
 					window.Ember.$.confirm({
 						'text': 'Are you sure that you want to revoke <strong>"' + permissionName + '"</strong> permission from the ' + parentGroup.get('name') + ' group?',
 						'title': 'Delete <strong>' + permissionName + '</strong>?',
-	
+
 						'confirm': delFn,
-	
+
 						'cancel': function() {
 							// Do nothing...
 						}
@@ -406,9 +412,9 @@ define(
 					window.Ember.$.confirm({
 						'text': 'Are you sure that you want to remove <strong>"' + userName + '"</strong> from the ' + parentGroup.get('name') + ' group?',
 						'title': 'Delete <strong>' + userName + '</strong>?',
-	
+
 						'confirm': delFn,
-	
+
 						'cancel': function() {
 							// Do nothing...
 						}

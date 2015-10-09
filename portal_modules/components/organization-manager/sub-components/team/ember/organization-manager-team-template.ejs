@@ -1,3 +1,29 @@
+<script type="text/x-handlebars" data-template-name="components/organization-manager-team-groups">
+<div class="box box-default" style="text-align:left;">
+	<div class="box-header with-border">
+		<h3 class="box-title">{{model.user.fullName}}&apos;s Groups</h3>
+	</div>
+	<div class="box-body no-padding">
+		<div class="col-md-5" style="margin:0px; padding:0px;">
+			<div id="organization-manager-team-groups-unused-tree-container" style="min-height:250px; max-height:250px; border-right:1px solid #f4f4f4; padding-top:10px;">&nbsp;</div>
+		</div>
+		<div class="col-md-2" style="margin:0px; padding:0px;">
+			<div class="form-group" style="min-height:250px; max-height:250px; margin:0px 0px; border:0px; padding: 90px 0px 0px; text-align:center;">
+			    <button type="button" id="organization-manager-team-groups-button-add-group" class="btn btn-default btn-sm" style="width:80%; margin-bottom:5px;" {{action "controller-action" "add-user-group" bubbles=false}}>
+					<span>Add Group<i class="fa fa-angle-double-right" style="margin-left:5px;" /></span>
+			    </button>
+			    <button type="button" id="organization-manager-team-groups-button-delete-group" class="btn btn-default btn-sm" style="width:80%; margin-top:5px;" {{action "controller-action" "delete-user-group" bubbles=false}}>
+					<span><i class="fa fa-angle-double-left" style="margin-right:5px;" />Del Group</span>
+			    </button>
+			</div>
+		</div>
+		<div class="col-md-5" style="margin:0px; padding:0px;">
+			<div id="organization-manager-team-groups-used-tree-container" style="min-height:250px; max-height:250px; border-left:1px solid #f4f4f4; padding-top:10px;">&nbsp;</div>
+		</div>
+	</div>
+</div>
+</script>
+
 <script type="text/x-handlebars" data-template-name="components/organization-manager-team">
 <div class="box box-default" style="text-align:left; margin-bottom:0px;">
 	<div class="box-header with-border">
@@ -34,13 +60,12 @@
 		</div>
 	</div>
 	<div class="box-body no-padding" style="margin-top:40px;">
+	<div class="col-md-6">
 		<table id="organization-manager-team-list-table" class="table table-bordered table-striped" role="grid">
 		<thead>
 			<tr>
 				<th style="vertical-align:middle;">Login</th>
-				<th style="vertical-align:middle;">First/Given Name</th>
-				<th style="vertical-align:middle;">Middle Names</th>
-				<th style="vertical-align:middle;">Last/Family Name</th>
+				<th style="vertical-align:middle;">Name</th>
 				<th style="vertical-align:middle;">Added On</th>
 				<th style="text-align:right; vertical-align:middle; padding-right:8px;">
 				    <button type="button" class="btn btn-primary btn-sm" {{action "controller-action" "add-tenant-user" model bubbles=false}}>
@@ -53,7 +78,7 @@
 		{{#each tenantTeam as |tenantUser index|}}
 		{{#if tenantUser.isNew}}
 		<tr>
-			<td colspan="4" class="form-group" style="vertical-align:middle;">
+			<td colspan="2" class="form-group" style="vertical-align:middle;">
 				<select id="organization-manager-team-tab-select-{{tenantUser.id}}" class="form-control" style="width:100%;" />
 			</td>
 			<td style="vertical-align:middle;">{{tenantUser.formattedCreatedOn}}</td>
@@ -67,9 +92,7 @@
 		{{#if tenantUser.isSelected}}
 			<tr style="background-color:#428bca; color:#fff;">
 				<td style="vertical-align:middle;">{{tenantUser.user.login}}</td>
-				<td style="vertical-align:middle;">{{tenantUser.user.firstName}}</td>
-				<td style="vertical-align:middle;">{{tenantUser.user.middleNames}}</td>
-				<td style="vertical-align:middle;">{{tenantUser.user.lastName}}</td>
+				<td style="vertical-align:middle;">{{tenantUser.user.fullName}}</td>
 				<td style="vertical-align:middle;">{{tenantUser.formattedCreatedOn}}</td>
 				<td style="text-align:right; vertical-align:middle;">
 					{{#if canDeleteUsers}}
@@ -84,9 +107,7 @@
 		{{else}}
 			<tr {{action "controller-action" "select-tenant-user" tenantUser bubbles=false}}>
 				<td style="vertical-align:middle;">{{tenantUser.user.login}}</td>
-				<td style="vertical-align:middle;">{{tenantUser.user.firstName}}</td>
-				<td style="vertical-align:middle;">{{tenantUser.user.middleNames}}</td>
-				<td style="vertical-align:middle;">{{tenantUser.user.lastName}}</td>
+				<td style="vertical-align:middle;">{{tenantUser.user.fullName}}</td>
 				<td style="vertical-align:middle;">{{tenantUser.formattedCreatedOn}}</td>
 				<td style="text-align:right; vertical-align:middle;">
 					{{#if canDeleteUsers}}
@@ -104,10 +125,9 @@
 		</tbody>
 		</table>
 	</div>
-
-	{{#if selectedTenantUser}}
-	<div class="box-body no-padding" style="margin-top:40px;">
+	<div class="col-md-6">
+		{{organization-manager-team-groups model=selectedTenantUser controller-action=(action 'controller-action')}}
 	</div>
-	{{/if}}
+	</div>
 </div>
 </script>

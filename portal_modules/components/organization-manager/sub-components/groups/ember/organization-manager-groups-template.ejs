@@ -211,10 +211,10 @@
 	</div>
 	<div class="box-body no-padding">
 		<div class="col-md-2" style="padding:0px;">
-			{{organization-manager-groups-tree model=currentModel tenantModel=model deleteTreeNode=deleteTreeNode controller-action="controller-action"}}
+			{{organization-manager-groups-tree model=currentModel tenantModel=model deleteTreeNode=deleteTreeNode controller-action=(action 'controller-action')}}
 		</div>
 		<div class="col-md-10" style="padding:0px;">
-			{{organization-manager-groups-editor model=currentModel controller-action="controller-action"}}
+			{{organization-manager-groups-editor model=currentModel controller-action=(action 'controller-action')}}
 		</div>
 	</div>
 </div>

@@ -40,12 +40,18 @@ define(
 				this.set('canDeleteUsers', (oldUsers.get('length') > 1));
 			}),
 
+			'_userStatusChangeReactor': window.Ember.observer('tenantTeam.@each.isNew', function() {
+				if(!this.get('tenantTeam')) return;
+
+				var oldUsers = this.get('tenantTeam').filterBy('isNew', false);
+				this.set('canDeleteUsers', (oldUsers.get('length') > 1));
+			}),
+
 			'_setTenantTeam': function() {
 				var self = this;
 				self.get('model').store.query('organization-manager-team', { 'tenant': self.get('model').get('id') })
 				.then(function(tenantTeam) {
 					self.set('tenantTeam', tenantTeam);
-					console.log('Setting Tenant Team: ', tenantTeam);
 
 					window.Ember.run.later(self, function() {
 						self.get('tenantTeam').forEach(function(tenantUser) {
@@ -53,7 +59,7 @@ define(
 							if(!tenantUser.get('isNew')) {
 								return;
 							}
-	
+
 							self._initNewTenantUserSelect(tenantUser.get('id'));
 						});
 
@@ -191,6 +197,7 @@ define(
 
 					window.Ember.run.scheduleOnce('afterRender', self, function() {
 						self['hide-create-user']();
+						self['select-tenant-user'](newUserRel);
 					});
 				})
 				.catch(function(err) {
@@ -215,6 +222,7 @@ define(
 				})
 				.then(function() {
 					self.sendAction('controller-action', 'display-status-message', { 'type': 'success', 'message': tenantUser.get('user').get('fullName') + ' has been added to the ' + tenantUser.get('tenant').get('name') + ' organization' });
+					self['select-tenant-user'](tenantUser);
 				})
 				.catch(function(reason) {
 					self.sendAction('controller-action', 'display-status-message', { 'type': 'error', 'errorModel': tenantUser });
@@ -227,15 +235,32 @@ define(
 					tenant = tenantUser.get('tenant'),
 					userName = (tenantUser.get('user').get('id') ? tenantUser.get('user').get('fullName'): 'New User'),
 					delFn = function() {
+						var wasSelected = false;
+						if(tenantUser.get('isSelected')) {
+							wasSelected = true;
+
+							tenantUser.set('isSelected', false);
+							self.set('selectedTenantUser', null);
+						}
+
 						tenantUser
 						.destroyRecord()
 						.then(function() {
 							self.get('tenantTeam').removeObject(tenantUser);
 							self.sendAction('controller-action', 'display-status-message', { 'type': 'success', 'message': userName + ' has been removed from the ' + tenant.get('name') + ' organization' });
+
+							var newSelectedTenantUser = self.get('tenantTeam').get('firstObject');
+							newSelectedTenantUser.set('isSelected', true);
+							self.set('selectedTenantUser', newSelectedTenantUser);
 						})
 						.catch(function(err) {
 							self.sendAction('controller-action', 'display-status-message', { 'type': 'error', 'errorModel': tenantUser });
+
 							tenantUser.rollbackAttributes();
+							if(wasSelected) {
+								tenantUser.set('isSelected', true);
+								self.set('selectedTenantUser', tenantUser);
+							}
 						});
 					};
 
@@ -246,9 +271,9 @@ define(
 					window.Ember.$.confirm({
 						'text': 'Are you sure that you want to remove <strong>"' + userName + '"</strong> from the ' + tenant.get('name') + ' organization?',
 						'title': 'Delete <strong>' + userName + '</strong>?',
-	
+
 						'confirm': delFn,
-	
+
 						'cancel': function() {
 							// Do nothing...
 						}
@@ -278,3 +303,174 @@ define(
 		exports['default'] = OrganizationManagerTeamComponent;
 	}
 );
+
+define(
+	"twyrPortal/components/organization-manager-team-groups",
+	["exports", "twyrPortal/app"],
+	function(exports, app) {
+		if(window.developmentMode) console.log('DEFINE: twyrPortal/components/organization-manager-team-groups');
+
+		var OrganizationManagerTeamGroupsComponent = window.Ember.Component.extend({
+			'didInsertElement': function() {
+				this._super();
+
+				if(!this.get('model'))
+					return true;
+
+				this._createTrees();
+				return true;
+			},
+
+			'_modelChangeReactor': window.Ember.observer('model', function() {
+				if(!this.get('model'))
+					return;
+
+				this._createTrees();
+			}),
+
+			'_createTrees': function() {
+				var self = this,
+					tenantId = self.get('model').get('tenant').get('id'),
+					userId = self.get('model').get('user').get('id');
+
+				// Delete the existing trees, if any...
+				self.$('div#organization-manager-team-groups-unused-tree-container').jstree('destroy');
+				self.$('div#organization-manager-team-groups-used-tree-container').jstree('destroy');
+
+				// Create the unused groups tree
+				var unusedGroupTree = self.$('div#organization-manager-team-groups-unused-tree-container').jstree({
+					'core': {
+						'check_callback': false,
+						'multiple': false,
+
+						'data': {
+							'url':window.apiServer + 'organization-manager/organization-manager-team/organization-manager-team-unused-groups-tree',
+							'dataType': 'json',
+							'data': function(node) {
+								return {
+									'tenant': tenantId,
+									'user': userId,
+									'group': (node ? node.id : null)
+								};
+							}
+						},
+
+						'themes': {
+							'icons': false,
+							'name': 'bootstrap'
+						}
+					}
+				});
+
+				unusedGroupTree.on('ready.jstree', function() {
+					var rootNodeId = self.$('div#organization-manager-team-groups-unused-tree-container > ul > li:first-child').attr('id');
+					self.$('div#organization-manager-team-groups-unused-tree-container').jstree('activate_node', rootNodeId, false, false);
+				});
+
+				// Create the used groups tree
+				var usedGroupTree = self.$('div#organization-manager-team-groups-used-tree-container').jstree({
+					'core': {
+						'check_callback': false,
+						'multiple': false,
+
+						'data': {
+							'url': window.apiServer + 'organization-manager/organization-manager-team/organization-manager-team-used-groups-tree',
+							'dataType': 'json',
+							'data': function(node) {
+								return {
+									'tenant': tenantId,
+									'user': userId,
+									'group': (node ? node.id : null)
+								};
+							}
+						},
+
+						'themes': {
+							'icons': false,
+							'name': 'bootstrap'
+						}
+					}
+				});
+
+				usedGroupTree.on('ready.jstree', function() {
+					var rootNodeId = self.$('div#organization-manager-team-groups-used-tree-container > ul > li:first-child').attr('id');
+					self.$('div#organization-manager-team-groups-used-tree-container').jstree('activate_node', rootNodeId, false, false);
+				});
+			},
+
+			'add-user-group': function() {
+				var selNodes = this.$('div#organization-manager-team-groups-unused-tree-container').jstree('get_selected', true)[0],
+					tenantId = this.get('model').get('tenant').get('id'),
+					groupId = (selNodes ? selNodes.id : null),
+					userId = this.get('model').get('user').get('id');
+
+				if(!groupId) return;
+
+				var self = this;
+				window.Ember.$.ajax({
+					'type': 'POST',
+					'url': window.apiServer + 'organization-manager/organization-manager-team/organization-manager-team-add-user-group',
+
+					'dataType': 'json',
+					'data': {
+						'tenant': tenantId,
+						'user': userId,
+						'group': groupId
+					},
+
+					'success': function(data) {
+						self.$('div#organization-manager-team-groups-used-tree-container').jstree().refresh();
+						self.$('div#organization-manager-team-groups-unused-tree-container').jstree().refresh();
+					},
+
+					'error': function(err) {
+						self.sendAction('controller-action', 'display-status-message', { 'type': 'danger', 'message': (err.responseJSON ? err.responseJSON.responseText : (err.responseText || 'Unknown error' )) });
+					}
+				});
+			},
+
+			'delete-user-group': function() {
+				var selNodes = this.$('div#organization-manager-team-groups-used-tree-container').jstree('get_selected', true)[0],
+					tenantId = this.get('model').get('tenant').get('id'),
+					groupId = (selNodes ? selNodes.id : null),
+					userId = this.get('model').get('user').get('id');
+
+				if(!groupId) return;
+
+				var self = this;
+				window.Ember.$.ajax({
+					'type': 'POST',
+					'url': window.apiServer + 'organization-manager/organization-manager-team/organization-manager-team-delete-user-group',
+
+					'dataType': 'json',
+					'data': {
+						'tenant': tenantId,
+						'user': userId,
+						'group': groupId
+					},
+
+					'success': function(data) {
+						self.$('div#organization-manager-team-groups-used-tree-container').jstree().refresh();
+						self.$('div#organization-manager-team-groups-unused-tree-container').jstree().refresh();
+					},
+
+					'error': function(err) {
+						self.sendAction('controller-action', 'display-status-message', { 'type': 'danger', 'message': (err.responseJSON ? err.responseJSON.responseText : (err.responseText || 'Unknown error' )) });
+					}
+				});
+			},
+
+			'actions': {
+				'controller-action': function(action, data) {
+					if(this[action])
+						this[action](data);
+					else
+						this.sendAction('controller-action', action, data);
+				}
+			}
+		});
+
+		exports['default'] = OrganizationManagerTeamGroupsComponent;
+	}
+);
+

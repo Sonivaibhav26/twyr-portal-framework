@@ -132,13 +132,13 @@
 	<div class="box-body" style="text-align:left;">
 		<div class="row">
 			<div class="col-md-6">
-				{{manage-personal-details model=model controller-action="controller-action"}}
+				{{manage-personal-details model=model controller-action=(action 'controller-action')}}
 			</div>
 			<div class="col-md-3">
-				{{change-password model=model controller-action="controller-action"}}
+				{{change-password model=model controller-action=(action 'controller-action')}}
 			</div>
 			<div class="col-md-3">
-				{{manage-linked-accounts controller-action="controller-action"}}
+				{{manage-linked-accounts controller-action=(action 'controller-action')}}
 			</div>
 		</div>
 	</div>

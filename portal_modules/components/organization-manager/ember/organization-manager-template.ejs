@@ -129,11 +129,11 @@
 		</ul>
 		<div class="tab-content" style="padding:0px;">
 			<div class="tab-pane active" id="organization-manager-suborganizations-tab">
-				{{organization-manager-suborganizations model=model controller-action="controller-action"}}
+				{{organization-manager-suborganizations model=model controller-action=(action 'controller-action')}}
 			</div>
 			<% for(var idx =0; idx < components.length; idx++) { %>
 			<div class="tab-pane" id="organization-manager-<%= components[idx].name %>-tab">
-				{{<%= components[idx].name %> model=model controller-action="controller-action"}}
+				{{<%= components[idx].name %> model=model controller-action=(action 'controller-action')}}
 			</div>
 			<% } %>
 		</div>
