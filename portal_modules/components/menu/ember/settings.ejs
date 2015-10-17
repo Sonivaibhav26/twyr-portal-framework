@@ -4,7 +4,7 @@
 		<li class="dropdown user-menu">
 			<a href="#" class="dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
 				<% if(menuItems[idx].icon_class) { %>
-					<i class="<%= menuItems[idx].icon_class %>" style="font-size:18px;"></i>
+					<i class="<%= menuItems[idx].icon_class %>" style="font-size:18px;" data-toggle="tooltip" title="<%= menuItems[idx].display_name %>" data-placement="bottom"></i>
 				<% } %>
 				<%= menuItems[idx].display_name %>
 			</a>
@@ -13,7 +13,7 @@
 					<li>
 						{{#link-to "<%= menuItems[idx].subRoutes[subIdx].ember_route %>"}}
 							<% if(menuItems[idx].subRoutes[subIdx].icon_class) { %>
-								<i class="<%= menuItems[idx].subRoutes[subIdx].icon_class %>" style="font-size:18px;"></i>
+								<i class="<%= menuItems[idx].subRoutes[subIdx].icon_class %>" style="font-size:18px;" data-toggle="tooltip" title="<%= menuItems[idx].display_name %>" data-placement="bottom"></i>
 							<% } %>
 							<%= menuItems[idx].subRoutes[subIdx].display_name %>
 						{{/link-to}}
@@ -25,7 +25,7 @@
 		<li class="user-menu">
 			{{#link-to "<%= menuItems[idx].ember_route %>"}}
 				<% if(menuItems[idx].icon_class) { %>
-					<i class="<%= menuItems[idx].icon_class %>" style="font-size:18px;"></i>
+					<i class="<%= menuItems[idx].icon_class %>" style="font-size:18px;" data-toggle="tooltip" title="<%= menuItems[idx].display_name %>" data-placement="bottom"></i>
 				<% } %>
 				<%= menuItems[idx].display_name %>
 			{{/link-to}}
