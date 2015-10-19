@@ -11,24 +11,22 @@ define(
 			'didInsertElement': function() {
 				this._super();
 
-				if(!this.get('model')) {
-					this.set('tenantTeam', null);
-					this.set('selectedTenantUser', null);
+				this.set('tenantTeam', null);
+				this.set('selectedTenantUser', null);
 
+				if(!this.get('model'))
 					return true;
-				}
 
 				this._setTenantTeam();
 				return true;
 			},
 
 			'_modelChangeReactor': window.Ember.observer('model', function() {
-				if(!this.get('model')) {
-					this.set('tenantTeam', null);
-					this.set('selectedTenantUser', null);
+				this.set('tenantTeam', null);
+				this.set('selectedTenantUser', null);
 
-					return;
-				}
+				if(!this.get('model'))
+					return true;
 
 				this._setTenantTeam();
 			}),
@@ -49,10 +47,19 @@ define(
 
 			'_setTenantTeam': function() {
 				var self = this;
+
 				self.get('model').store.query('organization-manager-team', { 'tenant': self.get('model').get('id') })
 				.then(function(tenantTeam) {
-					self.set('tenantTeam', tenantTeam);
+					var filteredTeam = window.Ember.ArrayProxy.create({ 'content': window.Ember.A([]) });
 
+ 					self.get('model').store.peekAll('organization-manager-team').forEach(function(teamMember) {
+						if(teamMember.get('tenant').get('id') !== self.get('model').get('id'))
+							return;
+
+						filteredTeam.addObject(teamMember);
+					});
+
+					self.set('tenantTeam', filteredTeam);
 					window.Ember.run.later(self, function() {
 						self.get('tenantTeam').forEach(function(tenantUser) {
 							tenantUser.set('isSelected', false);
@@ -155,7 +162,7 @@ define(
 					'tenant': tenant
 				});
 
-				self.get('tenantTeam').addObject(newTenantUser._internalModel);
+				self.get('tenantTeam').addObject(newTenantUser);
 				window.Ember.run.scheduleOnce('afterRender', self, function() {
 					self._initNewTenantUserSelect(tenantUserId);
 				});

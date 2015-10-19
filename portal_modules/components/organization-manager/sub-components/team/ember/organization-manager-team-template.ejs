@@ -105,7 +105,7 @@
 				</td>
 			</tr>
 		{{else}}
-			<tr {{action "controller-action" "select-tenant-user" tenantUser bubbles=false}}>
+			<tr style="cursor:pointer;" {{action "controller-action" "select-tenant-user" tenantUser bubbles=false}}>
 				<td style="vertical-align:middle;">{{tenantUser.user.login}}</td>
 				<td style="vertical-align:middle;">{{tenantUser.user.fullName}}</td>
 				<td style="vertical-align:middle;">{{tenantUser.formattedCreatedOn}}</td>
