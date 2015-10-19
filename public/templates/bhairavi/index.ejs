@@ -22,7 +22,7 @@
 
 	<!-- Bootstrap plugin styles -->
 	<link href="/bower_components/bootstrap-datepicker/dist/css/bootstrap-datepicker3.min.css" rel="stylesheet" type="text/css" />
-	
+
 	<!-- Font Awesome, for the Glyphs -->
 	<link href="/bower_components/fontawesome/css/font-awesome.min.css" rel="stylesheet" type="text/css" />
 
@@ -49,7 +49,7 @@
 		border-left: 1px solid #eee;
 		padding: 15px;
 	}
-	
+
 	div.navbar-custom-menu > ul.navbar-nav > div.ember-view li > a {
 		color: #333;
 		line-height: 20px;
@@ -116,7 +116,7 @@
 		<div id="bhairavi-status-message" class="callout" style="display:none; border-radius:0px; width:100%;">
 			<span></span>
 		</div>
-	
+
 		<div id="bhairavi-error-message" class="callout callout-danger" style="display:none; border-radius:0px; width:100%;">
 			{{#each errorModel.errors.id as |error|}}
 				<span>{{error.message}}</span>
@@ -167,7 +167,7 @@
 	<!-- The main component area -->
 	<div class="row" style="padding:0px 15px;">
 		<% if(widgets.leftsidebar && widgets.leftsidebar.length) { %>
-		<div id="div-bhairavi-left-sidebar" class="col-md-2 sidebar" style="padding:10px; background-color:#f9fafc; text-align:left;">
+		<div id="div-bhairavi-left-sidebar" class="col-md-2 sidebar" style="padding:0px; background-color:#f9fafc; text-align:left;">
 			<% for(var widgetIdx = 0; widgetIdx < widgets.leftsidebar.length; widgetIdx++) { %>
 				{{<%= widgets.leftsidebar[widgetIdx].ember_component %>}}
 			<% } %>
@@ -179,7 +179,7 @@
 		</div>
 
 		<% if(widgets.rightsidebar && widgets.rightsidebar.length) { %>
-		<div id="div-bhairavi-right-sidebar" class="col-md-2" style="padding:10px; background-color:#f9fafc; text-align:center;">
+		<div id="div-bhairavi-right-sidebar" class="col-md-2" style="padding:0px; background-color:#f9fafc; text-align:center;">
 			<% for(var widgetIdx = 0; widgetIdx < widgets.rightsidebar.length; widgetIdx++) { %>
 				{{<%= widgets.rightsidebar[widgetIdx].ember_component %>}}
 			<% } %>
@@ -206,7 +206,7 @@
 			<% } %>
 
 			<div id="div-bhairavi-footer-3" class="col-md-<%= widgets.moduleFooterColWidth %>" style="text-align:right; padding:15px;">
-				Copyright&copy; <%= baseYear %>-<%= currentYear %> {{#link-to "application"}}Twy&apos;r Framework{{/link-to}}. All rights reserved. 
+				Copyright&copy; <%= baseYear %>-<%= currentYear %> {{#link-to "application"}}Twy&apos;r Framework{{/link-to}}. All rights reserved.
 			</div>
 		</div>
 	</footer>
