@@ -169,7 +169,23 @@ var menuComponent = prime({
 	'_setupMenuCache': function(userId, userData, callback) {
 		var cacheSrvc = this.$dependencies.cacheService,
 			databaseSrvc = this.$dependencies.databaseService,
+			unique_ember_routes = [],
 			self = this;
+
+		userData.menus = [];
+
+		Object.keys(userData.tenants).forEach(function(key) {
+			var userTenant = userData.tenants[key];
+
+			for(var idx in userTenant.menus) {
+				var thisMenu = userTenant.menus[idx];
+				if(unique_ember_routes.indexOf(thisMenu.id) >= 0)
+					continue;
+
+				unique_ember_routes.push(thisMenu.id);
+				userData.menus.push(thisMenu);
+			};
+		});
 
 		var widgetList = userData.widgets,
 			menuList = userData.menus,

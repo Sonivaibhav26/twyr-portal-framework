@@ -333,15 +333,6 @@ var registeredRootPathRenderer = function(request, response, next) {
 					widgets[position].push(thisWidget);
 				}
 			});
-
-			for(var idx in userTenant.menus) {
-				var thisMenu = userTenant.menus[idx];
-				if(unique_ember_routes.indexOf(thisMenu.ember_route) >= 0)
-					continue;
-
-				unique_ember_routes.push(thisMenu.ember_route);
-				menus.push(thisMenu);
-			};
 		});
 
 		Object.keys(widgets).forEach(function(position) {
