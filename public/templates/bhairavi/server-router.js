@@ -25,7 +25,7 @@ var publicRootPathRenderer = function(request, response, next) {
 		self = this;
 
 	// Step 1: Check to see if the user is already in the cache
-	cacheSrvc.getAsync('eronkan!portal!user!public')
+	cacheSrvc.getAsync('twyr!portal!user!public')
 	.then(function(cachedData) {
 		// If the user is in the cache already, simply return it
 		cachedData = JSON.parse(cachedData);
@@ -243,7 +243,7 @@ var publicRootPathRenderer = function(request, response, next) {
 		})
 		// Step 4: Store User data in the cache for quick retrieval next time
 		.then(function() {
-			return cacheSrvc.setAsync('eronkan!portal!user!public', JSON.stringify(deserializedUser));
+			return cacheSrvc.setAsync('twyr!portal!user!public', JSON.stringify(deserializedUser));
 		})
 		// Finally, send it back up...
 		.then(function() {
@@ -297,7 +297,7 @@ var registeredRootPathRenderer = function(request, response, next) {
 		renderOptions.components.push({ 'name': path.join(mountPath, idx) });
 	}
 
-	cacheSrvc.getAsync('eronkan!portal!user!' + request.user.id)
+	cacheSrvc.getAsync('twyr!portal!user!' + request.user.id)
 	.then(function(cachedData) {
 		// If the user is in the cache already, simply return it
 		cachedData = JSON.parse(cachedData);
@@ -381,7 +381,7 @@ var registeredRootPathRenderer = function(request, response, next) {
 
 		cachedData.widgets = renderOptions.widgets;
 
-		return cacheSrvc.setAsync('eronkan!portal!user!' + request.user.id, JSON.stringify(cachedData));
+		return cacheSrvc.setAsync('twyr!portal!user!' + request.user.id, JSON.stringify(cachedData));
 	})
 	.then(function() {
 		return renderAsync(path.join(self.$config.templates.path, self.$config.currentTemplate.name, self.$config.currentTemplate.client_index_file), renderOptions);
@@ -423,7 +423,7 @@ var serverRouter = (function() {
 		var renderAsync = promises.promisify(response.render.bind(response));
 
 		if(request.user) {
-			cacheSrvc.getAsync('eronkan!portal!user!' + request.user.id)
+			cacheSrvc.getAsync('twyr!portal!user!' + request.user.id)
 			.then(function(cachedData) {
 				// If the user is in the cache already, simply return it
 				cachedData = JSON.parse(cachedData);

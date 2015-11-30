@@ -11,7 +11,7 @@
 "use strict";
 
 /**
- * Module dependencies, required for ALL Eronkan modules
+ * Module dependencies, required for ALL Twyr modules
  */
 var base = require('./../component-base').baseComponent,
 	prime = require('prime'),
@@ -49,7 +49,7 @@ var menuComponent = prime({
 			var userId = ((request.user && request.user.id) ? request.user.id : 'public'),
 				userData = null;
 
-			cacheSrvc.getAsync('eronkan!portal!user!' + userId)
+			cacheSrvc.getAsync('twyr!portal!user!' + userId)
 			.then(function(cachedData) {
 				userData = JSON.parse(cachedData);
 				if(!userData) {
@@ -88,7 +88,7 @@ var menuComponent = prime({
 			var userId = ((request.user && request.user.id) ? request.user.id : 'public'),
 				userData = null;
 
-			cacheSrvc.getAsync('eronkan!portal!user!' + userId)
+			cacheSrvc.getAsync('twyr!portal!user!' + userId)
 			.then(function(cachedData) {
 				userData = JSON.parse(cachedData);
 				if(!userData) {
@@ -255,7 +255,7 @@ var menuComponent = prime({
 			if(!userData.sessionData) userData.sessionData = {};
 			userData.sessionData[self.name] = sessionMenus;
 
-			return cacheSrvc.setAsync('eronkan!portal!user!' + userId, JSON.stringify(userData));
+			return cacheSrvc.setAsync('twyr!portal!user!' + userId, JSON.stringify(userData));
 		})
 		.then(function() {
 			callback(null);
