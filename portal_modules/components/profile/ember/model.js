@@ -12,6 +12,7 @@ define(
 			'dob': window.DS.attr('date'),
 			'email': window.DS.attr('string'),
 			'isSearchable': window.DS.attr('boolean', { 'defaultValue': true }),
+			'defaultHome': window.DS.attr('string'),
 			'createdOn': window.DS.attr('date'),
 
 			'formattedDOB': window.Ember.computed('dob', {

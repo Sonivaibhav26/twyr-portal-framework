@@ -126,8 +126,8 @@ define(
 
 						self.get('map').addListener('click', function(position) {
 							var markerPosition = { 'latLng': {} };
-							markerPosition.latLng.lat = position.latLng.H;
-							markerPosition.latLng.lng = position.latLng.L;
+							markerPosition.latLng.lat = position.latLng.lat();
+							markerPosition.latLng.lng = position.latLng.lng();
 
 							self._replaceMarker(markerPosition);
 							window.Ember.run.later(self, function() {

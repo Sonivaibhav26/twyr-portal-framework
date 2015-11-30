@@ -11,7 +11,7 @@
 "use strict";
 
 /**
- * Module dependencies, required for ALL Twy'r modules
+ * Module dependencies, required for ALL Eronkan modules
  */
 var base = require('./../component-base').baseComponent,
 	prime = require('prime'),
@@ -49,7 +49,7 @@ var menuComponent = prime({
 			var userId = ((request.user && request.user.id) ? request.user.id : 'public'),
 				userData = null;
 
-			cacheSrvc.getAsync('twyr!portal!user!' + userId)
+			cacheSrvc.getAsync('eronkan!portal!user!' + userId)
 			.then(function(cachedData) {
 				userData = JSON.parse(cachedData);
 				if(!userData) {
@@ -88,7 +88,7 @@ var menuComponent = prime({
 			var userId = ((request.user && request.user.id) ? request.user.id : 'public'),
 				userData = null;
 
-			cacheSrvc.getAsync('twyr!portal!user!' + userId)
+			cacheSrvc.getAsync('eronkan!portal!user!' + userId)
 			.then(function(cachedData) {
 				userData = JSON.parse(cachedData);
 				if(!userData) {
@@ -172,20 +172,21 @@ var menuComponent = prime({
 			unique_ember_routes = [],
 			self = this;
 
-		userData.menus = [];
+		if(userData.tenants) {
+			userData.menus = [];
+			Object.keys(userData.tenants).forEach(function(key) {
+				var userTenant = userData.tenants[key];
 
-		Object.keys(userData.tenants).forEach(function(key) {
-			var userTenant = userData.tenants[key];
+				for(var idx in userTenant.menus) {
+					var thisMenu = userTenant.menus[idx];
+					if(unique_ember_routes.indexOf(thisMenu.id) >= 0)
+						continue;
 
-			for(var idx in userTenant.menus) {
-				var thisMenu = userTenant.menus[idx];
-				if(unique_ember_routes.indexOf(thisMenu.id) >= 0)
-					continue;
-
-				unique_ember_routes.push(thisMenu.id);
-				userData.menus.push(thisMenu);
-			};
-		});
+					unique_ember_routes.push(thisMenu.id);
+					userData.menus.push(thisMenu);
+				};
+			});
+		}
 
 		var widgetList = userData.widgets,
 			menuList = userData.menus,
@@ -254,7 +255,7 @@ var menuComponent = prime({
 			if(!userData.sessionData) userData.sessionData = {};
 			userData.sessionData[self.name] = sessionMenus;
 
-			return cacheSrvc.setAsync('twyr!portal!user!' + userId, JSON.stringify(userData));
+			return cacheSrvc.setAsync('eronkan!portal!user!' + userId, JSON.stringify(userData));
 		})
 		.then(function() {
 			callback(null);

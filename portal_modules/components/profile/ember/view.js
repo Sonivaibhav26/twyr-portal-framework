@@ -14,7 +14,7 @@ define(
 						var currentPassword = window.Ember.$('input#component-change-password-input-current-password').val().trim(),
 							newPassword1 = window.Ember.$('input#component-change-password-input-new-password-1').val().trim(),
 							newPassword2 = window.Ember.$('input#component-change-password-input-new-password-2').val().trim();
-	
+
 						if((currentPassword != '') && (newPassword1 != '') && (newPassword2 != '') && (newPassword1 == newPassword2)) {
 							window.Ember.$('button#component-change-password-button-submit').addClass('btn-primary');
 							window.Ember.$('button#component-change-password-button-submit').removeAttr('disabled', 'disabled');
@@ -99,27 +99,28 @@ define(
 				self.resetManagePersonalDetailsForm();
 
 				window.Ember.run.scheduleOnce('afterRender', function() {
-					var genderSelectElem = window.Ember.$('select#component-manage-personal-details-select-gender');
+					var genderSelectElem = window.Ember.$('select#component-manage-personal-details-select-gender'),
+						homePageSelectElem = window.Ember.$('select#component-manage-personal-details-select-home-page');
 
 					window.Ember.$('div#component-manage-personal-details-div-image-drop').on('dragover', function(e) {
 						e.stopPropagation();
 						e.preventDefault();
 						return false;
 					});
-	
+
 					window.Ember.$('div#component-manage-personal-details-div-image-drop').on('dragenter', function(e) {
 						e.stopPropagation();
 						e.preventDefault();
 						return false;
 					});
-	
+
 					window.Ember.$('div#component-manage-personal-details-div-image-drop').on('drop', function(e) {
 						e.stopPropagation();
 						e.preventDefault();
-	
+
 						var file = e.dataTransfer.files[0],
 							reader = new FileReader();
-	
+
 						reader.addEventListener('loadend', function(e) {
 							window.Ember.$('img#component-manage-personal-details-img-profile-image').attr('src', e.target.result);
 							self.set('profileImage', {
@@ -129,7 +130,7 @@ define(
 
 							self.storeImage();
 						});
-	
+
 						reader.readAsDataURL(file);
 						return false;
 					});
@@ -137,7 +138,7 @@ define(
 					window.Ember.$('div#div-box-body-component-manage-personal-details input.form-control').on('input', function(e) {
 						var firstName = window.Ember.$('input#component-manage-personal-details-input-first-name').val().trim(),
 							lastName = window.Ember.$('input#component-manage-personal-details-input-last-name').val().trim();
-	
+
 						if((firstName != '') && (lastName != '')) {
 							window.Ember.$('button#component-manage-personal-details-button-submit').addClass('btn-primary');
 							window.Ember.$('button#component-manage-personal-details-button-submit').removeAttr('disabled', 'disabled');
@@ -152,7 +153,7 @@ define(
 						'ajax': {
 							'url': window.apiServer + 'masterdata/genders',
 							'dataType': 'json',
-		
+
 							'processResults': function (data) {
 								return  {
 									'results': window.Ember.$.map(data, function(item) {
@@ -167,7 +168,7 @@ define(
 
 							'cache': true
 						},
-			
+
 						'minimumInputLength': 0,
 						'minimumResultsForSearch': 10,
 
@@ -178,6 +179,38 @@ define(
 					})
 					.on('change', function() {
 						self.get('model').set('sex', genderSelectElem.val());
+					});
+
+					homePageSelectElem.select2({
+						'ajax': {
+							'url': window.apiServer + 'masterdata/homepages',
+							'dataType': 'json',
+
+							'processResults': function (data) {
+								return  {
+									'results': window.Ember.$.map(data, function(item) {
+										return {
+											'text': item.text,
+											'slug': item.text,
+											'id': item.id
+										};
+									})
+								};
+							},
+
+							'cache': true
+						},
+
+						'minimumInputLength': 0,
+						'minimumResultsForSearch': 10,
+
+						'allowClear': true,
+						'closeOnSelect': true,
+
+						'placeholder': 'Home Page'
+					})
+					.on('change', function() {
+						self.get('model').set('defaultHome', homePageSelectElem.val());
 					});
 
 					window.Ember.$('input#component-manage-personal-details-input-dob').datepicker({
@@ -205,6 +238,24 @@ define(
 					.fail(function() {
 						console.error(window.apiServer + 'masterdata/genders error:\n', arguments);
 					});
+
+					window.Ember.$
+					.ajax({
+						'url': window.apiServer + 'masterdata/homepages',
+						'dataType': 'json',
+						'cache': true
+					})
+					.done(function(data) {
+						window.Ember.$.each(data, function(index, item) {
+							var thisOption = new Option(item.text, item.id, false, false);
+							homePageSelectElem.append(thisOption);
+						});
+
+						homePageSelectElem.val(self.get('model').get('defaultHome')).trigger('change');
+					})
+					.fail(function() {
+						console.error(window.apiServer + 'masterdata/homepages error:\n', arguments);
+					});
 				});
 			}.on('init'),
 
@@ -228,10 +279,10 @@ define(
 				window.Ember.$.ajax({
 					'type': 'PUT',
 					'url': 'profile/profileImage',
-		
+
 					'dataType': 'json',
 					'data': self.get('profileImage'),
-		
+
 					'success': function(data) {
 						if(data.status) {
 							self.sendAction('controller-action', 'display-status-message', { 'type': 'success', 'message': data.responseText });
@@ -242,7 +293,7 @@ define(
 
 						window.Ember.$('img#component-manage-personal-details-img-profile-image').attr('src', 'profile/profileImage');
 					},
-		
+
 					'error': function(err) {
 						self.sendAction('controller-action', 'display-status-message', { 'type': 'danger', 'message': (err.responseJSON ? err.responseJSON.responseText : (err.responseText || 'Unknown error' )) });
 					}

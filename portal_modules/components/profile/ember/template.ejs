@@ -98,9 +98,19 @@
 						</div>
 					</div>
 				</div>
-				<div class="form-group">
-					{{input id="component-manage-account-preferences-input-is-visible" type="checkbox" name="isSearchable" checked=model.isSearchable}}
-					<label style="margin-left:5px;">My profile is searchable</label>
+				<div class="row">
+					<div class="col-md-6">
+						<div class="form-group">
+							<label>Home Page</label>
+							<select id="component-manage-personal-details-select-home-page" class="form-control" style="width:100%;" />
+						</div>
+					</div>
+					<div class="col-md-6">
+						<div class="form-group" style="padding-top:30px;">
+							{{input id="component-manage-personal-details-input-is-visible" type="checkbox" name="isSearchable" checked=model.isSearchable}}
+							<label style="margin-left:5px;">My profile is searchable</label>
+						</div>
+					</div>
 				</div>
 				<div class="form-group">
 					<button id="component-manage-account-preferences-button-delete-account" type="submit" class="btn btn-block btn-danger btn-sm" {{action "controller-action" "deleteAccount" bubbles=false}}>

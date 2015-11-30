@@ -24,3 +24,20 @@ define(
 		exports['default'] = ApplicationRoute;
 	}
 );
+
+<% if(default_home) { %>
+define(
+	"twyrPortal/routes/home",
+	["exports"],
+	function(exports) {
+		if(window.developmentMode) console.log('DEFINE: twyrPortal/routes/home');
+		var HomeRoute = window.Ember.Route.extend({
+			'beforeModel': function() {
+				this.transitionTo('<%= default_home %>');
+			}
+		});
+
+		exports['default'] = HomeRoute;
+	}
+);
+<% } %>

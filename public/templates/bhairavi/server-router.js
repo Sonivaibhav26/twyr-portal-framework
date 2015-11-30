@@ -25,7 +25,7 @@ var publicRootPathRenderer = function(request, response, next) {
 		self = this;
 
 	// Step 1: Check to see if the user is already in the cache
-	cacheSrvc.getAsync('twyr!portal!user!public')
+	cacheSrvc.getAsync('eronkan!portal!user!public')
 	.then(function(cachedData) {
 		// If the user is in the cache already, simply return it
 		cachedData = JSON.parse(cachedData);
@@ -38,7 +38,7 @@ var publicRootPathRenderer = function(request, response, next) {
 					response.status(err.code || err.number || 404).redirect('/error');
 					return;
 				}
-		
+
 				loggerSrvc.silly('Template Router Render Result: ', request.path, ' with:\nQuery: ', request.query, '\nBody: ', request.body, '\nParams: ', request.params, '\nHTML: ', html);
 				response.status(200).send(html);
 			});
@@ -89,7 +89,7 @@ var publicRootPathRenderer = function(request, response, next) {
 					var existingWidget = (reorgedWidgets[thisWidget.position_name]).filter(function(item) {
 						return item.id == thisWidget.id;
 					});
-	
+
 					if(existingWidget.length)
 						return;
 				}
@@ -99,10 +99,10 @@ var publicRootPathRenderer = function(request, response, next) {
 
 			Object.keys(reorgedWidgets).forEach(function(position) {
 				var widgetsInThisPosition = reorgedWidgets[position];
-				
+
 				widgetsInThisPosition.sort(function(left, right) {
 					var retVal = left.display_order - right.display_order;
-					
+
 					delete left.position_name;
 					delete left.display_order;
 
@@ -243,7 +243,7 @@ var publicRootPathRenderer = function(request, response, next) {
 		})
 		// Step 4: Store User data in the cache for quick retrieval next time
 		.then(function() {
-			return cacheSrvc.setAsync('twyr!portal!user!public', JSON.stringify(deserializedUser));
+			return cacheSrvc.setAsync('eronkan!portal!user!public', JSON.stringify(deserializedUser));
 		})
 		// Finally, send it back up...
 		.then(function() {
@@ -255,7 +255,7 @@ var publicRootPathRenderer = function(request, response, next) {
 					response.status(err.code || err.number || 404).redirect('/error');
 					return;
 				}
-		
+
 				loggerSrvc.silly('Template Router Render Result: ', request.path, ' with:\nQuery: ', request.query, '\nBody: ', request.body, '\nParams: ', request.params, '\nHTML: ', html);
 				response.status(200).send(html);
 			});
@@ -297,7 +297,7 @@ var registeredRootPathRenderer = function(request, response, next) {
 		renderOptions.components.push({ 'name': path.join(mountPath, idx) });
 	}
 
-	cacheSrvc.getAsync('twyr!portal!user!' + request.user.id)
+	cacheSrvc.getAsync('eronkan!portal!user!' + request.user.id)
 	.then(function(cachedData) {
 		// If the user is in the cache already, simply return it
 		cachedData = JSON.parse(cachedData);
@@ -307,9 +307,7 @@ var registeredRootPathRenderer = function(request, response, next) {
 		}
 
 		var widgets = {},
-			unique_ember_components = {},
-			menus = [],
-			unique_ember_routes = [];
+			unique_ember_components = {};
 
 		Object.keys(cachedData.tenants).forEach(function(key) {
 			var userTenant = cachedData.tenants[key];
@@ -326,10 +324,10 @@ var registeredRootPathRenderer = function(request, response, next) {
 					if(!unique_ember_components[position])
 						unique_ember_components[position] = [];
 
-					if(unique_ember_components[position].indexOf(thisWidget.ember_component) >= 0)
+					if(unique_ember_components[position].indexOf(thisWidget.id) >= 0)
 						continue;
 
-					unique_ember_components[position].push(thisWidget.ember_component);
+					unique_ember_components[position].push(thisWidget.id);
 					widgets[position].push(thisWidget);
 				}
 			});
@@ -339,7 +337,7 @@ var registeredRootPathRenderer = function(request, response, next) {
 			var widgetsInThisPosition = widgets[position];
 			widgetsInThisPosition.sort(function(left, right) {
 				var retVal = left.display_order - right.display_order;
-				
+
 				delete left.position_name;
 				delete left.display_order;
 
@@ -381,15 +379,14 @@ var registeredRootPathRenderer = function(request, response, next) {
 		widgets.moduleFooterColWidth = 12/numFooterPositions;
 		widgets.mainComponentColWidth = mainComponentWidth;
 
-		cachedData.menus = menus;
 		cachedData.widgets = renderOptions.widgets;
 
-		return cacheSrvc.setAsync('twyr!portal!user!' + request.user.id, JSON.stringify(cachedData));
+		return cacheSrvc.setAsync('eronkan!portal!user!' + request.user.id, JSON.stringify(cachedData));
 	})
 	.then(function() {
 		return renderAsync(path.join(self.$config.templates.path, self.$config.currentTemplate.name, self.$config.currentTemplate.client_index_file), renderOptions);
 	})
-	.then(function(html) {	
+	.then(function(html) {
 		loggerSrvc.silly('Template Router Render Result: ', request.path, ' with:\nQuery: ', request.query, '\nBody: ', request.body, '\nParams: ', request.params, '\nHTML: ', html);
 		response.status(200).send(html);
 	})
@@ -403,6 +400,7 @@ var serverRouter = (function() {
 	// Step 1: Instantiate the Router itself...
 	var router = require('express').Router(),
 		logger = require('morgan'),
+		cacheSrvc = this.$services.cacheService.getInterface(),
 		loggerSrvc = this.$services.logger.getInterface(),
 		self = this;
 
@@ -422,13 +420,37 @@ var serverRouter = (function() {
 		loggerSrvc.silly('Template Router Rendering: ', request.path, ' with:\nQuery: ', request.query, '\nBody: ', request.body, '\nParams: ', request.params);
 		response.type('application/javascript');
 
-		filesystem.readFileAsync(path.join(__dirname, 'ember/router.js'))
-		.then(function(router) {
-			response.status(200).send(router);
-		})
-		.catch(function(err) {
-			response.status(500).send(err);
-		});
+		var renderAsync = promises.promisify(response.render.bind(response));
+
+		if(request.user) {
+			cacheSrvc.getAsync('eronkan!portal!user!' + request.user.id)
+			.then(function(cachedData) {
+				// If the user is in the cache already, simply return it
+				cachedData = JSON.parse(cachedData);
+				if(!cachedData) {
+					throw({ 'code': 404, 'message': 'User not found' });
+					return;
+				}
+
+				return renderAsync(path.join(__dirname, 'ember/router.ejs'), { 'default_home': (cachedData.default_home == 'home' ? null : cachedData.default_home) });
+			})
+			.then(function(renderedRoute) {
+				response.status(200).send(renderedRoute);
+			})
+			.catch(function(err) {
+				loggerSrvc.error('Template Router Render Error: ', request.path, ' with:\nQuery: ', request.query, '\nBody: ', request.body, '\nParams: ', request.params, '\nError: ', err);
+				response.status(err.code || err.number || 404).redirect('/error');
+			});
+		}
+		else {
+			renderAsync(path.join(__dirname, 'ember/router.ejs'), { 'default_home': null })
+			.then(function(renderedRoute) {
+				response.status(200).send(renderedRoute);
+			})
+			.catch(function(err) {
+				response.status(500).send(err);
+			});
+		}
 	});
 
 	router.get('/mvc', function(request, response, next) {
