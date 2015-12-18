@@ -188,6 +188,18 @@ define(
 		if(window.developmentMode) console.log('DEFINE: twyrPortal/components/organization-manager-suborganizations');
 
 		var OrganizationManagerSuborganizationsComponent = window.Ember.Component.extend({
+			'didInsertElement': function() {
+				var self = this;
+				self._super();
+
+				window.Ember.$(self.$().parents('div.nav-tabs-custom')[0]).find('li > a').on('show.bs.tab', function(event) {
+					if(window.Ember.$(event.target).text().toLowerCase().indexOf('organization') < 0) return;
+					self.get('model').reload();
+				});
+
+				return true;
+			},
+
 			'actions': {
 				'controller-action': function(action, data) {
 					if(this[action])

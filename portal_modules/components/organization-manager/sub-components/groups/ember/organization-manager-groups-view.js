@@ -16,6 +16,8 @@ define(
 
 					self._createTree(self.get('tenantModel').get('id'));
 				});
+
+				return true;
 			},
 
 			'_createTree': function(tenantId) {
@@ -106,6 +108,9 @@ define(
 				var selNodes = this.$('div#organization-manager-groups-tree-container').jstree('get_selected', true),
 					selNodeIdx = null;
 
+				if(!this.get('model'))
+					return;
+
 				for(var idx = 0; idx < selNodes.length; idx++){
 					if(this.get('model').get('id') != selNodes[idx].id)
 						continue;
@@ -121,6 +126,9 @@ define(
 			}),
 
 			'_modelDeleteReactor': window.Ember.observer('model.isDeleted', function() {
+				if(!this.get('model'))
+					return;
+
 				if(this.get('model').get('isDeleted') === true) {
 					var selNodes = this.$('div#organization-manager-groups-tree-container').jstree('get_selected', true),
 						selNodeIdx = null;
@@ -192,19 +200,48 @@ define(
 		if(window.developmentMode) console.log('DEFINE: twyrPortal/components/organization-manager-groups');
 
 		var OrganizationManagerGroupsComponent = window.Ember.Component.extend({
+			'didInsertElement': function() {
+				var self = this;
+				self._super();
+
+				window.Ember.$(self.$().parents('div.nav-tabs-custom')[0]).find('li > a').on('show.bs.tab', function(event) {
+					if(window.Ember.$(event.target).text().toLowerCase().indexOf('group') < 0) return;
+					self._setTenantGroups();
+				});
+
+				return true;
+			},
+
 			'_modelChangeReactor': window.Ember.observer('model', function() {
+				this._setTenantGroups();
+			}),
+
+			'_setTenantGroups': function() {
 				var self = this;
 
-				if(!this.get('model')) {
-					this.set('currentModel', null);
+				self.set('tenantGroups', null);
+				self.set('currentModel', null);
+				if(!self.get('model'))
 					return;
-				}
 
-				this.get('model').store.query('organization-manager-group', { 'tenant': this.get('model').get('id') })
+				self.get('model').store.query('organization-manager-group', { 'tenant': self.get('model').get('id') })
+				.then(function() {
+					var filteredGroups = window.Ember.ArrayProxy.create({ 'content': window.Ember.A([]) });
+
+ 					self.get('model').store.peekAll('organization-manager-group').forEach(function(tenantGroup) {
+						if(tenantGroup.get('tenant').get('id') !== self.get('model').get('id'))
+							return;
+
+						filteredGroups.addObject(tenantGroup);
+					});
+
+					self.set('tenantGroups', filteredGroups);
+					self.set('currentModel', self.get('tenantGroups').get('firstObject'));
+				})
 				.catch(function(err) {
 					console.error('Error fetching groups for Tenant: ' + self.get('model').get('id') + '\n', err);
 				});
-			}),
+			},
 
 			'selected-group-changed': function(data) {
 				var newGroupId = data.id,

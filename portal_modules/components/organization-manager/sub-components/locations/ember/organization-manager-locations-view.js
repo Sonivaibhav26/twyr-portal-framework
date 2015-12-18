@@ -8,30 +8,40 @@ define(
 			'isCreating': false,
 
 			'didInsertElement': function() {
-				this._super();
+				var self = this;
+				self._super();
 
-				if(!this.get('model'))
-					return true;
+				window.Ember.$(self.$().parents('div.nav-tabs-custom')[0]).find('li > a').on('show.bs.tab', function(event) {
+					if(window.Ember.$(event.target).text().toLowerCase().indexOf('location') < 0) return;
+					self._setTenantLocations();
+				});
 
-				this._setTenantLocations();
 				return true;
 			},
 
 			'_modelChangeReactor': window.Ember.observer('model', function() {
-				if(!this.get('model')) {
-					this.set('tenantLocations', null);
-					return;
-				}
-
 				this._setTenantLocations();
 			}),
 
 			'_setTenantLocations': function() {
 				var self = this;
+				self.set('tenantLocations', null);
+
+				if(!self.get('model'))
+					return;
 
 				self.get('model').store.query('organization-manager-tenant-location', { 'tenant': self.get('model').get('id') })
 				.then(function(tenantLocations) {
-					self.set('tenantLocations', tenantLocations);
+					var filteredLocations = window.Ember.ArrayProxy.create({ 'content': window.Ember.A([]) });
+
+ 					self.get('model').store.peekAll('organization-manager-tenant-location').forEach(function(location) {
+						if(location.get('tenant').get('id') !== self.get('model').get('id'))
+							return;
+
+						filteredLocations.addObject(location);
+					});
+
+					self.set('tenantLocations', filteredLocations);
 				})
 				.catch(function(err) {
 					console.error('Error fetching locations for Tenant: ' + self.get('model').get('id') + '\n', err);
@@ -270,9 +280,9 @@ define(
 					window.Ember.$.confirm({
 						'text': 'Are you sure that you want to remove <strong>"' + locationName + '"</strong> address from the ' + tenant.get('name') + ' organization?',
 						'title': 'Delete <strong>' + locationName + '</strong>?',
-	
+
 						'confirm': delFn,
-	
+
 						'cancel': function() {
 							// Do nothing...
 						}

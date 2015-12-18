@@ -9,25 +9,18 @@ define(
 			'canDeleteUsers': false,
 
 			'didInsertElement': function() {
-				this._super();
+				var self = this;
+				self._super();
 
-				this.set('tenantTeam', null);
-				this.set('selectedTenantUser', null);
+				window.Ember.$(self.$().parents('div.nav-tabs-custom')[0]).find('li > a').on('show.bs.tab', function(event) {
+					if(window.Ember.$(event.target).text().toLowerCase().indexOf('user') < 0) return;
+					self._setTenantTeam();
+				});
 
-				if(!this.get('model'))
-					return true;
-
-				this._setTenantTeam();
 				return true;
 			},
 
 			'_modelChangeReactor': window.Ember.observer('model', function() {
-				this.set('tenantTeam', null);
-				this.set('selectedTenantUser', null);
-
-				if(!this.get('model'))
-					return true;
-
 				this._setTenantTeam();
 			}),
 
@@ -47,6 +40,12 @@ define(
 
 			'_setTenantTeam': function() {
 				var self = this;
+
+				self.set('tenantTeam', null);
+				self.set('selectedTenantUser', null);
+
+				if(!self.get('model'))
+					return;
 
 				self.get('model').store.query('organization-manager-team', { 'tenant': self.get('model').get('id') })
 				.then(function(tenantTeam) {

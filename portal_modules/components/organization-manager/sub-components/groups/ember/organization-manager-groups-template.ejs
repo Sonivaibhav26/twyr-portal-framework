@@ -19,7 +19,7 @@
 		{{/unless}}
 		<div class="pull-right" style="cursor:pointer; margin:0px 5px;" {{action "controller-action" "save-group" model bubbles=false}}>
 		    <button type="submit" class="btn btn-primary btn-sm">
-				<i class="fa fa-save" style="margin-right:5px;" /><span>Save</span>	
+				<i class="fa fa-save" style="margin-right:5px;" /><span>Save</span>
 		    </button>
 		</div>
 		{{/if}}
@@ -41,13 +41,13 @@
 	{{#unless model.isNew}}
 	<div class="box-body no-padding" style="margin-top:20px;">
 	<div class="nav-tabs-custom" style="margin:0px;">
-		<ul class="nav nav-tabs">
-			<li class="active"><a href="#organization-manager-group-permissions-tab" data-toggle="tab">Permissions</a></li>
-			<li><a href="#organization-manager-group-subgroups-tab" data-toggle="tab">Subgroups</a></li>
-			<li><a href="#organization-manager-group-users-tab" data-toggle="tab">Users</a></li>
+		<ul class="nav nav-tabs" role="tablist">
+			<li class="active" role="presentation"><a href="#organization-manager-group-permissions-tab" role="tab" data-toggle="tab">Permissions</a></li>
+			<li role="presentation"><a href="#organization-manager-group-subgroups-tab" role="tab" data-toggle="tab">Subgroups</a></li>
+			<li role="presentation"><a href="#organization-manager-group-users-tab" role="tab" data-toggle="tab">Users</a></li>
 		</ul>
 		<div class="tab-content" style="padding:0px;">
-			<div class="tab-pane active" id="organization-manager-group-permissions-tab">
+			<div class="tab-pane fade in active" role="tabpanel" id="organization-manager-group-permissions-tab">
 				<table class="table table-bordered table-striped table-hover" style="margin-bottom:0px;">
 				<thead>
 					<tr>
@@ -99,7 +99,7 @@
 				</tbody>
 				</table>
 			</div>
-			<div class="tab-pane" id="organization-manager-group-subgroups-tab">
+			<div class="tab-pane fade" role="tabpanel" id="organization-manager-group-subgroups-tab">
 				<table class="table table-bordered table-striped table-hover" style="margin-bottom:0px;">
 				<thead>
 					<tr>
@@ -140,7 +140,7 @@
 				</tbody>
 				</table>
 			</div>
-			<div class="tab-pane" id="organization-manager-group-users-tab">
+			<div class="tab-pane fade" role="tabpanel" id="organization-manager-group-users-tab">
 				<table class="table table-bordered table-striped table-hover" style="margin-bottom:0px;">
 				<thead>
 					<tr>

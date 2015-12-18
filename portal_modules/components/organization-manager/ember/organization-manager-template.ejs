@@ -99,7 +99,7 @@
 		{{/unless}}
 		<div class="pull-right" style="cursor:pointer; margin:0px 5px;" {{action "controller-action" "save-organization" model bubbles=false}}>
 		    <button type="submit" class="btn btn-primary btn-sm">
-				<i class="fa fa-save" style="margin-right:5px;" /><span>Save</span>	
+				<i class="fa fa-save" style="margin-right:5px;" /><span>Save</span>
 		    </button>
 		</div>
 		{{/if}}
@@ -121,18 +121,18 @@
 	{{#unless model.isNew}}
 	<div class="box-body no-padding" style="margin-top:50px;">
 	<div class="nav-tabs-custom" style="margin:0px;">
-		<ul class="nav nav-tabs">
-			<li class="active"><a href="#organization-manager-suborganizations-tab" data-toggle="tab">{{model.name}} Suborganizations</a></li>
+		<ul class="nav nav-tabs" role="tablist">
+			<li class="active" role="presentation"><a href="#organization-manager-suborganizations-tab" role="tab" data-toggle="tab">{{model.name}} Suborganizations</a></li>
 			<% for(var idx =0; idx < components.length; idx++) { %>
-			<li><a href="#organization-manager-<%= components[idx].name %>-tab" data-toggle="tab">{{model.name}} <%= components[idx].displayName %></a></li>
+			<li role="presentation"><a href="#organization-manager-<%= components[idx].name %>-tab" role="tab" data-toggle="tab">{{model.name}} <%= components[idx].displayName %></a></li>
 			<% } %>
 		</ul>
 		<div class="tab-content" style="padding:0px;">
-			<div class="tab-pane active" id="organization-manager-suborganizations-tab">
+			<div class="tab-pane active" class="tab-pane fade in active" role="tabpanel" id="organization-manager-suborganizations-tab">
 				{{organization-manager-suborganizations model=model controller-action=(action 'controller-action')}}
 			</div>
 			<% for(var idx =0; idx < components.length; idx++) { %>
-			<div class="tab-pane" id="organization-manager-<%= components[idx].name %>-tab">
+			<div class="tab-pane" class="tab-pane fade" role="tabpanel" id="organization-manager-<%= components[idx].name %>-tab">
 				{{<%= components[idx].name %> model=model controller-action=(action 'controller-action')}}
 			</div>
 			<% } %>
