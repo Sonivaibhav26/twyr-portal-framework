@@ -23,29 +23,29 @@ exports.socialAuthenticate = (function(request, profile, token, done) {
 	var self = this,
 		database = self.$dependencies['databaseService'],
 		logger = self.$dependencies['logger'];
-	
+
 	if(!User) {
 		User = database.Model.extend({
 			'tableName': 'users',
 			'idAttribute': 'id',
-	
+
 			'social': function() {
 				return this.hasMany(UserSocialLogins, 'user_id');
 			}
 		});
 	}
-	
+
 	if(!UserSocialLogins) {
 		UserSocialLogins = database.Model.extend({
 			'tableName': 'user_social_logins',
 			'idAttribute': 'id',
-	
+
 			'user': function() {
 				return this.belongsTo(User, 'user_id');
 			}
 		});
 	}
-	
+
 	// Step 1: Is this user already in the database?
 	UserSocialLogins.where({ 'provider': profile.provider, 'profile_id': profile.id }).fetch({'withRelated': ['user']})
 	.then(function(userSocialRecord) {
@@ -96,12 +96,15 @@ exports.socialAuthenticate = (function(request, profile, token, done) {
 				}
 
 				done(null, { 'id': userSocialLoginRecord.get('user_id'), 'first_name': profile.name.givenName, 'last_name': profile.name.familyName });
+				return null;
 			})
 			.catch(function(err) {
 				logger.error('socialAuthenticate Profile:\nData: ', profile, '\nError: ', JSON.stringify(err));
 				done(err);
 			});
 		}
+
+		return null;
 	})
 	.catch(function(err) {
 		logger.error('socialAuthenticate Profile:\nData: ', profile, '\nError: ', JSON.stringify(err));
@@ -113,40 +116,40 @@ exports.socialAuthorize = (function(request, profile, token, done) {
 	var self = this,
 		database = self.$dependencies['databaseService'],
 		logger = self.$dependencies['logger'];
-	
+
 	if(!User) {
 		User = database.Model.extend({
 			'tableName': 'users',
 			'idAttribute': 'id',
-	
+
 			'social': function() {
 				return this.hasMany(UserSocialLogins, 'user_id');
 			}
 		});
 	}
-	
+
 	if(!UserSocialLogins) {
 		UserSocialLogins = database.Model.extend({
 			'tableName': 'user_social_logins',
 			'idAttribute': 'id',
-	
+
 			'user': function() {
 				return this.belongsTo(User, 'user_id');
 			}
 		});
 	}
-	
+
 	// Special handling for Twitter...
 	if(!profile.emails) {
 		profile.emails = [];
 		profile.emails.push({ 'value': profile.username + '@' + profile.provider + '.com' });
-	
+
 		var names = profile.displayName.split(' ');
 		profile.name = {};
 		profile.name.givenName = names[0] || '';
 		profile.name.familyName = names[1] || '';
 	}
-	
+
 	new UserSocialLogins({
 		'provider': profile.provider,
 		'profile_id': profile.id
@@ -157,7 +160,7 @@ exports.socialAuthorize = (function(request, profile, token, done) {
 			userSocialRecord.set('profile_displayname', profile.displayName || profile.emails[0].value);
 			userSocialRecord.set('user_id', request.user.id);
 			userSocialRecord.set('profile_data', profile._json);
-	
+
 			return userSocialRecord.save();
 		}
 		else {
@@ -175,8 +178,9 @@ exports.socialAuthorize = (function(request, profile, token, done) {
 			'id': profile.id,
 			'displayName': profile.displayName || profile.emails[0].value
 		};
-	
+
 		done(null, request.user);
+		return null;
 	})
 	.catch(function(err) {
 		logger.error('socialAuthorize Profile:\nData: ', profile, '\nError: ', JSON.stringify(err));

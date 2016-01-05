@@ -55,7 +55,7 @@ if (cluster.isMaster) {
 					console.log('Twyr Portal #' + worker.id + ': Now listening at ' + thisAddress.address + ':' + address.port + ' (' + thisAddress.family + ' on ' + intIdx + ')' );
 				}
 			}
-		
+
 			console.log('\n');
 		})
 		.on('disconnect', function(worker) {
@@ -83,14 +83,15 @@ if (cluster.isMaster) {
 		var replConsole = repl.start(config.repl);
 		replConsole.on('exit', function() {
 			console.log('Twyr Portal Server Master: Stopping now...');
-	
+
 			for(var id in cluster.workers) {
 				(cluster.workers[id]).send('terminate');
 			}
-	
+
 			cluster.disconnectAsync()
 			.then(function() {
 				console.log('Twyr Portal Server Master: Disconnected workers. Exiting now...');
+				return null;
 			})
 			.catch(function(err) {
 				console.error('Twyr Portal Server Master Error: ' + JSON.stringify(err));
@@ -108,17 +109,18 @@ if (cluster.isMaster) {
 
 			replConsole.on('exit', function() {
 				console.log('Twyr Portal Server Master: Stopping now...');
-		
+
 				for(var id in cluster.workers) {
 					(cluster.workers[id]).send('terminate');
 				}
-		
+
 				cluster.disconnectAsync()
 				.then(function() {
 					console.log('Twyr Portal Server Master: Disconnected workers. Exiting now...');
 
 					socket.end();
 					telnetServer.close();
+					return null;
 				})
 				.timeout(60000)
 				.catch(function(err) {
@@ -151,6 +153,7 @@ else {
 		.then(function(status) {
 			console.log('Twyr Portal #' + cluster.worker.id + ': Unload Status:\n' + JSON.stringify(status, null, '\t'));
 			if(!status) throw status;
+			return null;
 		})
 		.timeout(60000)
 		.catch(function(err) {
@@ -158,6 +161,7 @@ else {
 		})
 		.finally(function() {
 	        cluster.worker.disconnect();
+			return null;
 		});
 	});
 
@@ -168,41 +172,43 @@ else {
 				return true;
 			}
 		});
-	
+
 		// Call load / initialize / start...
 		portalServer.loadAsync(null, appLoader)
 		.timeout(1000)
 		.then(function(status) {
 			console.log('Twyr Portal #' + cluster.worker.id + ': Load status:\n' + JSON.stringify(status, null, '\t'));
 			if(!status) throw { 'number': 500, 'message': 'Twyr Portal #' + cluster.worker.id + ': Load Error' };
-	
+
 			return portalServer.startAsync(null);
 		})
 		.timeout(60000)
 		.then(function(status) {
 			console.log('Twyr Portal #' + cluster.worker.id + ': Start Status:\n' + JSON.stringify(status, null, '\t'));
 			if(!status) throw { 'number': 500, 'message': 'Twyr Portal #' + cluster.worker.id + ': Start Error' };
+			return null;
 		})
 		.timeout(60000)
 		.catch(function(err) {
 			console.error('Twyr Portal #' + cluster.worker.id + ': Startup Error:\n' + JSON.stringify(err));
 	        cluster.worker.disconnect();
 		});
-	
+
 		process.on('message', function(msg) {
 			if(msg != 'terminate') return;
-	
+
 			portalServer.stopAsync()
 			.then(function(status) {
 				console.log('Twyr Portal #' + cluster.worker.id + ': Stop Status:\n' + JSON.stringify(status, null, '\t'));
 				if(!status) throw status;
-	
+
 				return portalServer.unloadAsync();
 			})
 			.timeout(60000)
 			.then(function(status) {
 				console.log('Twyr Portal #' + cluster.worker.id + ': Unload Status:\n' + JSON.stringify(status, null, '\t'));
 				if(!status) throw status;
+				return null;
 			})
 			.timeout(60000)
 			.catch(function(err) {

@@ -68,6 +68,7 @@ var loginComponent = prime({
 			renderFunc(self['router'], renderOptions)
 			.then(function(renderedRoute) {
 				callback(null, renderedRoute + '\n' + componentRoutes);
+				return null;
 			})
 			.catch(function(err) {
 				callback(err);
@@ -84,7 +85,7 @@ var loginComponent = prime({
 			}
 
 			var viewFile = '';
-	
+
 			if(!request.user) {
 				viewFile = self['publicView'];
 			}
@@ -92,9 +93,10 @@ var loginComponent = prime({
 				viewFile = self['registeredView'];
 			}
 
-			filesystem.readFileAsync(viewFile)	
+			filesystem.readFileAsync(viewFile)
 			.then(function(file) {
 				callback(null, file + '\n' + componentMVC);
+				return null;
 			})
 			.catch(function(err) {
 				callback(err);
@@ -112,7 +114,7 @@ var loginComponent = prime({
 
 			var tmplFile = '',
 				renderOptions = {};
-	
+
 			if(!request.user) {
 				tmplFile = self['publicTmpl'];
 			}
@@ -120,10 +122,11 @@ var loginComponent = prime({
 				tmplFile = self['registeredTmpl'];
 				renderOptions.mountPath = path.join(self.$module.$config.componentMountPath, self.name);
 			}
-	
+
 			renderFunc(tmplFile, renderOptions)
 			.then(function(renderedTemplate) {
 				callback(null, renderedTemplate + '\n' + componentTemplates);
+				return null;
 			})
 			.catch(function(err) {
 				callback(err);

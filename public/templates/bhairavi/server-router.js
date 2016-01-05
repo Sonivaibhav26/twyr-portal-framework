@@ -43,7 +43,7 @@ var publicRootPathRenderer = function(request, response, next) {
 				response.status(200).send(html);
 			});
 
-			return;
+			return null;
 		}
 
 		// Step 2: Setup basic stuff...
@@ -240,6 +240,8 @@ var publicRootPathRenderer = function(request, response, next) {
 
 			deserializedUser.widgets = reorgedWidgets;
 			deserializedUser.menus = reorgedMenus;
+
+			return null;
 		})
 		// Step 4: Store User data in the cache for quick retrieval next time
 		.then(function() {
@@ -259,11 +261,15 @@ var publicRootPathRenderer = function(request, response, next) {
 				loggerSrvc.silly('Template Router Render Result: ', request.path, ' with:\nQuery: ', request.query, '\nBody: ', request.body, '\nParams: ', request.params, '\nHTML: ', html);
 				response.status(200).send(html);
 			});
+
+			return null;
 		})
 		.catch(function(err) {
 			loggerSrvc.error('Template Router Render Error: ', request.path, ' with:\nQuery: ', request.query, '\nBody: ', request.body, '\nParams: ', request.params, '\nError: ', err);
 			response.status(err.code || err.number || 404).redirect('/error');
 		});
+
+		return null;
 	})
 	.catch(function(err) {
 		loggerSrvc.error('Template Router Render Error: ', request.path, ' with:\nQuery: ', request.query, '\nBody: ', request.body, '\nParams: ', request.params, '\nError: ', err);
@@ -303,7 +309,7 @@ var registeredRootPathRenderer = function(request, response, next) {
 		cachedData = JSON.parse(cachedData);
 		if(!cachedData) {
 			throw({ 'code': 404, 'message': 'User not found' });
-			return;
+			return null;
 		}
 
 		var widgets = {},
@@ -389,6 +395,7 @@ var registeredRootPathRenderer = function(request, response, next) {
 	.then(function(html) {
 		loggerSrvc.silly('Template Router Render Result: ', request.path, ' with:\nQuery: ', request.query, '\nBody: ', request.body, '\nParams: ', request.params, '\nHTML: ', html);
 		response.status(200).send(html);
+		return null;
 	})
 	.catch(function(err) {
 		loggerSrvc.error('Template Router Render Error: ', request.path, ' with:\nQuery: ', request.query, '\nBody: ', request.body, '\nParams: ', request.params, '\nError: ', err);
@@ -436,6 +443,7 @@ var serverRouter = (function() {
 			})
 			.then(function(renderedRoute) {
 				response.status(200).send(renderedRoute);
+				return null;
 			})
 			.catch(function(err) {
 				loggerSrvc.error('Template Router Render Error: ', request.path, ' with:\nQuery: ', request.query, '\nBody: ', request.body, '\nParams: ', request.params, '\nError: ', err);
@@ -446,6 +454,7 @@ var serverRouter = (function() {
 			renderAsync(path.join(__dirname, 'ember/router.ejs'), { 'default_home': null })
 			.then(function(renderedRoute) {
 				response.status(200).send(renderedRoute);
+				return null;
 			})
 			.catch(function(err) {
 				response.status(500).send(err);
@@ -460,6 +469,7 @@ var serverRouter = (function() {
 		filesystem.readFileAsync(path.join(__dirname, 'ember/controller.js'))
 		.then(function(controller) {
 			response.status(200).send(controller);
+			return null;
 		})
 		.catch(function(err) {
 			response.status(500).send(err);
@@ -473,6 +483,7 @@ var serverRouter = (function() {
 		filesystem.readFileAsync(path.join(__dirname, 'ember/template.js'))
 		.then(function(template) {
 			response.status(200).send(template);
+			return null;
 		})
 		.catch(function(err) {
 			response.status(500).send(err);

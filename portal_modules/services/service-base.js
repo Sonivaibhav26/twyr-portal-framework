@@ -37,6 +37,7 @@ var simpleService = prime({
 		.then(function(status) {
 			if(!status) throw status;
 			if(callback) callback(null, status);
+			return null;
 		})
 		.catch(function(err) {
 			console.error(self.name + ' Service Load Error: ', err);
@@ -61,6 +62,7 @@ var simpleService = prime({
 		.then(function(status) {
 			if(!status) throw status;
 			if(callback) callback(null, status);
+			return null;
 		})
 		.catch(function(err) {
 			console.error(self.name + ' Service Start Error: ', err);
@@ -80,6 +82,7 @@ var simpleService = prime({
 		.then(function(status) {
 			if(!status) throw status;
 			if(callback) callback(null, status);
+			return null;
 		})
 		.catch(function(err) {
 			console.error(self.name + ' Service Stop Error: ', err);
@@ -87,6 +90,7 @@ var simpleService = prime({
 		})
 		.finally(function() {
 			delete self['$dependencies'];
+			return null;
 		});
 	},
 
@@ -106,6 +110,7 @@ var simpleService = prime({
 		.then(function(status) {
 			if(!status) throw status;
 			if(callback) callback(null, status);
+			return null;
 		})
 		.catch(function(err) {
 			console.error(self.name + ' Service Unload Error: ', err);
@@ -114,6 +119,7 @@ var simpleService = prime({
 		.finally(function() {
 			delete self['$loader'];
 			delete self['$module'];
+			return null;
 		});
 	},
 

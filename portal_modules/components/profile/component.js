@@ -90,6 +90,7 @@ var profileComponent = prime({
 			.then(function(renderedRouteComponent) {
 				renderedRouteComponent.push(componentRoutes);
 				callback(null, renderedRouteComponent.join('\n'));
+				return null;
 			})
 			.catch(function(err) {
 				callback(err);
@@ -118,6 +119,7 @@ var profileComponent = prime({
 			.then(function(files) {
 				files.push(componentMVC);
 				callback(null, files.join('\n'));
+				return null;
 			})
 			.catch(function(err) {
 				callback(err);
@@ -140,10 +142,11 @@ var profileComponent = prime({
 
 			var renderOptions = {};
 			renderOptions.mountPath = path.join(self.$module.$config.componentMountPath, self.name);
-	
+
 			renderFunc(self['tmpl'], renderOptions)
 			.then(function(renderedTemplate) {
 				callback(null, renderedTemplate + '\n' + componentTemplates);
+				return null;
 			})
 			.catch(function(err) {
 				callback(err);
@@ -169,6 +172,7 @@ var profileComponent = prime({
 			})
 			.then(function(image) {
 				response.status(200).send(image);
+				return null;
 			})
 			.catch(function(err) {
 				self.$dependencies.logger.error('Get Profile Image:\nQuery: ' , request.query, '\nBody: ', request.body, '\nParams: ', request.params, '\nError: ', err);
@@ -185,6 +189,7 @@ var profileComponent = prime({
 			filesystem.writeFileAsync(profileImagePath, new Buffer(request.body.image.substring(1 + request.body.image.indexOf(',')), 'base64'))
 			.then(function() {
 				response.status(200).json({ 'status': true, 'responseText': 'Saved image successfully' });
+				return null;
 			})
 			.catch(function(err) {
 				self.$dependencies.logger.error('Error servicing request "' + request.path + '":\nQuery: ', request.query, '\nBody: ', request.body, '\nParams: ', request.params, '\nError: ', err);

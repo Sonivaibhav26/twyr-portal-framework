@@ -31,7 +31,7 @@ var databaseService = prime({
 		base.call(this);
 		this._loadConfig(path.join(__dirname, 'config.js'));
 	},
-	
+
 	'start': function(dependencies, callback) {
 		var self = this;
 		databaseService.parent.start.call(self, dependencies, function(err, status) {
@@ -59,16 +59,18 @@ var databaseService = prime({
 				callback(err);
 				return;
 			}
-		
+
 			self.$database.knex.destroy()
 			.then(function() {
 				if(callback) callback(null, status);
+				return null;
 			})
 			.catch(function(err) {
 				if(callback) callback(err);
 			})
 			.finally(function() {
 				delete self['$database'];
+				return null;
 			});
 		});
 	},

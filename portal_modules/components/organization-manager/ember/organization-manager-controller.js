@@ -89,9 +89,9 @@ define(
 					window.Ember.$.confirm({
 						'text': 'Are you sure that you want to delete <strong>"' + delOrgName + '"</strong>?',
 						'title': 'Delete <strong>' + delOrgName + '</strong>?',
-	
+
 						'confirm': delFn,
-	
+
 						'cancel': function() {
 							// Do nothing...
 						}

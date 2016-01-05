@@ -60,9 +60,11 @@ var organizationManagerComponent = prime({
 				callback(null, {
 					'name': 'organization-manager',
 					'path': '/organization',
-	
+
 					'subRoutes': componentResources
 				});
+
+				return null;
 			})
 			.catch(function(err) {
 				self.$dependencies.logger.error('Error servicing request "' + request.path + '":\nQuery: ', request.query, '\nBody: ', request.body, '\nParams: ', request.params, '\nError: ', err);
@@ -117,6 +119,7 @@ var organizationManagerComponent = prime({
 			.then(function(renderedRouteController) {
 				renderedRouteController.push(componentRoutes);
 				callback(null, renderedRouteController.join('\n'));
+				return null;
 			})
 			.catch(function(err) {
 				self.$dependencies.logger.error('Error servicing request "' + request.path + '":\nQuery: ', request.query, '\nBody: ', request.body, '\nParams: ', request.params, '\nError: ', err);
@@ -144,7 +147,7 @@ var organizationManagerComponent = prime({
 					throw({ 'code': 403, 'message': 'Unauthorized access!' });
 					return;
 				}
-	
+
 				var promiseResolutions = [];
 				promiseResolutions.push(filesystem.readFileAsync(path.join(__dirname, 'ember/organization-manager-view.js')));
 				promiseResolutions.push(filesystem.readFileAsync(path.join(__dirname, 'ember/organization-manager-model.js')));
@@ -153,6 +156,7 @@ var organizationManagerComponent = prime({
 			.then(function(mvcFiles) {
 				mvcFiles.push(componentMVC);
 				callback(null, mvcFiles.join('\n'));
+				return null;
 			})
 			.catch(function(err) {
 				self.$dependencies.logger.error('Error servicing request "' + request.path + '":\nQuery: ', request.query, '\nBody: ', request.body, '\nParams: ', request.params, '\nError: ', err);
@@ -180,7 +184,7 @@ var organizationManagerComponent = prime({
 					throw({ 'code': 403, 'message': 'Unauthorized access!' });
 					return;
 				}
-	
+
 				var renderOptions = { 'components': [] };
 				for(var idx in self.$components) {
 					renderOptions.components.push({
@@ -188,11 +192,12 @@ var organizationManagerComponent = prime({
 						'displayName': self.$components[idx].displayName
 					});
 				}
-	
+
 				return renderFunc(path.join(__dirname, 'ember/organization-manager-template.ejs'), renderOptions);
-			})		
+			})
 			.then(function(tmplFile) {
 				callback(null, tmplFile + '\n' + componentTemplates);
+				return null;
 			})
 			.catch(function(err) {
 				self.$dependencies.logger.error('Error servicing request "' + request.path + '":\nQuery: ', request.query, '\nBody: ', request.body, '\nParams: ', request.params, '\nError: ', err);

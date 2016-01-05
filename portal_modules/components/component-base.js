@@ -55,6 +55,7 @@ var simpleComponent = prime({
 		.then(function(status) {
 			if(!status) throw status;
 			if(callback) callback(null, status);
+			return null;
 		})
 		.catch(function(err) {
 			console.error(self.name + ' Component Load Error: ', err);
@@ -96,6 +97,7 @@ var simpleComponent = prime({
 		})
 		.then(function(status) {
 			if(callback) callback(null, status);
+			return null;
 		})
 		.catch(function(err) {
 			console.error(self.name + ' Component Start Error: ', err);
@@ -116,6 +118,7 @@ var simpleComponent = prime({
 		.then(function(status) {
 			if(!status) throw status;
 			if(callback) callback(null, status);
+			return null;
 		})
 		.catch(function(err) {
 			console.error(self.name + ' Component Stop Error: ', err);
@@ -124,6 +127,7 @@ var simpleComponent = prime({
 		.finally(function() {
 			delete self['$dependencies'];
 			delete self['$router'];
+			return null;
 		});
 	},
 
@@ -143,6 +147,7 @@ var simpleComponent = prime({
 		.then(function(status) {
 			if(!status) throw status;
 			if(callback) callback(null, status);
+			return null;
 		})
 		.catch(function(err) {
 			console.error(self.name + ' Service Unload Error: ', err);
@@ -151,6 +156,7 @@ var simpleComponent = prime({
 		.finally(function() {
 			delete self['$loader'];
 			delete self['$module'];
+			return null;
 		});
 	},
 
@@ -239,6 +245,8 @@ var simpleComponent = prime({
 			else {
 				response.status(200).send(routes);
 			}
+
+			return null;
 		})
 		.catch(function(err) {
 			self.$dependencies.logger.error('Error getting component resources for ' + self.name + ':\n', err);
@@ -254,6 +262,7 @@ var simpleComponent = prime({
 		self._getMVCAsync(request, renderFunc)
 		.then(function(componentMVCs) {
 			response.status(200).send(componentMVCs);
+			return null;
 		})
 		.catch(function(err) {
 			self.$dependencies.logger.error('Error sending MVCs: ', err);
@@ -269,6 +278,7 @@ var simpleComponent = prime({
 		self._getTemplatesAsync(request, renderFunc)
 		.then(function(componentTemplates) {
 			response.status(200).send(componentTemplates);
+			return null;
 		})
 		.catch(function(err) {
 			self.$dependencies.logger.error('Error sending templates: ', err);
@@ -288,6 +298,7 @@ var simpleComponent = prime({
 		promises.all(promiseResolutions)
 		.then(function(componentResources) {
 			callback(null, componentResources);
+			return null;
 		})
 		.catch(function(err) {
 			callback(err);
@@ -306,6 +317,7 @@ var simpleComponent = prime({
 		promises.all(promiseResolutions)
 		.then(function(componentRoutes) {
 			callback(null, componentRoutes.join('\n'));
+			return null;
 		})
 		.catch(function(err) {
 			callback(err);
@@ -324,6 +336,7 @@ var simpleComponent = prime({
 		promises.all(promiseResolutions)
 		.then(function(componentTemplates) {
 			callback(null, componentTemplates.join('\n'));
+			return null;
 		})
 		.catch(function(err) {
 			callback(err);
@@ -342,6 +355,7 @@ var simpleComponent = prime({
 		promises.all(promiseResolutions)
 		.then(function(componentMVCs) {
 			callback(null, componentMVCs.join('\n'));
+			return null;
 		})
 		.catch(function(err) {
 			callback(err);
@@ -377,6 +391,7 @@ var simpleComponent = prime({
 				}
 
 				callback(null, '');
+				return null;
 			})
 			.catch(function(err) {
 				self.$dependencies.logger.error('Error constructing route map: ', err);
@@ -448,6 +463,7 @@ var simpleComponent = prime({
 
 			self.$dependencies.logger.silly('_checkPermission:\nUser: ', request.user.id, '\nPermission: ', permission, '\nTenant: ', tenantId, '\nAllowed: ', allowed);
 			callback(null, allowed);
+			return null;
 		})
 		.catch(function(err) {
 			self.$dependencies.logger.error('_checkPermission Error: ', err);

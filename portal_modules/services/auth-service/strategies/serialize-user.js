@@ -46,8 +46,9 @@ exports.strategy = (function() {
 		cacheMulti.execAsync()
 		.then(function(execStatus) {
 			done(null, user.id);
-		}).
-		catch(function(err) {
+			return null;
+		})
+		.catch(function(err) {
 			logger.error('Error serializing user: ', user, '\nError: ', err);
 			done(err);
 		});
@@ -86,6 +87,7 @@ exports.strategy = (function() {
 			})
 			.then(function(homeRoute) {
 				deserializedUser.default_home = homeRoute.rows[0].ember_route;
+				return null;
 			})
 			// Step 3: Fetch User's linked social accounts
 			.then(function() {
@@ -175,6 +177,8 @@ exports.strategy = (function() {
 						thisUserTenant.widgets = thisUserTenant.widgets.concat(thisPermissionWidgets);
 					});
 				});
+
+				return null;
 			})
 			// Step 7: Reorganize User's Menus and Widgets for display
 			.then(function() {
@@ -335,6 +339,8 @@ exports.strategy = (function() {
 
 					(deserializedUser.tenants[thisTenantId]).menus = reorgedMenus;
 				});
+
+				return null;
 			})
 			// Step 8: Store User data in the cache for quick retrieval next time
 			.then(function() {
@@ -347,11 +353,14 @@ exports.strategy = (function() {
 			// Finally, send it back up...
 			.then(function() {
 				done(null, deserializedUser);
+				return null;
 			})
 			.catch(function(err) {
 				logger.error('Error deserializing user:\nId: ', id, '\nError: ', err);
 				done(err);
 			});
+
+			return null;
 		})
 		.catch(function(err) {
 			logger.error('Error deserializing user:\nId: ', id, '\nError: ', err);

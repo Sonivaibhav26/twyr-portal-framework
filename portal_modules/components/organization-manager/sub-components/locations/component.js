@@ -58,6 +58,7 @@ var organizationManagerLocationsComponent = prime({
 		})
 		.then(function(mvcFiles) {
 			callback(null, mvcFiles.join('\n'));
+			return null;
 		})
 		.catch(function(err) {
 			self.$dependencies.logger.error('Error servicing request "' + request.path + '":\nQuery: ', request.query, '\nBody: ', request.body, '\nParams: ', request.params, '\nError: ', err);
@@ -79,9 +80,10 @@ var organizationManagerLocationsComponent = prime({
 			}
 
 			return renderFunc(path.join(__dirname, 'ember/organization-manager-locations-template.ejs'));
-		})		
+		})
 		.then(function(tmplFile) {
 			callback(null, tmplFile);
+			return null;
 		})
 		.catch(function(err) {
 			self.$dependencies.logger.error('Error servicing request "' + request.path + '":\nQuery: ', request.query, '\nBody: ', request.body, '\nParams: ', request.params, '\nError: ', err);

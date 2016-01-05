@@ -54,11 +54,11 @@ var menuComponent = prime({
 				userData = JSON.parse(cachedData);
 				if(!userData) {
 					throw({ 'code': 404, 'message': 'User not found' })
-					return;
+					return null;
 				}
 
 				if(userData.sessionData && userData.sessionData[self.name])
-					return;
+					return null;
 
 				return self._setupMenuCacheAsync(userId, userData);
 			})
@@ -67,6 +67,7 @@ var menuComponent = prime({
 			})
 			.then(function(menuComponents) {
 				callback(null, menuComponents + '\n' + componentRoutes);
+				return null;
 			})
 			.catch(function(err) {
 				self.$dependencies.logger.error('Error Servicing request "' + request.path + '":\nQuery: ', request.query, '\nBody: ', request.body, '\nParams: ', request.params, '\nError: ', err);
@@ -106,6 +107,7 @@ var menuComponent = prime({
 			})
 			.then(function(tmpl) {
 				callback(null, tmpl + '\n' + componentTemplates);
+				return null;
 			})
 			.catch(function(err) {
 				self.$dependencies.logger.error('Error fetching menu items from database for user: ' + userId + '\n', err);
@@ -133,6 +135,7 @@ var menuComponent = prime({
 		promises.all(promiseResolutions)
 		.then(function(renderedMenus) {
 			callback(null, renderedMenus.join('\n'));
+			return null;
 		})
 		.catch(function(err) {
 			callback(err);
@@ -160,6 +163,7 @@ var menuComponent = prime({
 		promises.all(promiseResolutions)
 		.then(function(renderedMenus) {
 			callback(null, renderedMenus.join('\n'));
+			return null;
 		})
 		.catch(function(err) {
 			callback(err);
@@ -259,6 +263,7 @@ var menuComponent = prime({
 		})
 		.then(function() {
 			callback(null);
+			return null;
 		})
 		.catch(function(err) {
 			callback(err);

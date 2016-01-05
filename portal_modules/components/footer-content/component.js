@@ -42,6 +42,7 @@ var footerComponent = prime({
 			filesystem.readFileAsync(path.join(__dirname, 'ember/templates.js'))
 			.then(function(tmpl) {
 				callback(null, tmpl + '\n' + componentTemplates);
+				return null;
 			})
 			.catch(function(err) {
 				callback(err);

@@ -39,6 +39,7 @@ var app = prime({
 		.then(function(status) {
 			if(!status) throw status;
 			if(callback) callback(null, status);
+			return null;
 		})
 		.catch(function(err) {
 			if(callback) callback(err);
@@ -86,14 +87,14 @@ var app = prime({
 				sessStore = require('connect-' + self.$config.session.store.media)(session),
 				timeout = require('connect-timeout'),
 				loggerSrvc = self.$services.logger.getInterface();
-			
+
 			// Step 2: Setup Winston for Express Logging
 			var loggerStream = {
 				'write': function(message, encoding) {
 					loggerSrvc.silly(message);
 				}
 			};
-			
+
 			// Step 3: Setup Express
 			var portalServer = express();
 			portalServer.set('view engine', self.$config.templates.templateEngine);
@@ -117,7 +118,7 @@ var app = prime({
 				'saveUninitialized': true,
 				'resave': false
 			});
-			
+
 			// Step 3.2: Setup the standard stuff...
 			portalServer
 				.use(logger('combined', {
@@ -164,7 +165,7 @@ var app = prime({
 
 					next();
 				});
-			
+
 			// Step 3.3: Setup the static server
 			self.$config.publicDir = path.join(__dirname, self.$config.publicDir);
 			portalServer
@@ -219,6 +220,7 @@ var app = prime({
 			(self.$services.eventService.getInterface()).emit('twyrstart', self);
 
 			if(callback) callback(null, status);
+			return null;
 		})
 		.catch(function(err) {
 			if(callback) callback(err);
@@ -237,6 +239,7 @@ var app = prime({
 		.then(function(status) {
 			if(!status) throw status;
 			if(callback) callback(null, status);
+			return null;
 		})
 		.catch(function(err) {
 			if(callback) callback(err);
@@ -244,6 +247,7 @@ var app = prime({
 		.finally(function() {
 			delete self['$loader'];
 			delete self['$module'];
+			return null;
 		});
 	},
 
@@ -270,6 +274,7 @@ var app = prime({
 		.then(function(status) {
 			if(!status) throw status;
 			if(callback) callback(null, status);
+			return null;
 		})
 		.catch(function(err) {
 			if(callback) callback(err);
@@ -278,6 +283,7 @@ var app = prime({
 			delete self['$portalServer'];
 			delete self['$session'];
 			delete self['$cookieParser'];
+			return null;
 		});
 	},
 
