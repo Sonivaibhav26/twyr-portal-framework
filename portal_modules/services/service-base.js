@@ -20,6 +20,10 @@ var prime = require('prime'),
 var simpleService = prime({
 	'constructor': function() {
 		console.log('Constructor of the ' + this.name + ' Service');
+		if(this.name == 'logger') return;
+
+		if(this.dependencies.indexOf('logger') < 0)
+			this.dependencies.push('logger');
 	},
 
 	'load': function(module, loader, callback) {
@@ -47,7 +51,7 @@ var simpleService = prime({
 			callback(null, true);
 		}
 	},
-	
+
 	'start': function(dependencies, callback) {
 		console.log('Starting the ' + this.name + ' Service');
 		var self = this;
